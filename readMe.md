@@ -17,9 +17,7 @@
 ## If you work with a VPS
 [.....]
 
-#### Starting the bot
-
-##### Do any one
+## Starting the bot
 
 - `npm start`
 - `node index.js`
