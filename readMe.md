@@ -1,8 +1,10 @@
-<h3 align="center">Sweet Meet</h3>
+<h1 align="center">Sweet Meet</h1>
 
 <p align="center">
 	  A simple Game in discord Bot from a dev 🕵️
 </p>
+
+Explanation here ........
 
 ## Requirements
 
