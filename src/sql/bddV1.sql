@@ -1,0 +1,46 @@
+CREATE TABLE IF NOT EXISTS `User` (
+    `id` INT(11) NOT NULL AUTO_INCREMENT,
+    `discordId` VARCHAR(255) NOT NULL,
+    `power` INT(11) NOT NULL DEFAULT 0,
+    `winCounter` INT(11) NOT NULL DEFAULT 0,
+    `loseCounter` INT(11) NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE IF NOT EXISTS `Materiau` (
+    `id` INT(11) NOT NULL AUTO_INCREMENT,
+    `nom` VARCHAR(255) NOT NULL,
+    `cout` INT(11) NOT NULL,
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE IF NOT EXISTS `Possession` (
+    `id` INT(11) NOT NULL AUTO_INCREMENT,
+    `IdUser` INT(11) NOT NULL,
+    `IdMateriau` INT(11) NOT NULL,
+    `lvl` INT(11) NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`IdUser`) REFERENCES `User`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`IdMateriau`) REFERENCES `Materiau`(`id`) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS `Mariage` (
+    `Id` INT(11) NOT NULL AUTO_INCREMENT,
+    `userId` INT(11) NOT NULL,
+    `userId2` INT(11) NOT NULL,
+    `Date` DATETIME NOT NULL,
+    PRIMARY KEY (`Id`),
+    FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`userId2`) REFERENCES `User`(`id`) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS `Duel` (
+    `id` INT(11) NOT NULL AUTO_INCREMENT,
+    `userId1` INT(11) NOT NULL,
+    `userId2` INT(11) NOT NULL,
+    `date` DATETIME NOT NULL,
+    `win` INT(11) NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`userId1`) REFERENCES `User`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`userId2`) REFERENCES `User`(`id`) ON DELETE CASCADE
+);
