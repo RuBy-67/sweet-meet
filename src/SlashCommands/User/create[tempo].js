@@ -10,7 +10,7 @@ module.exports = {
     "Créer un compte et donne le rôle first Arrival à tous les membres du serveur.",
   options: null,
   run: async (client, interaction, args) => {
-    // Vérifier si l'utilisateur a la permission d'utiliser cette commande
+    // Check if user have the permission to use this command
     if (!interaction.member.permissions.has("ADMINISTRATOR")) {
       return interaction.reply({
         content: "Vous n'avez pas la permission d'utiliser cette commande.",
@@ -18,7 +18,6 @@ module.exports = {
       });
     }
 
-    // Envoyer un message de chargement
     await interaction.reply({
       content: "Création des comptes en cours...",
       ephemeral: true,
