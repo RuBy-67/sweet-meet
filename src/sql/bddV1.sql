@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS mariage (
     Id int(11) NOT NULL AUTO_INCREMENT,
     userId varchar(255) NOT NULL,
     userId2 varchar(255) NOT NULL,
-    Date date NOT NULL,
+    date date NOT NULL,
     PRIMARY KEY (Id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
 

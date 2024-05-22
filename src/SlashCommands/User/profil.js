@@ -27,7 +27,6 @@ module.exports = {
     const targetUser = await client.users.fetch(target.user.id);
     console.log(targetUser);
 
-    // Récupérer les matériaux de l'utilisateur
     const materiauResult = await connection
       .promise()
       .query("SELECT * FROM materiau_user WHERE idUser = ?", [targetUser.id]);
@@ -50,7 +49,6 @@ module.exports = {
       badges = badgeResult[0].map((badge) => emoji(badge.emojiId)).join(" | ");
     }
 
-    // Récupérer les informations de mariage de l'utilisateur
     const marriageResult = await connection
       .promise()
       .query("SELECT * FROM mariage WHERE userId = ? OR userId2 = ?", [
@@ -62,35 +60,40 @@ module.exports = {
     if (marriageResult[0].length === 0) {
       marriageStatus = "Célibataire";
     } else {
-      const spouse = await interaction.guild.members.fetch(
-        marriageResult[0][0].userId2
-      );
-      marriageStatus = `Marié(e) avec ${
-        spouse.user.username
-      } depuis le ${mariage.date.substring(0, 10)} `;
+      let spouse;
+      if (marriageResult[0][0].userId2 === targetUser.id) {
+        spouse = await interaction.guild.members.fetch(
+          marriageResult[0][0].userId
+        );
+      } else {
+        spouse = await interaction.guild.members.fetch(
+          marriageResult[0][0].userId2
+        );
+      }
+
+      const mariage = marriageResult[0][0].date;
+      const mariageTimestamp = Math.floor(mariage.getTime() / 1000);
+      marriageStatus = `Marié(e) avec <@${spouse.user.id}> \n Depuis le: <t:${mariageTimestamp}:D>`;
     }
 
-    // Récupérer info de l'utilisateur
     const statsResult = await connection
       .promise()
       .query("SELECT * FROM user WHERE discordId = ?", [targetUser.id]);
     const win = statsResult[0][0].winCounter;
     const lose = statsResult[0][0].loseCounter;
     const power = statsResult[0][0].power;
-    console.log(statsResult);
-    console.log(win);
-    console.log(lose);
-    console.log(power);
-    // Calculer le taux de réussite de l'utilisateur
     const rate = win / (win + lose) || 0;
 
-    // Générer l'embed du profil de l'utilisateur
     const embed = new EmbedBuilder()
       .setTitle(`Profil de ${targetUser.username}`)
       .setColor(color.pink)
       .setThumbnail(targetUser.displayAvatarURL({ dynamic: true }))
       .addFields(
-        { name: "Marié", value: marriageStatus, inline: true },
+        {
+          name: "Marié(e)",
+          value: marriageStatus,
+          inline: true,
+        },
         { name: "Puissance", value: `${power}`, inline: true },
         { name: "Badges", value: badges, inline: false },
         { name: "Matériaux", value: materiaux, inline: false },
@@ -103,7 +106,6 @@ module.exports = {
         iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
       });
 
-    // Envoyer l'embed du profil de l'utilisateur
     return interaction.reply({ embeds: [embed] });
   },
 };
