@@ -4,7 +4,7 @@ const color = require(`../../jsons/color.json`);
 
 module.exports = {
   name: "social",
-  description: "Social link of my devs",
+  description: "Social link of my queen (devs)",
   options: null,
   run: async (client, interaction, args) => {
     function emoji(id) {
@@ -14,8 +14,8 @@ module.exports = {
       );
     }
     const embed = new EmbedBuilder()
-      .setTitle("Social Owner Link")
-      .setColor("#000000")
+      .setTitle("Social Queen Link")
+      .setColor(color.pink)
       .setDescription(
         `➼ ** | [${emoji(
           emo.git
@@ -25,10 +25,10 @@ module.exports = {
           emo.insta
         )} @ru3y_67](https://www.instagram.com/ru3y_67?igsh=MXZ0aDFjZHZncTlzdw==)**\n➼ ** |** ${emoji(
           emo.discord
-        )} <@375590278880428034>\n\n *Write me if you need any update in bot*`
+        )} <@375590278880428034>\n\n *Besoin d'une Update, un beug ? DM moi 😉*`
       )
       .setFooter({
-        text: `Requested by ${interaction.user.tag}`,
+        text: `Demandé(e) par ${interaction.user.tag}`,
         iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
       });
 
