@@ -16,7 +16,6 @@ module.exports = {
   ],
   run: async (client, interaction, args) => {
     function emoji(id) {
-      console.log(id);
       return (
         client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
         "Missing Emoji"
@@ -25,7 +24,6 @@ module.exports = {
     const target =
       interaction.options.getMember("membre") || interaction.member;
     const targetUser = await client.users.fetch(target.user.id);
-    console.log(targetUser);
 
     const materiauResult = await connection
       .promise()
