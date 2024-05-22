@@ -15,7 +15,7 @@ module.exports = {
     }
     const embed = new EmbedBuilder()
       .setTitle("Social Owner Link")
-      .setColor(color.pink)
+      .setColor("#000000")
       .setDescription(
         `➼ ** | [${emoji(
           emo.git

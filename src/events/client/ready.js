@@ -19,7 +19,7 @@ module.exports = (client) => {
   });
 
   console.log(
-   ` ${client.channels.cache.size} channels \n ${allMembers.size} members `
+    ` ${client.channels.cache.size} channels \n ${allMembers.size} members `
   );
   updateActivity(client);
 
@@ -28,8 +28,8 @@ module.exports = (client) => {
    */
   async function updateActivity(client) {
     const activities = [
-      `/help | Watching Trading Boys`,
-      `Created by RuBy#0822`,
+      `/help | Watching sweeties`,
+      `Created by RuBy_67`,
       `look ${allMembers.size} members`,
     ];
     setInterval(() => {

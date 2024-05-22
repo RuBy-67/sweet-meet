@@ -14,9 +14,10 @@ Explanation here ........
 - Basic knowlegde of Discord.js or JavaScript or NodeJS
 - Wamp / Xamp / Any other local server for a Maria DB database (local)
 - Php my Admin or any other database management tool
- [.....]
+  [.....]
 
 ## If you work with a VPS
+
 [.....]
 
 ## Starting the bot
@@ -31,15 +32,15 @@ Explanation here ........
 
 ```json
 {
-  "botToken": "ENTER_YOUR_BOT_TOKEN_HERE",
-  "ownerId": "ENTER_YOUR_ID_HERE",
-  "prefix": "ANY_PREFIX_OF_YOUR_CHOICE", /// Depreciated
-  "error_logs": "ENTER_THE_ERROR_LOGS_CHANNEL_ID_HERE",
-
-  "db": "ENTER_YOUR_DATABASE_NAME",
-  "dbUrl": "ENTER_YOUR_DATABASE_NAME",
-  "dbUser": "ENTER_YOUR_DATABASE_NAME",  "dbPassword": "ENTER_YOUR_DATABASE_NAME"
-
+  "botToken": "YOUR BOT TOKEN HERE",
+  "ownerId": "375590278880428034",
+  "prefix": "$", //deprecated
+  "error_logs": "ENTER_THE_ERROR_LOGS_CHANNEL_HERE",
+  "activityInterval": 5,
+  "db_host": "HostDb",
+  "db_user": "dbUser",
+  "db_password": "dbPassword",
+  "db": "dbName"
 }
 ```
 
@@ -49,4 +50,3 @@ Explanation here ........
 ## Star the Repo if you liked it ! ⭐
 
 ## [.....]
-

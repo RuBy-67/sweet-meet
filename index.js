@@ -8,6 +8,7 @@ const { loadEvents } = require("./src/handlers/loadEvents");
 const { loadSlashCommands } = require("./src/handlers/loadSlashCommands");
 const { botToken, auth } = require("./src/jsons/config.json");
 const connection = require("./src/db");
+const { name } = require("./src/SlashCommands/Social/social");
 
 // Declaring our Discord Client
 const client = new Client({
@@ -39,8 +40,7 @@ process.on("uncaughtException", (err) => {
 
   const exceptionembed = new EmbedBuilder()
     .setTitle("Uncaught Exception")
-    .setDescription(`${err}`)
-    .setColor("RED");
+    .setDescription(`${err}`);
   console.log(err);
 });
 
@@ -54,9 +54,8 @@ process.on("unhandledRejection", (reason, promise) => {
 
   const rejectionembed = new EmbedBuilder()
     .setTitle("Unhandled Promise Rejection")
-    .addField("Promise", `${promise}`)
-    .addField("Reason", `${reason.message}`)
-    .setColor("RED");
+    .addField({ name: "Promise", value: `${promise}` })
+    .addField({ name: "Reason", value: `${reason.message}` });
 });
 
 client.login(botToken).then(() => {
