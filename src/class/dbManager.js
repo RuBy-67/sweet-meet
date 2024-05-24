@@ -78,6 +78,36 @@ class DatabaseManager {
         userId,
       ]);
   }
+  async updateBadge(userId, nomBadge) {
+    // Find the badge id with the name
+    const badgeResult = await this.connection
+      .promise()
+      .query("SELECT id FROM badge WHERE nom = ?", [nomBadge]);
+
+    if (badgeResult[0].length === 0) {
+      throw new Error(
+        `Le badge "${nomBadge}" n'existe pas dans la base de données.`
+      );
+    }
+
+    const badgeId = badgeResult[0][0].id;
+    /// insert the badge into the user's badges
+    await this.connection
+      .promise()
+      .query("INSERT INTO badge_user (idUser, idBadge) VALUES (?, ?)", [
+        userId,
+        badgeId,
+      ]);
+  }
+  async updatePowerByBadgeId(badgeId, amount) {
+    const result = await this.connection
+      .promise()
+      .query("SELECT idUser FROM badge_user WHERE idBadge=?", [badgeId]);
+
+    for (const row of result[0]) {
+      await this.updatePower(row.idUser, amount);
+    }
+  }
 }
 
 module.exports = DatabaseManager;

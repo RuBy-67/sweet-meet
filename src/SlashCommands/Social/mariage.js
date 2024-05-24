@@ -6,13 +6,13 @@ const {
 } = require("discord.js");
 const emo = require(`../../jsons/emoji.json`);
 const color = require(`../../jsons/color.json`);
+const param = require(`../../jsons/param.json`);
 const DatabaseManager = require("../../class/dbManager");
 const dbManager = new DatabaseManager();
 
 module.exports = {
   name: "mariage",
-  description:
-    "Demander en mariage un autre utilisateur (coûte 20 000 points de puissance).",
+  description: `Demander en mariage un autre utilisateur (coûte ${param.Pricing.marriage.accepter} points de puissance).`,
   options: [
     {
       name: "membre",
@@ -29,9 +29,9 @@ module.exports = {
 
     // Verify if the author has enough power to get married
     const authorStats = await dbManager.getStats(authorId);
-    if (authorStats.power < 20000) {
+    if (authorStats.power < param.Pricing.marriage.accepter) {
       return interaction.reply({
-        content: `Vous n'avez pas suffisamment de puissance pour vous marier. Vous avez besoin de 20 000 points de puissance.`,
+        content: `Vous n'avez pas suffisamment de puissance pour vous marier. Vous avez besoin de ${param.Pricing.marriage.accepter} points de puissance.`,
         ephemeral: true,
       });
     }
@@ -52,7 +52,7 @@ module.exports = {
         ephemeral: true,
       });
     }
-    dbManager.updatePower(authorId, -20000);
+    dbManager.updatePower(authorId, -param.Pricing.marriage.accepter);
     const temps = Math.floor(Date.now() / 1000) + 60;
     const embed = new EmbedBuilder()
       .setTitle(
@@ -60,7 +60,7 @@ module.exports = {
       )
       .setColor(color.pink)
       .setDescription(
-        `Un mariage coûte 20 000 points de puissance. Les avantages et inconvénients du mariage seront partagés entre les deux utilisateurs. Voulez-vous accepter cette demande en mariage ? \n\nFin <t:${temps}:R> `
+        `Un mariage coûte ${param.Pricing.marriage.accepter} points de puissance. Les avantages et inconvénients du mariage seront partagés entre les deux utilisateurs. Voulez-vous accepter cette demande en mariage ? \n\nFin <t:${temps}:R> `
       )
       .setFooter({
         text: `demandé(e) par ${interaction.user.tag}`,
@@ -99,6 +99,12 @@ module.exports = {
 
       if (interaction.customId === "accepter") {
         dbManager.setMarriage(authorId, targetId);
+        dbManager.updateBadge(targetId, "love");
+        dbManager.updateBadge(authorId, "love");
+        dbManager.updatePowerByBadgeId(
+          5,
+          param.Pricing.marriage.accepter * param.Pricing.marriage.fees
+        );
 
         await interaction.editReply({
           content: `Félicitations, <@${targetId}> et <@${authorId}> sont maintenant mariés !`,
@@ -106,9 +112,14 @@ module.exports = {
           components: [],
         });
       } else if (interaction.customId === "refuser") {
-        dbManager.updatePower(authorId, 5000);
+        dbManager.updatePower(authorId, param.Pricing.marriage.refuse);
+        dbManager.updatePowerByBadgeId(
+          5,
+          (param.Pricing.marriage.accepter - param.Pricing.marriage.refuse) *
+            param.Pricing.marriage.fees
+        );
         await interaction.editReply({
-          content: `La demande en mariage de <@${authorId}> à <@${targetId}> a été refusée, 5000 ont été rendus à <@${authorId}>`,
+          content: `La demande en mariage de <@${authorId}> à <@${targetId}> a été refusée, ${param.Pricing.marriage.refuse} ont été rendus à <@${authorId}>`,
           embeds: [],
           components: [],
         });
@@ -117,9 +128,14 @@ module.exports = {
 
     collector.on("end", (collected) => {
       if (collected.size === 0) {
-        dbManager.updatePower(authorId, 19000);
+        dbManager.updatePower(authorId, param.Pricing.marriage.expire);
+        dbManager.updatePowerByBadgeId(
+          5,
+          (param.Pricing.marriage.accepter - param.Pricing.marriage.expire) *
+            param.Pricing.marriage.fees
+        );
         interaction.editReply({
-          content: `La demande en mariage a expiré car <@${targetId}> n'a pas répondu dans le temps imparti, 19000 on été rendu à <@${authorId}>.`,
+          content: `La demande en mariage a expiré car <@${targetId}> n'a pas répondu dans le temps imparti, ${param.Pricing.marriage.expire} on été rendu à <@${authorId}>.`,
           components: [],
           embeds: [],
         });

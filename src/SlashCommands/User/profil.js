@@ -38,7 +38,7 @@ module.exports = {
     const badgeResult = await dbManager.getBadge(targetUser.id);
     let badges = "Aucun";
     if (badgeResult.length > 0) {
-      badges = badgeResult.map((badge) => emoji(badge.emojiId)).join(" | ");
+      badges = badgeResult.map((badge) => emoji(badge.emojiId)).join(" ");
     }
 
     const marriageResult = await dbManager.getMarriage(targetUser.id);

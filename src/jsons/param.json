@@ -1,0 +1,24 @@
+{
+"updatePrice" : {
+    "commun" : "5000",
+    "epic" : "7500",
+    "legendaire" : "25000",
+    "level" : "0.5"
+},
+
+"Pricing" : {
+    "marriage" : {
+        "accepter" : "20000",
+        "refuse" : "5000",
+        "expire" : "19000",
+        "fees" : "0.5"
+    },
+     "divorce" : {
+        "prix" : "10000",
+        "refus" : "5000",
+        "fees" : "0.8"
+    }
+} 
+
+
+}
