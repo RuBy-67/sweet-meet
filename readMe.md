@@ -62,7 +62,3 @@ SQL class Page here
 ## [......]
 
 you need information about the project, you can contact me !
-
-```
-
-```

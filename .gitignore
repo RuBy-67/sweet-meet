@@ -2,3 +2,4 @@ src/jsons/config.json
 /node_modules
 src/jsons/param.json
 src/class/dbManager.js
+src/jsons/gif.json
