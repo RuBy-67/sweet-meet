@@ -47,6 +47,20 @@ Explanation here ........
 - `botToken` is the token of your bot
 - `ownerId` is the ID of the owner of the bot
 
+- Create the `param.json` file
+
+```json
+{
+ "no Information here"
+}
+```
+
 ## Star the Repo if you liked it ! ⭐
 
 ## [......]
+
+you need information about the project, you can contact me !
+
+```
+
+```
