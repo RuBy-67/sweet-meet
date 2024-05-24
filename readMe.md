@@ -35,12 +35,8 @@ Explanation here ........
   "botToken": "YOUR BOT TOKEN HERE",
   "ownerId": "375590278880428034",
   "prefix": "$", //deprecated
-  "error_logs": "ENTER_THE_ERROR_LOGS_CHANNEL_HERE",
-  "activityInterval": 5,
-  "db_host": "HostDb",
-  "db_user": "dbUser",
-  "db_password": "dbPassword",
-  "db": "dbName"
+
+  "no More Information since here"
 }
 ```
 
