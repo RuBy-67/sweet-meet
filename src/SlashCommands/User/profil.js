@@ -1,7 +1,8 @@
 const { EmbedBuilder } = require("discord.js");
 const emo = require(`../../jsons/emoji.json`);
 const color = require(`../../jsons/color.json`);
-const { connection } = require("../../db");
+const DatabaseManager = require("../../class/dbManager");
+const dbManager = new DatabaseManager();
 
 module.exports = {
   name: "profil",
@@ -25,61 +26,47 @@ module.exports = {
       interaction.options.getMember("membre") || interaction.member;
     const targetUser = await client.users.fetch(target.user.id);
 
-    const materiauResult = await connection
-      .promise()
-      .query("SELECT * FROM materiau_user WHERE idUser = ?", [targetUser.id]);
+    const materiauResult = await dbManager.getMateriau(targetUser.id);
 
     let materiaux = "Aucun";
-    if (materiauResult[0].length > 0) {
-      materiaux = materiauResult[0]
+    if (materiauResult.length > 0) {
+      materiaux = materiauResult
         .map((materiau) => `${materiau.lvl}x ${emoji(emo[materiau.nom])}`)
         .join(" | ");
     }
 
-    const badgeResult = await connection
-      .promise()
-      .query(
-        "SELECT badge.emojiId FROM badge_user INNER JOIN badge ON badge_user.idBadge = badge.id WHERE badge_user.idUser = ?",
-        [targetUser.id]
-      );
+    const badgeResult = await dbManager.getBadge(targetUser.id);
     let badges = "Aucun";
-    if (badgeResult[0].length > 0) {
-      badges = badgeResult[0].map((badge) => emoji(badge.emojiId)).join(" | ");
+    if (badgeResult.length > 0) {
+      badges = badgeResult.map((badge) => emoji(badge.emojiId)).join(" | ");
     }
 
-    const marriageResult = await connection
-      .promise()
-      .query("SELECT * FROM mariage WHERE userId = ? OR userId2 = ?", [
-        targetUser.id,
-        targetUser.id,
-      ]);
+    const marriageResult = await dbManager.getMarriage(targetUser.id);
 
     let marriageStatus;
-    if (marriageResult[0].length === 0) {
+    if (marriageResult.length === 0) {
       marriageStatus = "Célibataire";
     } else {
       let spouse;
-      if (marriageResult[0][0].userId2 === targetUser.id) {
+      if (marriageResult[0].userId2 === targetUser.id) {
         spouse = await interaction.guild.members.fetch(
-          marriageResult[0][0].userId
+          marriageResult[0].userId
         );
       } else {
         spouse = await interaction.guild.members.fetch(
-          marriageResult[0][0].userId2
+          marriageResult[0].userId2
         );
       }
 
-      const mariage = marriageResult[0][0].date;
+      const mariage = marriageResult[0].date;
       const mariageTimestamp = Math.floor(mariage.getTime() / 1000);
       marriageStatus = `Marié(e) avec <@${spouse.user.id}> \n Depuis le: <t:${mariageTimestamp}:D>`;
     }
 
-    const statsResult = await connection
-      .promise()
-      .query("SELECT * FROM user WHERE discordId = ?", [targetUser.id]);
-    const win = statsResult[0][0].winCounter;
-    const lose = statsResult[0][0].loseCounter;
-    const power = statsResult[0][0].power;
+    const statsResult = await dbManager.getStats(targetUser.id);
+    const win = statsResult.winCounter;
+    const lose = statsResult.loseCounter;
+    const power = statsResult.power;
     const rate = win / (win + lose) || 0;
 
     const embed = new EmbedBuilder()
