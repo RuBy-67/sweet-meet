@@ -51,6 +51,12 @@ Explanation here ........
 }
 ```
 
+- Create the `dbManager.js` file
+
+```js
+SQL class Page here
+```
+
 ## Star the Repo if you liked it ! ⭐
 
 ## [......]
