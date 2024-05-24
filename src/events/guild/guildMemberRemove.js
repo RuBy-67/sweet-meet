@@ -21,11 +21,6 @@ module.exports = {
     const welcomeChannel = member.guild.channels.cache.find(
       (channel) => channel.id === welcome
     );
-    const currentDate = new Date()
-      .toISOString()
-      .substring(0, 10)
-      .replace(/-/g, "");
-
     try {
       // take data from main database
       const result = await connection
@@ -50,13 +45,12 @@ module.exports = {
       await connectionBo
         .promise()
         .query(
-          "INSERT INTO backup_user (discordId, power, winCounter, loseCounter, date) VALUES (?, ?, ?, ?,?)",
+          "INSERT INTO backup_user (discordId, power, winCounter, loseCounter, date) VALUES (?, ?, ?, ?,NOW())",
           [
             userData.discordId,
             userData.power,
             userData.winCounter,
             userData.loseCounter,
-            currentDate,
           ]
         );
 
@@ -70,8 +64,8 @@ module.exports = {
         await connectionBo
           .promise()
           .query(
-            "INSERT INTO backup_materiau_user (idUser, idMateriau, lvl, date) VALUES (?, ?, ?, ?)",
-            [materiau.IdUser, materiau.IdMateriau, materiau.lvl, currentDate]
+            "INSERT INTO backup_materiau_user (idUser, idMateriau, lvl, date) VALUES (?, ?, ?, NOW())",
+            [materiau.IdUser, materiau.IdMateriau, materiau.lvl]
           );
       }
 
@@ -85,8 +79,8 @@ module.exports = {
         await connectionBo
           .promise()
           .query(
-            "INSERT INTO backup_badge_user (idUser, idBadge, date) VALUES (?, ?, ?)",
-            [badge.IdUser, badge.idBadge, currentDate]
+            "INSERT INTO backup_badge_user (idUser, idBadge, date) VALUES (?, ?, NOW())",
+            [badge.IdUser, badge.idBadge]
           );
       }
 

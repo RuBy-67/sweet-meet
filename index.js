@@ -37,10 +37,6 @@ loadSlashCommands(client);
 // Error Handling
 process.on("uncaughtException", (err) => {
   console.log("Uncaught Exception: " + err);
-
-  const exceptionembed = new EmbedBuilder()
-    .setTitle("Uncaught Exception")
-    .setDescription(`${err}`);
   console.log(err);
 });
 
@@ -51,11 +47,6 @@ process.on("unhandledRejection", (reason, promise) => {
     " reason: ",
     reason.message
   );
-
-  const rejectionembed = new EmbedBuilder()
-    .setTitle("Unhandled Promise Rejection")
-    .addField({ name: "Promise", value: `${promise}` })
-    .addField({ name: "Reason", value: `${reason.message}` });
 });
 
 client.login(botToken).then(() => {

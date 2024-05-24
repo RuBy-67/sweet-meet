@@ -42,6 +42,42 @@ class DatabaseManager {
 
     return result[0][0];
   }
+  async getTopUsers(field, limit) {
+    const result = await this.connection
+      .promise()
+      .query(`SELECT * FROM user ORDER BY ${field} DESC LIMIT ?`, [limit]);
+
+    return result[0];
+  }
+
+  async getTopUsersByRate(limit) {
+    const result = await this.connection
+      .promise()
+      .query(
+        "SELECT *, winCounter / (winCounter + loseCounter) as rate FROM user WHERE winCounter + loseCounter > 0 ORDER BY rate DESC LIMIT ?",
+        [limit]
+      );
+
+    return result[0];
+  }
+
+  async setMarriage(userId1, userId2) {
+    await this.connection
+      .promise()
+      .query(
+        "INSERT INTO mariage (userId, userId2, date) VALUES (?, ?,NOW())",
+        [userId1, userId2]
+      );
+  }
+
+  async updatePower(userId, amount) {
+    await this.connection
+      .promise()
+      .query("UPDATE user SET power = power + ? WHERE discordId = ?", [
+        amount,
+        userId,
+      ]);
+  }
 }
 
 module.exports = DatabaseManager;
