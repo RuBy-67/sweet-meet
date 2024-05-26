@@ -16,6 +16,7 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setTitle("Social Queen Link")
       .setColor(color.pink)
+      .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
       .setDescription(
         `➼ ** | [${emoji(
           emo.git
@@ -31,7 +32,6 @@ module.exports = {
         text: `Demandé(e) par ${interaction.user.tag}`,
         iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
       });
-
     return interaction.reply({ embeds: [embed] });
   },
 };
