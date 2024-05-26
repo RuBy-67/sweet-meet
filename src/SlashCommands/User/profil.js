@@ -54,11 +54,43 @@ module.exports = {
       materiaux = [...materiauxMap.values()]
         .map(
           (materiau) =>
-            `${emoji(emo[materiau.nom])} lvl: ${materiau.lvl}x ${
-              materiau.quantite
-            }`
+            `${emoji(emo[materiau.nom])} \`${materiau.nom}\` *=>* lvl: ${
+              materiau.lvl
+            }, **x${materiau.quantite}**`
         )
         .join(" \n");
+    }
+
+    //-------------------------------------//
+    let materiauxDetails = [];
+    if (materiauResult.length > 0) {
+      const materiauxMap2 = new Map();
+      materiauResult.forEach((materiau) => {
+        const materiauKey = `${materiau.nom}-${materiau.rarete}-${materiau.type}-${materiau.defenseBoost}-${materiau.attaqueBoost}-${materiau.santeBoost}-${materiau.lore}`;
+        if (!materiauxMap2.has(materiauKey)) {
+          materiauxMap2.set(materiauKey, {
+            nom: materiau.nom,
+            rarete: materiau.rarete,
+            type: materiau.type,
+            defense: materiau.defenseBoost,
+            attaque: materiau.attaqueBoost,
+            sante: materiau.santeBoost,
+            lore: materiau.lore,
+            quantite: 0,
+          });
+        }
+        materiauxMap2.get(materiauKey).quantite++;
+      });
+
+      materiauxDetails = [...materiauxMap2.values()].map((materiau) => {
+        const materiauEmoji = emoji(emo[materiau.nom]);
+        const description = `**Rareté:** ${materiau.rarete}\n**Type:** ${materiau.type}\n**Boost:** 💚 ${materiau.sante}% - ⚔️ ${materiau.attaque}% - 🛡️ ${materiau.defense}%\n**Description:** ${materiau.lore}\n**Quantité:** ${materiau.quantite}\n__~~**----------------------------------**~~__`;
+
+        return {
+          name: `${materiauEmoji} ${materiau.nom}`,
+          value: description,
+        };
+      });
     }
 
     const badgeResult = await dbManager.getBadge(targetUser.id);
@@ -104,31 +136,39 @@ module.exports = {
         .setThumbnail(targetUser.displayAvatarURL({ dynamic: true }))
         .addFields(
           {
-            name: "Marié(e)",
+            name: "Situation :",
             value: marriageStatus,
             inline: true,
           },
-          { name: "Puissance", value: `${power}`, inline: true },
-          { name: "Badges", value: badges, inline: false },
-          { name: "Matériaux", value: materiaux, inline: false },
-          { name: "Win", value: `${win}`, inline: true },
-          { name: "Lose", value: `${lose}`, inline: true },
-          { name: "Rate", value: `${(rate * 100).toFixed(2)}%`, inline: true },
+          { name: "Puissance :", value: `${power}`, inline: true },
+          { name: "Badges :", value: badges, inline: false },
+          { name: "Matériaux :", value: materiaux, inline: false },
+          { name: "Win :", value: `${win}`, inline: true },
+          { name: "Lose :", value: `${lose}`, inline: true },
+          {
+            name: "Rate :",
+            value: `${(rate * 100).toFixed(2)}%`,
+            inline: true,
+          },
           {
             name: "Statistique de combat",
-            value: `💚 Santé : ${stats.sante} \n🛡️ Défense : ${stats.defense} \n⚔️ Attaque : ${stats.attaque}`,
+            value: `💚 Santé : **${stats.sante}** \n🛡️ Défense : **${stats.defense}** \n⚔️ Attaque : **${stats.attaque}**`,
           }
         )
         .setFooter({
-          text: `demandé(e) par ${interaction.user.tag}`,
+          text: `demandé(e) par ${interaction.user.tag} - Page 1/2`,
           iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
         }),
+
       new EmbedBuilder()
-        .setTitle("Mes Matériaux & Badges Détails")
+        .setTitle("Mes Matériaux")
         .setColor(color.pink)
-        .addFields({ name: "Matériaux", value: "bloblbo" })
+        .setDescription(
+          "*Dans l'univers mystique où ces matériaux émergent, leur utilité est souvent ancrée dans des récits légendaires et des croyances profondément enracinées. Chacun de ces matériaux mystiques possède des propriétés uniques, non seulement physiques, mais aussi symboliques, qui influencent leur utilisation dans diverses facettes de la vie.*\n\n***Le level Influe sur les Boost***"
+        )
+        .addFields(materiauxDetails)
         .setFooter({
-          text: `Demandé(e) par ${interaction.user.tag} - Page 3/3`,
+          text: `Demandé(e) par ${interaction.user.tag} - Page 2/2`,
           iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
         }),
     ];

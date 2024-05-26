@@ -26,9 +26,43 @@ module.exports = {
         "Missing Emoji"
       );
     }
+    const materiauResult = await dbManager.getMateriau();
+    const materialEmbeds = [];
+    let currentEmbed = new EmbedBuilder()
+      .setTitle("Help - Matériaux")
+      .setColor(color.pink)
+      .setFooter({
+        text: `Demandé(e) par ${interaction.user.tag}`,
+        iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+      })
+      .setDescription("Liste de tous les matériaux :");
+    materiauResult.forEach((material, index) => {
+      const materialEmoji = emoji(emo[material.nom]);
+      const description = `**Rareté:** ${material.rarete}\n**Type:** ${material.type}\n**Bonus:** 💚 ${material.santeBoost}% - ⚔️ ${material.attaqueBoost}% - 🛡️ ${material.defenseBoost}%\n**Description:** ${material.lore}\n__~~**----------------------------------**~~__`;
+      currentEmbed.addFields({
+        name: `${materialEmoji} ${material.nom}`,
+        value: description,
+      });
+
+      if ((index + 1) % 4 === 0) {
+        materialEmbeds.push(currentEmbed);
+        currentEmbed = new EmbedBuilder()
+          .setTitle("Help - Matériaux")
+          .setColor(color.pink)
+          .setFooter({
+            text: `Demandé(e) par ${interaction.user.tag}`,
+            iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+          })
+          .setDescription("Suite... ");
+      }
+    });
+    if (currentEmbed && currentEmbed.fields && currentEmbed.fields.length > 0) {
+      materialEmbeds.push(currentEmbed);
+    }
+
     const pages = [
       new EmbedBuilder()
-        .setTitle("Commande Basique - Page 1")
+        .setTitle("Help - Commande Basique")
         .setColor(color.pink)
         .setDescription("Commande Basique du bot")
         .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
@@ -43,36 +77,29 @@ module.exports = {
           }
         )
         .setFooter({
-          text: `Demandé(e) par ${interaction.user.tag} - Page 1/3`,
+          text: `Demandé(e) par ${interaction.user.tag}`,
           iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
         }),
       new EmbedBuilder()
-        .setTitle("Duels - Page 2")
+        .setTitle("Help - Duels")
         .setColor(color.pink)
         .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
         .setDescription("Duel")
         .setFooter({
-          text: `Demandé(e) par ${interaction.user.tag} - Page 2/3`,
+          text: `Demandé(e) par ${interaction.user.tag}`,
           iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
         }),
+
       new EmbedBuilder()
-        .setTitle("Matériaux - Page 3")
-        .setColor(color.pink)
-        .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-        .setDescription("Description for page 3")
-        .setFooter({
-          text: `Demandé(e) par ${interaction.user.tag} - Page 3/3`,
-          iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
-        }),
-      new EmbedBuilder()
-        .setTitle("Campagne - Page 4")
+        .setTitle("Help - Campagne")
         .setColor(color.pink)
         .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
         .setDescription("🚧 🚧 🚧 🚧")
         .setFooter({
-          text: `Demandé(e) par ${interaction.user.tag} - Page 3/3`,
+          text: `Demandé(e) par ${interaction.user.tag}`,
           iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
         }),
+      ...materialEmbeds,
     ];
     const legendaryMaterials = await dbManager.getMateriauxByRarity(
       "Legendaire"
