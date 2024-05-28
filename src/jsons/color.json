@@ -3,5 +3,6 @@
     "blue" : "#7798ab",
     "white-pink" : "#f2cee6",
     "pink" : "#e08dac",
-    "yellow" : "#C7CB85"
+    "yellow" : "#C7CB85",
+    "error" : "#ff0000"
 }

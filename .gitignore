@@ -3,3 +3,7 @@ src/jsons/config.json
 src/jsons/param.json
 src/class/dbManager.js
 src/jsons/gif.json
+src/class/sqlQueries.js
+src/class/sqlQueriesPlayer.js
+src/class/sqlQueriesDb.js
+src/class/player.js

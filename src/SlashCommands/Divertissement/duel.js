@@ -1,0 +1,223 @@
+const {
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  StringSelectMenuBuilder,
+} = require("discord.js");
+const emo = require(`../../jsons/emoji.json`);
+const color = require(`../../jsons/color.json`);
+const DatabaseManager = require("../../class/dbManager");
+const dbManager = new DatabaseManager();
+const Player = require("../../class/player");
+const player = new Player();
+const duelMessages = require(`../../jsons/gif.json`);
+
+module.exports = {
+  name: "duel",
+  description: "duel between two players",
+  options: [
+    {
+      name: "membre",
+      description: "Le membre avec lequel vous voulez faire un duel",
+      type: 6,
+      required: true,
+    },
+    {
+      name: "paris",
+      description:
+        "la puissance mise en jeu pour le duel (n'influe pas sur le résultat du duel)",
+      type: 4,
+      required: true,
+    },
+  ],
+  run: async (client, interaction, args) => {
+    function emoji(id) {
+      return (
+        client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
+        "Missing Emoji"
+      );
+    }
+    const temps = Math.floor(Date.now() / 1000) + 60;
+    const membre = interaction.options.getUser("membre");
+    const userId = interaction.user.id;
+    const userName = interaction.user.username;
+    let paris = interaction.options.getInteger("paris");
+    const userPower = await dbManager.getStats(userId);
+    const adversaryPower = await dbManager.getStats(membre.id);
+    if (userPower.power < paris) {
+      const embed = new EmbedBuilder()
+        .setTitle("Erreur")
+        .setDescription(
+          `Vous n'avez pas assez de puissance pour initier ce duel avec une mise de ${paris}.`
+        )
+        .setColor(color.error);
+
+      return interaction.reply({ embeds: [embed] });
+    }
+
+    if (adversaryPower.power < paris) {
+      const embed = new EmbedBuilder()
+        .setTitle("Erreur")
+        .setDescription(
+          `${membre.username} n'a pas assez de puissance pour accepter ce duel avec une mise de ${paris}.`
+        )
+        .setColor(color.error);
+
+      return interaction.reply({ embeds: [embed] });
+    }
+    if (membre === interaction.user) {
+      const embed = new EmbedBuilder()
+        .setTitle("Erreur")
+        .setDescription(
+          `Vous ne pouvez pas initier un duel avec vous-même. (Bien essayé)`
+        )
+        .setColor(color.error);
+
+      return interaction.reply({ embeds: [embed] });
+    }
+    if (paris < 0) {
+      const embed = new EmbedBuilder()
+        .setTitle("Erreur")
+        .setDescription(
+          `Vous ne pouvez pas initier un duel avec une mise de ${paris} inférieur à 0 (hé oui).`
+        )
+        .setColor(color.error);
+
+      return interaction.reply({ embeds: [embed] });
+    }
+
+    const [userMaterials, adversaryMaterials] = await Promise.all([
+      player.getMaterialsById(userId),
+      player.getMaterialsById(membre.id),
+    ]);
+    const userMaterialNames = getMaterialNames(userMaterials);
+    const adversaryMaterialNames = await getMaterialNames(adversaryMaterials);
+    function getMaterialNames(materials) {
+      if (materials.length === 0) return [];
+      const materialNames = materials.map(
+        (material) =>
+          `${emoji(emo[material.nom])} \`${material.nom}\` *=>* lvl: ${
+            material.materiauLevel
+          }`
+      );
+      return materialNames;
+    }
+
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("accept_duel")
+        .setLabel("Accepter")
+        .setStyle(ButtonStyle.Success),
+
+      new ButtonBuilder()
+        .setCustomId("decline_duel")
+        .setLabel("Refuser")
+        .setStyle(ButtonStyle.Danger)
+    );
+
+    const embed = new EmbedBuilder()
+      .setTitle("Duel Initié")
+      .setDescription(
+        `Vous avez initié un duel avec **${
+          membre.username
+        }** avec une mise en jeu de  ${
+          paris * 2
+        } Power.\nFin <t:${temps}:R>\n\n*Appuyez sur le bouton ci-dessous pour accepter/refuser le duel.*`
+      )
+      .addFields(
+        {
+          name: "Vos détails",
+          value: `Power : ${userPower.power}\n\n**Materiaux :**\n ${
+            userMaterialNames.length > 0
+              ? userMaterialNames.join("\n")
+              : "Aucun"
+          }`,
+          inline: true,
+        },
+        {
+          name: `Détail de ${membre.username}`,
+          value: `Power : ${adversaryPower.power}\n\n**Materiaux :**\n ${
+            adversaryMaterialNames.length > 0
+              ? adversaryMaterialNames.join("\n")
+              : "Aucun"
+          }`,
+          inline: true,
+        },
+        {
+          name: `Répartition des gains:`,
+          value: "75% pour le gagnant et 25% pour le perdant",
+          inline: false,
+        }
+      )
+      .setImage("https://media1.tenor.com/m/6QwxgzQLGKUAAAAC/battle.gif")
+      .setColor(color.pink);
+    const message = await interaction.reply({
+      embeds: [embed],
+      components: [row],
+      fetchReply: true,
+    });
+    const filter = (interaction) => interaction.user.id === membre.id;
+    const collector = message.createMessageComponentCollector({
+      filter,
+      time: 60000,
+    });
+
+    collector.on("collect", async (buttonInteraction) => {
+      if (buttonInteraction.customId === "accept_duel") {
+        row.components.forEach((component) => component.setDisabled(true));
+        message.edit({ components: [row] });
+        const [winner, duelId] = await player.fightBattle(userId, membre.id);
+        await player.updatePower(membre.id, -paris);
+        await player.updatePower(userId, -paris);
+        paris = paris * 2;
+        parisWin = Math.floor(paris * (75 / 100));
+        parisLose = Math.floor(paris * (25 / 100));
+        parisDraw = Math.floor((paris / 2) * 1.02);
+        if (winner === userId) {
+          await player.updatePower(userId, parisWin);
+          await player.updatePower(membre.id, parisLose);
+        } else if (winner === membre.id) {
+          await player.updatePower(membre.id, parisWin);
+          await player.updatePower(membre.id, parisLose);
+        } else {
+          await player.updatePower(userId, parisDraw);
+          await player.updatePower(membre.id, parisDraw);
+        }
+
+        buttonInteraction
+          .reply(
+            `- __${userName} :__ *${await player.getRandomMessage(
+              "start"
+            )}*\n- __${membre.username} :__ *${await player.getRandomMessage(
+              "start"
+            )}*`
+          )
+          .then(async (message) => {
+            setTimeout(async () => {
+              await player.duelProgress(
+                message,
+                userName,
+                membre,
+                winner,
+                duelId,
+                userId,
+                parisWin,
+                parisLose,
+                parisDraw
+              );
+            }, 5000);
+          });
+      } else if (buttonInteraction.customId === "decline_duel") {
+        buttonInteraction.reply("Duel refusé.");
+        row.components.forEach((component) => component.setDisabled(true));
+        message.edit({ components: [row] });
+      }
+    });
+
+    collector.on("end", () => {
+      row.components.forEach((component) => component.setDisabled(true));
+      message.edit({ components: [row] });
+    });
+  },
+};

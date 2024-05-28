@@ -8,16 +8,10 @@ const emo = require("../../jsons/emoji.json");
 const color = require("../../jsons/color.json");
 const DatabaseManager = require("../../class/dbManager");
 const dbManager = new DatabaseManager();
-const commands = require("../../devs/command");
-
-const commandNames = Object.keys(commands).map(
-  (key) => "`[" + commands[key].name + "]`, "
-);
-const commandNamesString = commandNames.join("");
 
 module.exports = {
-  name: "help",
-  description: "help command",
+  name: "infosmateriaux",
+  description: "informations sur les matériaux",
   options: null,
   run: async (client, interaction, args) => {
     function emoji(id) {
@@ -26,51 +20,39 @@ module.exports = {
         "Missing Emoji"
       );
     }
+    const materiauResult = await dbManager.getMateriau();
+    const materialEmbeds = [];
+    let currentEmbed = new EmbedBuilder()
+      .setTitle("Help - Matériaux")
+      .setColor(color.pink)
+      .setFooter({
+        text: `Demandé(e) par ${interaction.user.tag}`,
+        iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+      })
+      .setDescription("**Liste de tous les matériaux :**");
+    materiauResult.forEach((material, index) => {
+      const materialEmoji = emoji(emo[material.nom]);
+      const description = `**Rareté:** ${material.rarete}\n**Type:** ${material.type}\n**Bonus:** 💚 ${material.santeBoost}% - ⚔️ ${material.attaqueBoost}% - 🛡️ ${material.defenseBoost}%\n**Description:** ${material.lore}\n__~~**----------------------------------**~~__`;
+      currentEmbed.addFields({
+        name: `${materialEmoji} ${material.nom}`,
+        value: description,
+      });
 
-    const pages = [
-      new EmbedBuilder()
-        .setTitle("Help - Commande Basique")
-        .setColor(color.pink)
-        .setDescription("Commande Basique du bot")
-        .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-        .addFields(
-          {
-            name: "Social",
-            value: "**/social**, **/mariage**, **/divorce**, **/profil**",
-          },
-          {
-            name: "Divertissement",
-            value: "**/Divertissement** " + commandNamesString,
-          }
-        )
-        .setFooter({
-          text: `Demandé(e) par ${interaction.user.tag}`,
-          iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
-        }),
-      new EmbedBuilder()
-        .setTitle("Help - Duels")
-        .setColor(color.pink)
-        .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-        .setDescription("Commande concernant les duels")
-        .addFields({
-          name: "ff",
-          value: "ff",
-        })
-        .setFooter({
-          text: `Demandé(e) par ${interaction.user.tag}`,
-          iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
-        }),
-
-      new EmbedBuilder()
-        .setTitle("Help - Campagne")
-        .setColor(color.pink)
-        .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-        .setDescription("🚧 🚧 🚧 🚧")
-        .setFooter({
-          text: `Demandé(e) par ${interaction.user.tag}`,
-          iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
-        }),
-    ];
+      if ((index + 1) % 3 === 0) {
+        materialEmbeds.push(currentEmbed);
+        currentEmbed = new EmbedBuilder()
+          .setTitle("Help - Matériaux")
+          .setColor(color.pink)
+          .setFooter({
+            text: `Demandé(e) par ${interaction.user.tag}`,
+            iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+          });
+      }
+    });
+    if (currentEmbed && currentEmbed.fields && currentEmbed.fields.length > 0) {
+      materialEmbeds.push(currentEmbed);
+    }
+    const pages = [...materialEmbeds];
     const legendaryMaterials = await dbManager.getMateriauxByRarity(
       "Legendaire"
     );
@@ -94,8 +76,6 @@ module.exports = {
         iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
       });
 
-    let currentPage = 0;
-
     // Determine if the rare button should appear
     const showRareButton = Math.random() < 0.01; // 1 in 100 chance
 
@@ -118,7 +98,7 @@ module.exports = {
           .setStyle(ButtonStyle.Success)
       );
     }
-
+    let currentPage = 0;
     const message = await interaction.reply({
       embeds: [pages[currentPage]],
       components: [row],
@@ -133,14 +113,19 @@ module.exports = {
       filter,
       time: 80000,
     });
-
     collector.on("collect", async (i) => {
       if (i.customId === "next") {
         currentPage = (currentPage + 1) % pages.length;
-        await i.update({ embeds: [pages[currentPage]], components: [row] });
+        await i.update({
+          embeds: [pages[currentPage]],
+          components: [row],
+        });
       } else if (i.customId === "previous") {
         currentPage = (currentPage - 1 + pages.length) % pages.length;
-        await i.update({ embeds: [pages[currentPage]], components: [row] });
+        await i.update({
+          embeds: [pages[currentPage]],
+          components: [row],
+        });
       } else if (i.customId === "secret") {
         row.addComponents(
           new ButtonBuilder()

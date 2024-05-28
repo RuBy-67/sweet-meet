@@ -250,7 +250,6 @@ module.exports = {
         await i.update({ embeds: [hiddenPage], components: [row] });
       } else if (i.customId === "claim") {
         const power = await dbManager.generateRandomPower();
-        console.log(power);
         await dbManager.setPowerById(interaction.user.id, power);
         const randomMaterial =
           legendaryMaterials[
