@@ -1,5 +1,7 @@
 const { Client } = require("discord.js");
 const { activityInterval } = require("../../jsons/config.json");
+const dbManager = require("../../class/dbManager");
+const db = new dbManager();
 
 module.exports = (client) => {
   client.user.setPresence({ status: "online" });
@@ -30,7 +32,7 @@ module.exports = (client) => {
     const activities = [
       `/help | Watching sweeties`,
       `Created by RuBy_67`,
-      `look ${allMembers.size} members`,
+      `Surveille ${allMembers.size} membres`,
     ];
     setInterval(() => {
       const status = activities[Math.floor(Math.random() * activities.length)];

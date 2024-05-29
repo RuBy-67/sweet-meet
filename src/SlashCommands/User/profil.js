@@ -39,7 +39,6 @@ module.exports = {
     if (materiauResult.length > 0) {
       const materiauxMap = new Map();
       materiauResult.forEach((materiau) => {
-        const materiauId = materiau.idMateriau;
         const materiauKey = `${materiau.nom}-${materiau.lvl}`;
         if (!materiauxMap.has(materiauKey)) {
           materiauxMap.set(materiauKey, {

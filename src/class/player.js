@@ -3,6 +3,7 @@ const DatabaseManager = require("./dbManager");
 const sqlQueries = require("./sqlQueriesPlayer");
 const { connection } = require("../db");
 const duelMessages = require(`../jsons/gif.json`);
+const emo = require(`../jsons/emoji.json`);
 
 class Player extends DatabaseManager {
   constructor() {
@@ -224,6 +225,62 @@ class Player extends DatabaseManager {
     return result;
   }
 
+  async getMaterialsStringSelect(userId, etat, withId = false) {
+    const materials =
+      etat === 1
+        ? await this.getMaterialsById(userId)
+        : await this.getMaterialsByIdEtat0(userId);
+    const materialStrings = materials.map(
+      (material) =>
+        `${emo[material.nom]}_${material.nom}_${material.materiauLevel}_${
+          material.idMateriau
+        }`
+    );
+    return materialStrings.join("\n");
+  }
+
+  async getMaterialsStringMessage(userId) {
+    const materiaux = await this.getMaterialsById(userId);
+
+    if (materiaux.length === 0) {
+      return [];
+    }
+
+    const materiauxArray = materiaux.map((materiau) => {
+      let bonusSante = materiau.santeBoost;
+      let bonusAttaque = materiau.attaqueBoost;
+      let bonusDefense = materiau.defenseBoost;
+
+      const levelBonus = param.level[materiau.materiauLevel] / 10;
+      if (bonusSante > 0) {
+        bonusSante += levelBonus;
+      } else if (bonusAttaque > 0) {
+        bonusAttaque += levelBonus;
+      } else if (bonusDefense > 0) {
+        bonusDefense += levelBonus;
+      }
+
+      return {
+        emoji: emo[materiau.nom],
+        nom: materiau.nom,
+        lvl: materiau.materiauLevel,
+        rarete: materiau.rarete,
+        type: materiau.type,
+        bonusSante,
+        bonusAttaque,
+        bonusDefense,
+      };
+    });
+    return materiauxArray;
+  }
+
+  async getMaterialsByIdEtat0(userId) {
+    const [result] = await this.connection
+      .promise()
+      .query(sqlQueries.getMaterialsByIdEtat0, [userId]);
+    return result || [];
+  }
+
   async insertMaterialsIntoDuelDetail(duelId, userId, materialIds) {
     const [materialId1, materialId2, materialId3, materialId4] = materialIds;
     await this.connection
@@ -307,6 +364,20 @@ class Player extends DatabaseManager {
           }, 6500);
         }
       }, i * 6500);
+    }
+  }
+
+  rarete(rarete) {
+    if (rarete === "Commun") {
+      return "⚪";
+    } else if (rarete === "Rare") {
+      return "🔵";
+    } else if (rarete === "Très Rare") {
+      return "🟠";
+    } else if (rarete === "Épique") {
+      return "🟣";
+    } else if (rarete === "Legendaire") {
+      return "🟡";
     }
   }
 }

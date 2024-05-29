@@ -53,8 +53,9 @@ module.exports = {
         .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
         .setDescription("Commande concernant les duels")
         .addFields({
-          name: "ff",
-          value: "ff",
+          name: "Commande de Duel",
+          value:
+            "**/duel @user** pour défier un utilisateur\n**/setmateriaux** pour choisir les matériaux à utiliser",
         })
         .setFooter({
           text: `Demandé(e) par ${interaction.user.tag}`,
