@@ -10,8 +10,8 @@ const DatabaseManager = require("../../class/dbManager");
 const dbManager = new DatabaseManager();
 
 module.exports = {
-  name: "infosmateriaux",
-  description: "informations sur les matériaux",
+  name: "infosobjet",
+  description: "informations sur les Objets Roles et Badges disponible",
   options: null,
   run: async (client, interaction, args) => {
     function emoji(id) {
@@ -29,7 +29,9 @@ module.exports = {
         text: `Demandé(e) par ${interaction.user.tag}`,
         iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
       })
-      .setDescription("**Liste de tous les matériaux :**");
+      .setDescription(
+        "Les matériaux de Valoria possèdent des propriétés uniques et sont recherchés par les guerriers pour leurs pouvoirs : \n\n**Liste de tous les matériaux :**"
+      );
     materiauResult.forEach((material, index) => {
       const materialEmoji = emoji(emo[material.nom]);
       const description = `**Rareté:** ${material.rarete}\n**Type:** ${material.type}\n**Bonus:** 💚 ${material.santeBoost}% - ⚔️ ${material.attaqueBoost}% - 🛡️ ${material.defenseBoost}%\n**Description:** ${material.lore}\n__~~**----------------------------------**~~__`;

@@ -1,10 +1,27 @@
-const { Client, EmbedBuilder } = require("discord.js");
+const {
+  Client,
+  EmbedBuilder,
+  StringSelectMenuBuilder,
+  StringSelectMenuOptionBuilder,
+  ActionRowBuilder,
+} = require("discord.js");
 const { activityInterval } = require("../../jsons/config.json");
 const dbManager = require("../../class/dbManager");
 const os = require("os-utils");
 const color = require("../../jsons/color.json");
 const db = new dbManager();
+const param = require("../../jsons/param.json");
+const emo = require("../../jsons/emoji.json");
 const config = require("../../jsons/config.json");
+const {
+  buyMaterial,
+  daysBox,
+  randomLootBox,
+  openShop,
+  closeShop,
+  buyRole,
+} = require("../../devs/shop");
+let shopMessage;
 
 module.exports = (client) => {
   os.cpuUsage(async (v) => {
@@ -81,6 +98,30 @@ module.exports = (client) => {
       allChannels.add(channel.id);
     });
   });
+  openShop(client);
+
+  client.on("interactionCreate", async (interaction) => {
+    if (!interaction.isStringSelectMenu()) return;
+
+    if (interaction.customId === "select-item") {
+      const selectedItem = interaction.values[0];
+      const userId = interaction.user.id;
+      if (selectedItem.startsWith("material_")) {
+        const materialId = selectedItem.split("_")[1];
+        const level = selectedItem.split("_")[2];
+        await buyMaterial(client, interaction, userId, materialId, level);
+      } else if (selectedItem.startsWith("role_")) {
+        const roleId = selectedItem.split("_")[1];
+        await buyRole(client, interaction, userId, roleId);
+      } else if (selectedItem === "randomlootbox") {
+        await randomLootBox(interaction);
+      } else if (selectedItem === "daysbox") {
+        await daysBox(interaction);
+      } else {
+        await interaction.reply(`Sélection invalide.`);
+      }
+    }
+  });
 
   console.log(
     ` ${client.channels.cache.size} channels \n ${allMembers.size} members `
@@ -92,9 +133,9 @@ module.exports = (client) => {
    */
   async function updateActivity(client) {
     const activities = [
-      `/help | Watching sweeties`,
+      `/help | Watching Valoria`,
       `Created by RuBy_67`,
-      `Surveille ${allMembers.size} membres`,
+      `Surveille ${allMembers.size} Valorien`,
     ];
     setInterval(() => {
       const status = activities[Math.floor(Math.random() * activities.length)];

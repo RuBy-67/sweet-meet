@@ -32,10 +32,8 @@ class Cooldown {
     );
 
     if (cooldownInfo) {
-      console.log(cooldownInfo);
       const remainingTime = cooldownInfo.remainingTime.toFixed(1);
       const timestamp = Math.floor((Date.now() + remainingTime * 1000) / 1000);
-      console.log(timestamp);
       await interaction.reply({
         content: `Vous êtes en cooldown pour cette commande. Veuillez réessayer <t:${timestamp}:R>`,
         ephemeral: true,

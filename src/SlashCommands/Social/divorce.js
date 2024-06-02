@@ -67,8 +67,11 @@ module.exports = {
       components: [row],
       fetchReply: true,
     });
+    const targetId = authorMarriage[0].userId2;
+    const targetId2 = authorMarriage[0].userId;
 
-    const filter = (interaction) => interaction.user.id === authorId;
+    const filter = (interaction) =>
+      interaction.user.id === authorId || interaction.user.id === targetId;
     const collector = message.createMessageComponentCollector({
       filter,
       time: 60000,
@@ -78,9 +81,11 @@ module.exports = {
       await interaction.deferUpdate();
 
       if (interaction.customId === "accepter") {
-        const targetId = authorMarriage[0].userId2;
-        const targetId2 = authorMarriage[0].userId;
         dbManager.deleteMarriage(authorId, targetId);
+        dbManager.updateBadge(targetId, "loveb");
+        dbManager.updateBadge(authorId, "loveb");
+        dbManager.removeBadgeById(4, targetId);
+        dbManager.removeBadgeById(4, authorId);
 
         await interaction.editReply({
           content: `Félicitations ?, <@${targetId}> et <@${targetId2}> sont maintenant divorcés !`,

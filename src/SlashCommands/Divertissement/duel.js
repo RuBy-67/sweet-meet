@@ -16,7 +16,7 @@ const cooldown = new Cooldown();
 
 module.exports = {
   name: "duel",
-  description: "duel between two players",
+  description: "Duel avec un autre joueur pour gagner de la puissance",
   options: [
     {
       name: "membre",
@@ -233,7 +233,6 @@ module.exports = {
               gainUserId = 0;
               gainMembreId = 0;
             }
-            console.log(duelDetail);
             const duelEmbed = new EmbedBuilder()
               .setTitle("Duel terminé")
               .setDescription(

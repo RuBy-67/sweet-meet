@@ -51,6 +51,12 @@ module.exports = {
     },
   ],
   run: async (client, interaction, args) => {
+    function emoji(id) {
+      return (
+        client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
+        "Missing Emoji"
+      );
+    }
     const gameMasterIds = Object.values(param.gameMaster);
     if (!gameMasterIds.includes(interaction.user.id)) {
       const role = interaction.guild.roles.cache.find(
@@ -70,13 +76,6 @@ module.exports = {
 
         return interaction.reply({ embeds: [errorEmbed] });
       }
-    }
-
-    function emoji(id) {
-      return (
-        client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
-        "Missing Emoji"
-      );
     }
     const type = interaction.options.getString("type");
     const target = interaction.options.getMember("membre");
@@ -166,7 +165,7 @@ module.exports = {
         const selectedMaterialId = selectedMaterials[0];
 
         if (i.customId === "material_select") {
-          await dbManager.setMaterials(utilisateur.id, selectedMaterialId);
+          await dbManager.addMaterialToUser(utilisateur.id, selectedMaterialId);
           await i.update({
             content: `Vous avez donné le matériel à ${utilisateur}.`,
           });

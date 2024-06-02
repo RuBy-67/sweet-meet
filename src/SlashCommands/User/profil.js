@@ -126,7 +126,11 @@ module.exports = {
     const power = statsResult.power;
     const rate = win / (win + lose) || 0;
     const stats = await player.getStatsById(targetUser.id);
-
+    const roleInfo = await dbManager.getRoleByUserId(targetUser.id);
+    let role = "Aucun";
+    if (roleInfo.length > 0) {
+      role = roleInfo.map((role1) => `<@&${role1.id}>`).join(" ");
+    }
     const pages = [
       new EmbedBuilder()
 
@@ -139,9 +143,14 @@ module.exports = {
             value: marriageStatus,
             inline: true,
           },
-          { name: "Puissance :", value: `${power}`, inline: true },
-          { name: "Badges :", value: badges, inline: false },
-          { name: "Matériaux :", value: materiaux, inline: false },
+          { name: "Puissance :", value: `${power}` || "0", inline: true },
+          { name: "Badges :", value: badges || "Aucun", inline: false },
+          {
+            name: "Roles :",
+            value: role || "Aucun",
+            inline: false,
+          },
+          { name: "Matériaux :", value: materiaux || "Aucun", inline: false },
           { name: "Win :", value: `${win}`, inline: true },
           { name: "Lose :", value: `${lose}`, inline: true },
           {

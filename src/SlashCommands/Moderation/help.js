@@ -51,11 +51,13 @@ module.exports = {
         .setTitle("Help - Duels")
         .setColor(color.pink)
         .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-        .setDescription("Commande concernant les duels")
+        .setDescription(
+          "Explication et commande concernant les duels\n\nAutrefois, Valoria était unifiée sous le règne d'un puissant Empereur, un alchimiste de renom ayant découvert l'Essence de l'Océan, une substance mystique dotée de propriétés inimaginables. Cependant, la mort de l'Empereur a plongé le royaume dans le chaos, et les Seigneurs de guerre se sont emparés des terres, déchirant le royaume en plusieurs régions. Les duels sont un moyen pour les habitants de Valoria de régler leurs différends, et de gagner en puissance et en gloire."
+        )
         .addFields({
           name: "Commande de Duel",
           value:
-            "**/duel @user** pour défier un utilisateur\n**/setmateriaux** pour choisir les matériaux à utiliser",
+            "**/duel @user** pour défier un guerrier\n**/setmateriaux** pour choisir les matériaux à utiliser\n**/upgrade** pour améliorer vos matériaux\n**/sell** Pour vendre vos materiaux\n**/classement** pour voir le classement des joueurs",
         })
         .setFooter({
           text: `Demandé(e) par ${interaction.user.tag}`,
@@ -63,10 +65,23 @@ module.exports = {
         }),
 
       new EmbedBuilder()
-        .setTitle("Help - Campagne")
+        .setTitle("Help - Campagne solo 🚧🚧🚧")
         .setColor(color.pink)
         .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-        .setDescription("🚧 🚧 🚧 🚧")
+        .setDescription(
+          "Dans le monde de Valoria, un royaume mystérieux et magique, les joueurs se retrouvent plongés dans un univers où les duels, et la quête de pouvoir s'entremêlent. Les contrées de Valoria sont divisées en plusieurs régions, chacune gouvernée par un Roi ou une Reine. La technologie et la magie coexistent, et des guildes secrètes ainsi que des créatures fantastiques influencent la destinée des habitants, dans la campagne vous être uen de ces guildes et vous devez accomplir des missions pour gagner en puissance et en gloire."
+        )
+        .setFooter({
+          text: `Demandé(e) par ${interaction.user.tag}`,
+          iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+        }),
+      new EmbedBuilder()
+        .setTitle("Help - Royaume 🚧🚧🚧")
+        .setColor(color.pink)
+        .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
+        .setDescription(
+          "Aucun Royaume n'a encore été créé, revenez plus tard pour plus d'information."
+        )
         .setFooter({
           text: `Demandé(e) par ${interaction.user.tag}`,
           iconURL: interaction.user.displayAvatarURL({ dynamic: true }),

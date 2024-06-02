@@ -1,12 +1,13 @@
-const {
-  Client,
-  Collection,
-  GatewayIntentBits,
-  EmbedBuilder,
-} = require("discord.js");
+const { Client, Collection, GatewayIntentBits } = require("discord.js");
 const { loadEvents } = require("./src/handlers/loadEvents");
 const { loadSlashCommands } = require("./src/handlers/loadSlashCommands");
 const { botToken, auth } = require("./src/jsons/config.json");
+const {
+  openShop,
+  randomLootBox,
+  daysBox,
+  buyMaterial,
+} = require("./src/devs/shop");
 
 // Declaring our Discord Client
 const client = new Client({
