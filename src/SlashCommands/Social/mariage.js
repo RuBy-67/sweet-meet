@@ -9,9 +9,12 @@ const color = require(`../../jsons/color.json`);
 const param = require(`../../jsons/param.json`);
 const DatabaseManager = require("../../class/dbManager");
 const dbManager = new DatabaseManager();
+const Cooldown = require("../../class/cooldown");
+const cooldown = new Cooldown();
 
 module.exports = {
   name: "mariage",
+  cooldown: param.cooldownMariage,
   description: `Demander en mariage un autre utilisateur (coûte ${param.Pricing.marriage.accepter} points de puissance).`,
   options: [
     {
@@ -22,6 +25,10 @@ module.exports = {
     },
   ],
   run: async (client, interaction, args) => {
+    const commandName = "marriage";
+    const cooldownDuration = param.cooldownMariage; // en secondes
+    await cooldown.handleCooldown(interaction, commandName, cooldownDuration);
+
     const target = interaction.options.getMember("membre");
     const targetUser = await client.users.fetch(target.user.id);
     const authorId = interaction.user.id;

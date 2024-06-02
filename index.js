@@ -7,9 +7,6 @@ const {
 const { loadEvents } = require("./src/handlers/loadEvents");
 const { loadSlashCommands } = require("./src/handlers/loadSlashCommands");
 const { botToken, auth } = require("./src/jsons/config.json");
-const connection = require("./src/db");
-
-const { name } = require("./src/SlashCommands/Social/social");
 
 // Declaring our Discord Client
 const client = new Client({

@@ -6,7 +6,7 @@ const dbManager = new DatabaseManager();
 
 module.exports = {
   name: "classement",
-  description: "Affiche le classement des utilisateurs",
+  description: "Affiche le classement des utilisateurs_ A revoire",
   run: async (client, interaction, args) => {
     function emoji(id) {
       return (

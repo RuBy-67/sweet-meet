@@ -160,13 +160,13 @@ module.exports = {
       } else {
         await interaction.followUp("La sélection est terminée");
       }
-      collector.on("end", (collected, reason) => {
-        if (reason === "time") {
-          interaction.followUp(
-            "La sélection est terminée car le délai a expiré."
-          );
-        }
-      });
+    });
+    collector.on("end", (collected, reason) => {
+      if (reason === "time") {
+        interaction.followUp(
+          "La sélection est terminée car le délai a expiré."
+        );
+      }
     });
   },
 };

@@ -1,12 +1,14 @@
 const { EmbedBuilder } = require("discord.js");
 const { welcome } = require("../../jsons/config.json");
-const { connection, connectionBo } = require("../../db");
-const color = require(`../../jsons/color.json`);
+const color = require("../../jsons/color.json");
+const DatabaseManager = require("../../class/dbManager");
+const dbManager = new DatabaseManager();
 
 module.exports = {
   name: "guildMemberRemove",
   execute: async (member) => {
-    // bye message
+    const welcomeChannel = member.guild.channels.cache.get(welcome);
+
     const embed = new EmbedBuilder()
       .setTitle("Au revoir !")
       .setColor(color.pink)
@@ -18,16 +20,10 @@ module.exports = {
         iconURL: member.guild.iconURL({ dynamic: true }),
       });
 
-    const welcomeChannel = member.guild.channels.cache.find(
-      (channel) => channel.id === welcome
-    );
     try {
-      // take data from main database
-      const result = await connection
-        .promise()
-        .query("SELECT * FROM user WHERE discordId = ?", [member.id]);
+      const result = await dbManager.getUserData(member.id);
 
-      if (result[0].length === 0) {
+      if (result.length === 0) {
         console.log(
           `Le compte pour l'utilisateur ${member.id} n'existe pas dans la base de données principale.`
         );
@@ -39,72 +35,21 @@ module.exports = {
         return;
       }
 
-      const userData = result[0][0];
+      const userData = result[0];
 
-      // save data in backup database
-      await connectionBo
-        .promise()
-        .query(
-          "INSERT INTO backup_user (discordId, power, winCounter, loseCounter, date) VALUES (?, ?, ?, ?,NOW())",
-          [
-            userData.discordId,
-            userData.power,
-            userData.winCounter,
-            userData.loseCounter,
-          ]
-        );
+      await dbManager.insertBackupUserData(userData);
 
-      const materiauData = await connection
-        .promise()
-        .query("SELECT * FROM materiau_user WHERE idUser = ?", [
-          userData.discordId,
-        ]);
-
-      for (const materiau of materiauData[0]) {
-        await connectionBo
-          .promise()
-          .query(
-            "INSERT INTO backup_materiau_user (idUser, idMateriau, lvl, date) VALUES (?, ?, ?, NOW())",
-            [materiau.IdUser, materiau.IdMateriau, materiau.lvl]
-          );
+      const materiauData = await dbManager.getMateriauData(userData.discordId);
+      for (const materiau of materiauData) {
+        await dbManager.insertBackupMateriauData(materiau);
       }
 
-      const badgeData = await connection
-        .promise()
-        .query("SELECT * FROM badge_user WHERE idUser = ?", [
-          userData.discordId,
-        ]);
-
-      for (const badge of badgeData[0]) {
-        await connectionBo
-          .promise()
-          .query(
-            "INSERT INTO backup_badge_user (idUser, idBadge, date) VALUES (?, ?, NOW())",
-            [badge.IdUser, badge.idBadge]
-          );
+      const badgeData = await dbManager.getBadgeData(userData.discordId);
+      for (const badge of badgeData) {
+        await dbManager.insertBackupBadgeData(badge);
       }
 
-      // delete data from main database
-      await connection
-        .promise()
-        .query("DELETE FROM user WHERE discordId = ?", [userData.discordId]);
-
-      await connection
-        .promise()
-        .query("DELETE FROM mariage WHERE userId = ? OR userId2 = ?", [
-          userData.discordId,
-          userData.discordId,
-        ]);
-
-      await connection
-        .promise()
-        .query("DELETE FROM materiau_user WHERE idUser = ?", [
-          userData.discordId,
-        ]);
-
-      await connection
-        .promise()
-        .query("DELETE FROM badge_user WHERE idUser = ?", [userData.discordId]);
+      await dbManager.deleteUserData(userData.discordId);
 
       console.log(`Profil supprimé pour l'utilisateur ${member.id}`);
 

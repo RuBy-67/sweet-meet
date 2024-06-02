@@ -3,15 +3,16 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  StringSelectMenuBuilder,
 } = require("discord.js");
 const emo = require(`../../jsons/emoji.json`);
+const param = require(`../../jsons/param.json`);
 const color = require(`../../jsons/color.json`);
 const DatabaseManager = require("../../class/dbManager");
 const dbManager = new DatabaseManager();
 const Player = require("../../class/player");
 const player = new Player();
-const duelMessages = require(`../../jsons/gif.json`);
+const Cooldown = require("../../class/cooldown");
+const cooldown = new Cooldown();
 
 module.exports = {
   name: "duel",
@@ -32,12 +33,16 @@ module.exports = {
     },
   ],
   run: async (client, interaction, args) => {
+    const commandName = "duel";
+    const cooldownDuration = param.cooldownDuel;
+    await cooldown.handleCooldown(interaction, commandName, cooldownDuration);
     function emoji(id) {
       return (
         client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
         "Missing Emoji"
       );
     }
+
     const temps = Math.floor(Date.now() / 1000) + 60;
     const membre = interaction.options.getUser("membre");
     const userId = interaction.user.id;
@@ -194,19 +199,141 @@ module.exports = {
             )}*`
           )
           .then(async (message) => {
-            setTimeout(async () => {
-              await player.duelProgress(
-                message,
-                userName,
-                membre,
-                winner,
-                duelId,
-                userId,
-                parisWin,
-                parisLose,
-                parisDraw
-              );
-            }, 5000);
+            await new Promise((resolve) => setTimeout(resolve, 100)); // Attendre 100 ms avant de commencer duelProgress
+
+            await player.duelProgress(
+              message,
+              userName,
+              membre,
+              winner,
+              duelId,
+              userId,
+              parisWin,
+              parisLose,
+              parisDraw
+            );
+            await new Promise((resolve) => setTimeout(resolve, 29000)); // Attendre 30 secondes supplémentaires après duelProgress
+            const [duelDetail] = await dbManager.getDuelDetails(duelId, userId);
+            const [duelDetail2] = await dbManager.getDuelDetails(
+              duelId,
+              membre.id
+            );
+            let gainUserId, gainMembreId;
+
+            if (winner === userId) {
+              gainUserId = parisWin;
+              gainMembreId = -parisLose;
+            } else if (winner === membre.id) {
+              gainUserId = -parisLose;
+              gainMembreId = parisWin;
+            } else if (winner === "draw") {
+              gainUserId = parisDraw;
+              gainMembreId = parisDraw;
+            } else {
+              gainUserId = 0;
+              gainMembreId = 0;
+            }
+            console.log(duelDetail);
+            const duelEmbed = new EmbedBuilder()
+              .setTitle("Duel terminé")
+              .setDescription(
+                `Le duel entre <@${userId}> et <@${membre.id}> est terminé.`
+              )
+              .addFields(
+                {
+                  name: `Détails de ${userName}`,
+                  value:
+                    `> Power: **${duelDetail.powerUser1}**  ${emoji(
+                      emo.power
+                    )} (Gain: **${gainUserId}**)\n` +
+                    `${
+                      duelDetail.nomMateriau1
+                        ? `> __Materiaux 1:__ ${emoji(
+                            emo[duelDetail.nomMateriau1]
+                          )} **${duelDetail.nomMateriau1}**, Type: ${
+                            duelDetail.typeMateriau1
+                          }\n`
+                        : ""
+                    }` +
+                    `${
+                      duelDetail.nomMateriau2
+                        ? `> __Materiaux 2:__ ${emoji(
+                            emo[duelDetail.nomMateriau2]
+                          )} **${duelDetail.nomMateriau2}**, Type: ${
+                            duelDetail.typeMateriau2
+                          }\n`
+                        : ""
+                    }` +
+                    `${
+                      duelDetail.nomMateriau3
+                        ? `> __Materiaux 3:__ ${emoji(
+                            emo[duelDetail.nomMateriau3]
+                          )} **${duelDetail.nomMateriau3}**, Type: ${
+                            duelDetail.typeMateriau3
+                          }\n`
+                        : ""
+                    }` +
+                    `${
+                      duelDetail.nomMateriau4
+                        ? `> __Materiaux 4:__ ${emoji(
+                            emo[duelDetail.nomMateriau4]
+                          )} **${duelDetail.nomMateriau4}**, Type: ${
+                            duelDetail.typeMateriau4
+                          }\n`
+                        : ""
+                    }`,
+                },
+                {
+                  name: `Détails de ${membre.username}`,
+                  value:
+                    `> Power: **${duelDetail2.powerUser1}** ${emoji(
+                      emo.power
+                    )} (Gain: **${gainMembreId}**)\n` +
+                    `${
+                      duelDetail2.nomMateriau1
+                        ? `> __Materiaux 1:__ ${emoji(
+                            emo[duelDetail2.nomMateriau1]
+                          )} **${duelDetail2.nomMateriau1}**, Type: ${
+                            duelDetail2.typeMateriau1
+                          }\n`
+                        : ""
+                    }` +
+                    `${
+                      duelDetail2.nomMateriau2
+                        ? `> __Materiaux 2:__ ${emoji(
+                            emo[duelDetail2.nomMateriau2]
+                          )} **${duelDetail2.nomMateriau2}**, Type: ${
+                            duelDetail2.typeMateriau2
+                          }\n`
+                        : ""
+                    }` +
+                    `${
+                      duelDetail2.nomMateriau3
+                        ? `> __Materiaux 3:__ ${emoji(
+                            emo[duelDetail2.nomMateriau3]
+                          )} **${duelDetail2.nomMateriau3}**, Type: ${
+                            duelDetail2.typeMateriau3
+                          }\n`
+                        : ""
+                    }` +
+                    `${
+                      duelDetail2.nomMateriau4
+                        ? `> __Materiaux 4:__ ${emoji(
+                            emo[duelDetail2.nomMateriau4]
+                          )} **${duelDetail2.nomMateriau4}**, Type: ${
+                            duelDetail2.typeMateriau4
+                          }\n`
+                        : ""
+                    }`,
+                }
+              )
+              .setColor(color.pink)
+              .setFooter({
+                text: `Duel ID: ${duelId} | Demandé(e) par ${interaction.user.tag}`,
+                iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+              });
+            console.log(duelEmbed);
+            message.edit({ embeds: [duelEmbed] });
           });
       } else if (buttonInteraction.customId === "decline_duel") {
         buttonInteraction.reply("Duel refusé.");

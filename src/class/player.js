@@ -1,7 +1,7 @@
 const param = require("../jsons/param.json");
 const DatabaseManager = require("./dbManager");
 const sqlQueries = require("./sqlQueriesPlayer");
-const { connection } = require("../db");
+const { connection, connectionBo, connectionCampagne } = require("../db");
 const duelMessages = require(`../jsons/gif.json`);
 const emo = require(`../jsons/emoji.json`);
 
@@ -12,6 +12,13 @@ class Player extends DatabaseManager {
     this.stats = null;
     this.materiaux = null;
     this.connection = connection;
+  }
+
+  async userExists(userId) {
+    const [result] = await this.connection
+      .promise()
+      .query(sqlQueries.userExists, [userId]);
+    return result;
   }
 
   async getStatsById(userId) {
@@ -367,7 +374,7 @@ class Player extends DatabaseManager {
     }
   }
 
-  rarete(rarete) {
+  async rarete(rarete) {
     if (rarete === "Commun") {
       return "⚪";
     } else if (rarete === "Rare") {

@@ -12,6 +12,12 @@ function loadEvents(client) {
     const event = guildEvent("guildMemberRemove");
     await event.execute(member);
   });
+  client.on("messageCreate", (message) =>
+    clientEvent("messageCreate").execute(client, message)
+  );
+  client.on("guildUpdate", (oldGuild, newGuild) =>
+    guildEvent("boost").execute(client, oldGuild, newGuild)
+  );
 }
 
 module.exports = {
