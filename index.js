@@ -1,7 +1,7 @@
 const { Client, Collection, GatewayIntentBits } = require("discord.js");
 const { loadEvents } = require("./src/handlers/loadEvents");
 const { loadSlashCommands } = require("./src/handlers/loadSlashCommands");
-const { botToken, auth } = require("./src/jsons/config.json");
+const { botToken, botToken2Test, auth } = require("./src/jsons/config.json");
 const {
   openShop,
   randomLootBox,
@@ -48,7 +48,7 @@ process.on("unhandledRejection", (reason, promise) => {
   );
 });
 
-client.login(botToken).then(() => {
+client.login(botToken2Test).then(() => {
   console.log(
     ` Successfully logged in as: ${client.user.username}#${client.user.discriminator} `
   );
