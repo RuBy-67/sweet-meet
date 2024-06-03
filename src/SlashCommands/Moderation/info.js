@@ -28,14 +28,13 @@ module.exports = {
 **Framework**: ${info.framework}
 **Base de Données**: ${info.base_de_donnees}
 **URL Git**: [GitHub Repository](${info.url_git})
-**Fonctionnalités**:
-- Duel entre utilisateurs
-- Système économique
-- Récompenses sous forme de badges
-- Attribution de rôles avec des bonus spécifiques
-- Mode de jeu solo avec une campagne et des quêtes
   `
       )
+      .addFields({
+        name: "📚 ChangeLog (MAJ) V 0.1.0 -> V 0.1.01",
+        value: `>>> 📉 Rewiew à la baisse des ajouts de power lors des discussions\n🏪 Ajout du rôle Manquant dans la boutique Hunter\n📍Ajout Ping lancement duel\n👽 Correction de beug mineur`,
+        inline: true,
+      })
       .setFooter({
         text: `Demandé(e) par ${interaction.user.tag}`,
         iconURL: interaction.user.displayAvatarURL({ dynamic: true }),

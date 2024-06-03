@@ -34,7 +34,7 @@ module.exports = {
     }
     embed.addFields({
       name: "🏆 Top - Puissance",
-      value: powerDescription,
+      value: powerDescription || "Pas de données",
       inline: true,
     });
 
@@ -52,7 +52,7 @@ module.exports = {
     embed.addFields({ name: " ", value: " ", inline: true });
     embed.addFields({
       name: "👑 Top - Victoires",
-      value: winDescription,
+      value: winDescription || "Pas de données",
       inline: true,
     });
 
@@ -69,7 +69,7 @@ module.exports = {
     }
     embed.addFields({
       name: "👎 Top - Looser__A REVOIRE",
-      value: loseDescription,
+      value: loseDescription || "Pas de données",
       inline: true,
     });
 
@@ -87,7 +87,7 @@ module.exports = {
     embed.addFields({ name: " ", value: " ", inline: true });
     embed.addFields({
       name: "👑 Top - Taux de victoire",
-      value: rateDescription,
+      value: rateDescription || "Pas de données",
       inline: true,
     });
 
