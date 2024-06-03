@@ -158,6 +158,9 @@ module.exports = {
       .setImage("https://media1.tenor.com/m/6QwxgzQLGKUAAAAC/battle.gif")
       .setColor(color.pink);
     const message = await interaction.reply({
+      content: `Duel initié avec ${membre.id} avec une mise de ${paris} ${emoji(
+        emo.power
+      )}.`,
       embeds: [embed],
       components: [row],
       fetchReply: true,
