@@ -10,3 +10,4 @@ src/class/player.js
 src/sql/TEST/sweetmeet.sql
 src/sql/TEST/sweetmeetbo.sql
 src/sql/TEST/sweetmeetcampagne1.sql
+src/sql/Deploy/sweetmeet.sql
