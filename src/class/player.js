@@ -108,7 +108,7 @@ class Player extends DatabaseManager {
       opponentWinChance + opponentRandom * param.randomFactor;
     const diff = Math.abs(playerAdjustedWinChance - opponentAdjustedWinChance);
 
-    if (diff < 0.05) {
+    if (diff < 0.04) {
       return null;
     } else {
       return playerAdjustedWinChance > opponentAdjustedWinChance
