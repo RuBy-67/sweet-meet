@@ -1,17 +1,10 @@
 {
    "nom": "SweetMeet",
-    "version": "0.1.0",
+    "version": "0.1.01",
     "creatrice": "Ruby_67",
     "hebergement": "Heroku",
     "langage": "JS, SQL",
     "framework": "Discord.js",
     "base_de_donnees": "PostgreSQL",
-    "url_git": "https://github.com/RuBy-67/sweet-meet",
-    "fonctionnalites": {
-        "duel_utilisateurs": "Permet aux utilisateurs de s'affronter dans des duels",
-        "economies": "Système économique pour gérer les ressources et les transactions",
-        "badges": "Récompenses pour les joueurs basées sur leurs accomplissements",
-        "roles": "Attribution de rôles avec des bonus spécifiques",
-        "campagne_solo": "Mode de jeu solo avec une histoire et des quêtes"
-    }
+    "url_git": "https://github.com/RuBy-67/sweet-meet"
 }

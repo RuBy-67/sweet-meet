@@ -27,14 +27,22 @@ module.exports = {
 **Langage**: ${info.langage}
 **Framework**: ${info.framework}
 **Base de Données**: ${info.base_de_donnees}
-**URL Git**: [GitHub Repository](${info.url_git})
-**Fonctionnalités**:
-- Duel entre utilisateurs
-- Système économique
-- Récompenses sous forme de badges
-- Attribution de rôles avec des bonus spécifiques
-- Mode de jeu solo avec une campagne et des quêtes
+**URL Git**: [GitHub Repository](${info.url_git})\n\n__~~**----------------------------------------**~~__
   `
+      )
+      .addFields(
+        {
+          name: "📚 ChangeLog (MAJ) V 0.1.0 -> V 0.1.01",
+          value: `>>> - 📉 Rewiew à la baisse des ajouts de power lors des discussions\n- 🏪 Ajout du rôle Manquant dans la boutique Hunter\n- 📍Ajout Ping lancement duel\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
+        },
+        {
+          name: "Mid-Update V 0.1.01",
+          value: `>>> - Correction du setMateriel donnant des matériels\n- Mise à jours de la possibilité d'égalité trop fréqente 0.05 -> 0.04 \n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
+        },
+        {
+          name: "📚 Prévision V 0.1.01 -> V 0.1.2",
+          value: `>>> - 📍Ajout dans */infoobjet* des infos Role et Badge\n- 📍Ajout Achat des RandomBox et DaysBox disponible dans la boutique\n- 📍+++\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
+        }
       )
       .setFooter({
         text: `Demandé(e) par ${interaction.user.tag}`,
