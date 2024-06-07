@@ -23,6 +23,11 @@ async function openShop(client, shopMessage) {
   }
 
   const BuyableMaterial = await dbManager.getRandomMaterial();
+  const materialLevels = {};
+  BuyableMaterial.forEach((material) => {
+    const level = Math.floor(Math.random() * 5) + 1;
+    materialLevels[material.id] = level;
+  });
   const role = await dbManager.getRolesFromDB();
   const temps = Math.floor(Date.now() / 1000);
   const timestamp = temps + param.shopDuration;
@@ -51,14 +56,15 @@ async function openShop(client, shopMessage) {
       {
         name: "Materiaux",
         value: BuyableMaterial.map((material) => {
-          const level = Math.floor(Math.random() * 5) + 1;
+          const level = materialLevels[material.id]; // Récupérer le niveau à partir de l'objet
+          const price = Math.floor(
+            param.boutique.achat.prix.materiaux[material.rarete] * level * 0.6
+          );
           return `- ${emoji(emo[material.nom])} **${
             material.nom
-          }** => (lvl: ${level}), **Prix: ${Math.floor(
-            param.boutique.achat.prix.materiaux[material.rarete] * level * 0.6
-          )}** ${emoji(emo.power)}\n> **${material.rarete}** \n> ${
-            material.lore
-          }`;
+          }** => (lvl: ${level}), **Prix: ${price}** ${emoji(emo.power)}\n> **${
+            material.rarete
+          }** \n> ${material.lore}`;
         }).join("\n\n"),
       },
       {
@@ -101,17 +107,14 @@ async function openShop(client, shopMessage) {
         )
         .concat(
           BuyableMaterial.map((material) => {
-            const level = Math.floor(Math.random() * 5) + 1;
+            const level = materialLevels[material.id]; // Récupérer le niveau à partir de l'objet
+            const price = Math.floor(
+              param.boutique.achat.prix.materiaux[material.rarete] * level * 0.6
+            );
             return new StringSelectMenuOptionBuilder()
               .setEmoji(emo[material.nom] || "❔")
               .setLabel(`${material.nom} (lvl: ${level})`)
-              .setDescription(
-                `Prix: ${Math.floor(
-                  param.boutique.achat.prix.materiaux[material.rarete] *
-                    level *
-                    0.6
-                )}⚡`
-              )
+              .setDescription(`Prix: ${price}⚡`)
               .setValue(`material_${material.id}_${level}`);
           }),
           role.map((role) => {

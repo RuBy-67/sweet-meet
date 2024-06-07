@@ -29,6 +29,7 @@ module.exports = {
       description:
         "la puissance mise en jeu pour le duel (n'influe pas sur le résultat du duel)",
       type: 4,
+      min: 100,
       required: true,
     },
   ],
@@ -126,9 +127,9 @@ module.exports = {
       .setDescription(
         `Vous avez initié un duel avec **${
           membre.username
-        }** avec une mise en jeu de  ${
-          paris * 2
-        } Power.\nFin <t:${temps}:R>\n\n*Appuyez sur le bouton ci-dessous pour accepter/refuser le duel.*`
+        }** avec une mise en jeu de  ${paris * 2} ${emoji(
+          emo.power
+        )}.\nFin <t:${temps}:R>\n\n*Appuyez sur le bouton ci-dessous pour accepter/refuser le duel.*`
       )
       .addFields(
         {
@@ -158,6 +159,9 @@ module.exports = {
       .setImage("https://media1.tenor.com/m/6QwxgzQLGKUAAAAC/battle.gif")
       .setColor(color.pink);
     const message = await interaction.reply({
+      content: `Duel initié avec <@${
+        membre.id
+      }> avec une mise de ${paris} ${emoji(emo.power)}.`,
       embeds: [embed],
       components: [row],
       fetchReply: true,
@@ -226,12 +230,12 @@ module.exports = {
             } else if (winner === membre.id) {
               gainUserId = -parisLose;
               gainMembreId = parisWin;
-            } else if (winner === "draw") {
+            } else if (winner === null) {
               gainUserId = parisDraw;
               gainMembreId = parisDraw;
             } else {
-              gainUserId = 0;
-              gainMembreId = 0;
+              gainUserId = parisDraw;
+              gainMembreId = parisDraw;
             }
             const duelEmbed = new EmbedBuilder()
               .setTitle("Duel terminé")
@@ -331,7 +335,6 @@ module.exports = {
                 text: `Duel ID: ${duelId} | Demandé(e) par ${interaction.user.tag}`,
                 iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
               });
-            console.log(duelEmbed);
             message.edit({ embeds: [duelEmbed] });
           });
       } else if (buttonInteraction.customId === "decline_duel") {

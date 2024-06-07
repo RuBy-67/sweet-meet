@@ -26,7 +26,7 @@ module.exports = {
     const userId = interaction.user.id;
     const materialsUsed = await player.getMaterialsById(userId);
     const materials = await player.getMaterialsByIdEtat0(userId);
-    if (materials.length === 0) {
+    if (materials.length === 0 && materialsUsed.length === 0) {
       return interaction.reply("Aucun matériau disponible.");
     }
     if (materialsUsed.length > 4) {
@@ -34,11 +34,12 @@ module.exports = {
         "Vous Avez déjà 4 matériaux actifs, veuillez en désactiver un pour en activer un autre."
       );
     }
-    const etat0Materials = await player.getMaterialsByIdEtat0(userId);
-    const userIdMaterials = await player.getMaterialsById(userId);
 
     async function component() {
+      const etat0Materials = await player.getMaterialsByIdEtat0(userId);
+      const userIdMaterials = await player.getMaterialsById(userId);
       let components = [];
+
       if (etat0Materials.length > 0) {
         const selectMenu = new StringSelectMenuBuilder()
           .setCustomId("material_select")
@@ -65,7 +66,6 @@ module.exports = {
         const row = new ActionRowBuilder().addComponents(selectMenu);
         components.push(row);
       }
-
       if (userIdMaterials.length > 0) {
         const unselectMenu = new StringSelectMenuBuilder()
           .setCustomId("material_unselect")
@@ -94,6 +94,7 @@ module.exports = {
 
         components.push(row2);
       }
+
       return components;
     }
 

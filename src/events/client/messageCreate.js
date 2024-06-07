@@ -15,8 +15,8 @@ module.exports = {
       const lastMessageTime = userLastMessage.get(userId);
       const timeDiff = currentTime - lastMessageTime;
 
-      // If the user has sent a message in the last 10 seconds, ignore it
-      if (timeDiff < 10000) return;
+      // If the user has sent a message in the last 60 seconds, ignore it
+      if (timeDiff < 60000) return;
     }
     userLastMessage.set(userId, currentTime);
     const ranges = [

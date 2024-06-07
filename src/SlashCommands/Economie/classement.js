@@ -25,12 +25,15 @@ module.exports = {
     const powerResult = await dbManager.getTopUsers("power", top);
     let powerDescription = "";
     for (let i = 0; i < powerResult.length; i++) {
-      const user = await interaction.guild.members.fetch(
-        powerResult[i].discordId
-      );
-      powerDescription += `${i + 1}. <@${user.user.id}> : ${
-        powerResult[i].power
-      }\n`;
+      const user = `${powerResult[i].discordId}`;
+      console.log(user);
+      if (user === undefined) {
+        powerDescription += `${i + 1}. Utilisateur inconnu : ${
+          powerResult[i].power
+        }\n`;
+      } else {
+        powerDescription += `${i + 1}. <@${user}> : ${powerResult[i].power}\n`;
+      }
     }
     embed.addFields({
       name: "🏆 Top - Puissance",
@@ -42,12 +45,14 @@ module.exports = {
     const winResult = await dbManager.getTopUsers("winCounter", top);
     let winDescription = "";
     for (let i = 0; i < winResult.length; i++) {
-      const user = await interaction.guild.members.fetch(
-        winResult[i].discordId
-      );
-      winDescription += `${i + 1}. <@${user.user.id}> : ${
-        winResult[i].winCounter
-      }\n`;
+      const user = `${winResult[i].discordId}`;
+      if (user === undefined) {
+        winDescription += `${i + 1}. Utilisateur inconnu : ${
+          winResult[i].winCounter
+        }\n`;
+      } else {
+        winDescription += `${i + 1}. <@${user}> : ${winResult[i].winCounter}\n`;
+      }
     }
     embed.addFields({ name: " ", value: " ", inline: true });
     embed.addFields({
@@ -60,12 +65,16 @@ module.exports = {
     const loseResult = await dbManager.getTopUsers("loseCounter", top);
     let loseDescription = "";
     for (let i = 0; i < loseResult.length; i++) {
-      const user = await interaction.guild.members.fetch(
-        loseResult[i].discordId
-      );
-      loseDescription += `${i + 1}. <@${user.user.id}> : ${
-        loseResult[i].loseCounter
-      }\n`;
+      const user = `${loseResult[i].discordId}`;
+      if (user === undefined) {
+        loseDescription += `${i + 1}. Utilisateur inconnu : ${
+          loseResult[i].loseCounter
+        }\n`;
+      } else {
+        loseDescription += `${i + 1}. <@${user}> : ${
+          loseResult[i].loseCounter
+        }\n`;
+      }
     }
     embed.addFields({
       name: "👎 Top - Looser__A REVOIRE",
@@ -77,12 +86,16 @@ module.exports = {
     const rateResult = await dbManager.getTopUsersByRate(top);
     let rateDescription = "";
     for (let i = 0; i < rateResult.length; i++) {
-      const user = await interaction.guild.members.fetch(
-        rateResult[i].discordId
-      );
-      rateDescription += `${i + 1}. <@${user.user.id}> : ${(
-        rateResult[i].rate * 100
-      ).toFixed(2)}%\n`;
+      const user = await `${rateResult[i].discordId}`;
+      if (user === undefined) {
+        rateDescription += `${i + 1}. Utilisateur inconnu : ${(
+          rateResult[i].rate * 100
+        ).toFixed(2)}%\n`;
+      } else {
+        rateDescription += `${i + 1}. <@${user}> : ${(
+          rateResult[i].rate * 100
+        ).toFixed(2)}%\n`;
+      }
     }
     embed.addFields({ name: " ", value: " ", inline: true });
     embed.addFields({
