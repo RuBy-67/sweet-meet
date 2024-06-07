@@ -127,9 +127,9 @@ module.exports = {
       .setDescription(
         `Vous avez initié un duel avec **${
           membre.username
-        }** avec une mise en jeu de  ${
-          paris * 2
-        } Power.\nFin <t:${temps}:R>\n\n*Appuyez sur le bouton ci-dessous pour accepter/refuser le duel.*`
+        }** avec une mise en jeu de  ${paris * 2} ${emoji(
+          emo.power
+        )}.\nFin <t:${temps}:R>\n\n*Appuyez sur le bouton ci-dessous pour accepter/refuser le duel.*`
       )
       .addFields(
         {

@@ -23,17 +23,19 @@ async function openShop(client, shopMessage) {
   }
 
   const BuyableMaterial = await dbManager.getRandomMaterial();
+  const materialLevels = {};
+  BuyableMaterial.forEach((material) => {
+    const level = Math.floor(Math.random() * 5) + 1;
+    materialLevels[material.id] = level;
+  });
   const role = await dbManager.getRolesFromDB();
   const temps = Math.floor(Date.now() / 1000);
   const timestamp = temps + param.shopDuration;
   const embed = new EmbedBuilder()
     .setTitle("Boutique Ouverte")
     .setColor(color.pink)
-    .setImage(
-      "https://cdn.discordapp.com/attachments/1246893100790448198/1246964534170877982/ruby_67_Elowen_is_a_merchant_His_shop_is_a_cart_pulled_by_Mist__4813330d-83d8-486a-a496-50ecc8699eff.png?ex=665e4db8&is=665cfc38&hm=ec62864ddf3667a00b9152ff8e6afa4a672e973cc5bbd75efc4172b67acb8c7f&"
-    )
     .setDescription(
-      `> Elowen le Marchand, vous acceuille dans sa charrette ! Sélectionnez un objet à acheter.\n\nLa boutique fermera <t:${timestamp}:R>.`
+      `> Elowen le Marchand, vous acceuille dans sa boutique ! Sélectionnez un objet à acheter.\n\nLa boutique fermera <t:${timestamp}:R>.`
     )
     .addFields(
       {
@@ -51,14 +53,15 @@ async function openShop(client, shopMessage) {
       {
         name: "Materiaux",
         value: BuyableMaterial.map((material) => {
-          const level = Math.floor(Math.random() * 5) + 1;
+          const level = materialLevels[material.id]; // Récupérer le niveau à partir de l'objet
+          const price = Math.floor(
+            param.boutique.achat.prix.materiaux[material.rarete] * level * 0.6
+          );
           return `- ${emoji(emo[material.nom])} **${
             material.nom
-          }** => (lvl: ${level}), **Prix: ${Math.floor(
-            param.boutique.achat.prix.materiaux[material.rarete] * level * 0.6
-          )}** ${emoji(emo.power)}\n> **${material.rarete}** \n> ${
-            material.lore
-          }`;
+          }** => (lvl: ${level}), **Prix: ${price}** ${emoji(emo.power)}\n> **${
+            material.rarete
+          }** \n> ${material.lore}`;
         }).join("\n\n"),
       },
       {
@@ -71,6 +74,9 @@ async function openShop(client, shopMessage) {
           })
           .join("\n\n"),
       }
+    )
+    .setImage(
+      "https://cdn.discordapp.com/attachments/1246893100790448198/1246964534170877982/ruby_67_Elowen_is_a_merchant_His_shop_is_a_cart_pulled_by_Mist__4813330d-83d8-486a-a496-50ecc8699eff.png?ex=66643c78&is=6662eaf8&hm=0952c25358d275f94f26477c9fec2f24d544e4ef12738c17dbbefb40d17780bb&"
     )
     .setFooter({
       text: `created by Ruby_67 - Boutique Ouverte`,
@@ -101,17 +107,14 @@ async function openShop(client, shopMessage) {
         )
         .concat(
           BuyableMaterial.map((material) => {
-            const level = Math.floor(Math.random() * 5) + 1;
+            const level = materialLevels[material.id]; // Récupérer le niveau à partir de l'objet
+            const price = Math.floor(
+              param.boutique.achat.prix.materiaux[material.rarete] * level * 0.6
+            );
             return new StringSelectMenuOptionBuilder()
               .setEmoji(emo[material.nom] || "❔")
               .setLabel(`${material.nom} (lvl: ${level})`)
-              .setDescription(
-                `Prix: ${Math.floor(
-                  param.boutique.achat.prix.materiaux[material.rarete] *
-                    level *
-                    0.6
-                )}⚡`
-              )
+              .setDescription(`Prix: ${price}⚡`)
               .setValue(`material_${material.id}_${level}`);
           }),
           role.map((role) => {
@@ -150,11 +153,11 @@ async function closeShop(client, shopMessage) {
   const embed = new EmbedBuilder()
     .setTitle("Boutique Fermée")
     .setColor(color.black)
-    .setImage(
-      "https://cdn.discordapp.com/attachments/1246893100790448198/1246964534170877982/ruby_67_Elowen_is_a_merchant_His_shop_is_a_cart_pulled_by_Mist__4813330d-83d8-486a-a496-50ecc8699eff.png?ex=665e4db8&is=665cfc38&hm=ec62864ddf3667a00b9152ff8e6afa4a672e973cc5bbd75efc4172b67acb8c7f&"
-    )
     .setDescription(
-      `> Elowen le Marchand est actuellement en voyage à travers les contrées de Valoria, découvrant de nouveaux trésors\n> Revenez plus tard pour découvrir les merveilles qu'il aura ramenées de ses aventures lointaines. En attendant, que la magie de Valoria guide vos pas.\n\nMerci de votre visite ! <t:${timestamp}:R> .`
+      `> Elowen le Marchand est actuellement en voyage à travers les contrées de Valoria, découvrant de nouveaux trésors et forçant de nouvelles alliances.\n> Revenez plus tard pour découvrir les merveilles qu'il aura ramenées de ses aventures lointaines. En attendant, que la magie de Valoria guide vos pas.\n\nMerci de votre visite ! <t:${timestamp}:R> .`
+    )
+    .setImage(
+      "https://cdn.discordapp.com/attachments/1246893100790448198/1246964534170877982/ruby_67_Elowen_is_a_merchant_His_shop_is_a_cart_pulled_by_Mist__4813330d-83d8-486a-a496-50ecc8699eff.png?ex=66643c78&is=6662eaf8&hm=0952c25358d275f94f26477c9fec2f24d544e4ef12738c17dbbefb40d17780bb&"
     )
     .setFooter({
       text: `Boutique Fermée - Created by Ruby_67`,

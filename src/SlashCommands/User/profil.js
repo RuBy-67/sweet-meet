@@ -205,7 +205,7 @@ module.exports = {
     let currentPage = 0;
 
     // Determine if the rare button should appear
-    const showRareButton = Math.random() < 0.01; // 1 in 100 chance
+    const showRareButton = Math.random() < 0.001; // 1 in 1000 chance
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
