@@ -76,7 +76,7 @@ async function openShop(client, shopMessage) {
       }
     )
     .setImage(
-      "https://cdn.discordapp.com/attachments/1246893100790448198/1246964534170877982/ruby_67_Elowen_is_a_merchant_His_shop_is_a_cart_pulled_by_Mist__4813330d-83d8-486a-a496-50ecc8699eff.png?ex=66643c78&is=6662eaf8&hm=0952c25358d275f94f26477c9fec2f24d544e4ef12738c17dbbefb40d17780bb&"
+      "https://media.discordapp.net/attachments/1246893100790448198/1246964534170877982/ruby_67_Elowen_is_a_merchant_His_shop_is_a_cart_pulled_by_Mist__4813330d-83d8-486a-a496-50ecc8699eff.png?ex=66658df8&is=66643c78&hm=5d0ed0876f998bb32c36eaf79acb88b2a07ab7efb06322da905819209445853c&=&format=webp&quality=lossless&width=810&height=540"
     )
     .setFooter({
       text: `created by Ruby_67 - Boutique Ouverte`,
@@ -157,7 +157,7 @@ async function closeShop(client, shopMessage) {
       `> Elowen le Marchand est actuellement en voyage à travers les contrées de Valoria, découvrant de nouveaux trésors et forçant de nouvelles alliances.\n> Revenez plus tard pour découvrir les merveilles qu'il aura ramenées de ses aventures lointaines. En attendant, que la magie de Valoria guide vos pas.\n\nMerci de votre visite ! <t:${timestamp}:R> .`
     )
     .setImage(
-      "https://cdn.discordapp.com/attachments/1246893100790448198/1246964534170877982/ruby_67_Elowen_is_a_merchant_His_shop_is_a_cart_pulled_by_Mist__4813330d-83d8-486a-a496-50ecc8699eff.png?ex=66643c78&is=6662eaf8&hm=0952c25358d275f94f26477c9fec2f24d544e4ef12738c17dbbefb40d17780bb&"
+      "https://media.discordapp.net/attachments/1246893100790448198/1246964534170877982/ruby_67_Elowen_is_a_merchant_His_shop_is_a_cart_pulled_by_Mist__4813330d-83d8-486a-a496-50ecc8699eff.png?ex=66658df8&is=66643c78&hm=5d0ed0876f998bb32c36eaf79acb88b2a07ab7efb06322da905819209445853c&=&format=webp&quality=lossless&width=810&height=540"
     )
     .setFooter({
       text: `Boutique Fermée - Created by Ruby_67`,

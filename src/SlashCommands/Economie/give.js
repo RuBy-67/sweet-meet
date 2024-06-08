@@ -23,15 +23,15 @@ module.exports = {
       required: true,
       choices: [
         {
-          name: "power",
+          name: "Fragments de Protection",
           value: "power",
         },
         {
-          name: "materiel",
+          name: "Materiel",
           value: "materiel",
         },
         {
-          name: "badge",
+          name: "Badge",
           value: "badge",
         },
       ],
@@ -43,8 +43,8 @@ module.exports = {
       required: true,
     },
     {
-      name: "valeur",
-      description: "Valeur à donner (power)",
+      name: "nombre",
+      description: "Nombre de Fragments",
       type: 4,
       max: 100000,
       required: false,
@@ -151,7 +151,7 @@ module.exports = {
     if (type === "power") {
       await dbManager.updatePower(utilisateur.id, valeur);
       interaction.reply({
-        content: `Vous avez donné à ${utilisateur},  ${valeur} de puissance. ${emoji(
+        content: `Vous avez donné à ${utilisateur},  ${valeur} Fragments de Protection. ${emoji(
           emo.power
         )}`,
       });

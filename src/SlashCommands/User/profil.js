@@ -143,7 +143,11 @@ module.exports = {
             value: marriageStatus,
             inline: true,
           },
-          { name: "Puissance :", value: `${power}` || "0", inline: true },
+          {
+            name: "Fragments :",
+            value: `${power} ${emoji(emo.power)}` || "0",
+            inline: true,
+          },
           { name: "Badges :", value: badges || "Aucun", inline: false },
           {
             name: "Roles :",
@@ -191,7 +195,7 @@ module.exports = {
       .setTitle("Secret Page")
       .setColor(color.pink)
       .setDescription(
-        "Ho t'a trouvé la page secrète ! claim ton cadeau 🧧 c'est une chance sur 100 de tomber sur cette page, et te permet de claim entre 5000 et 15000 de power !\nAinsi que d'obtenir un matériaux legendaire parmis la liste suivante !"
+        "Ho t'a trouvé la page secrète ! claim ton cadeau 🧧 c'est une chance sur 1000 de tomber sur cette page, et te permet de claim entre 5000 et 15000 Fragments de Protection !\nAinsi que d'obtenir un matériaux legendaire parmis la liste suivante !"
       )
       .addFields({
         name: "Matériaux Légendaires Disponibles",
@@ -268,9 +272,11 @@ module.exports = {
           randomMaterial.id
         );
         await i.update({
-          content: `Claimed! You received ${power} power and a legendary material: ${emoji(
-            emo[randomMaterial.nom]
-          )} ${randomMaterial.nom}.`,
+          content: `Claimed! You received ${power} ${emoji(
+            emo.power
+          )} and a legendary material: ${emoji(emo[randomMaterial.nom])} ${
+            randomMaterial.nom
+          }.`,
           embeds: [],
           components: [],
         });

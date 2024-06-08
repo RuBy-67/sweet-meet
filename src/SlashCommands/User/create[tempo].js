@@ -62,7 +62,7 @@ module.exports = {
       .setTitle("Accounts Created")
       .setColor(color.pink)
       .setDescription(
-        `Les comptes ont été créés et les badges donnés à ${i} membres. 20 000 de puissance ont été crédités à chaque membre.`
+        `Les comptes ont été créés et les badges donnés à ${i} membres. 20 000 Fragments ont été crédités à chaque membre.`
       )
       .setFooter({
         text: `Demandé par :  ${interaction.user.tag}`,

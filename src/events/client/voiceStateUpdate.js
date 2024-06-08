@@ -41,7 +41,10 @@ async function handleVoiceReward(userId, totalTime, channel) {
     try {
       await db.updatePower(userId, powerIncrement);
     } catch (error) {
-      console.error(`Failed to add power to user ${userId}:`, error);
+      console.error(
+        `Failed to add Fragments of Protection to user ${userId}:`,
+        error
+      );
     }
   }
   //}

@@ -67,7 +67,7 @@ module.exports = {
               const label =
                 material.lvl > 4
                   ? `${material.nom} (lvl: ${material.lvl}) Up : Max`
-                  : `${material.nom} (lvl: ${material.lvl}) Up: ${calculLevelPrice} de Puissance`;
+                  : `${material.nom} (lvl: ${material.lvl}) Up: ${calculLevelPrice} Fragments`;
               const value = material.mid.toString();
 
               return new StringSelectMenuOptionBuilder()
@@ -116,7 +116,7 @@ module.exports = {
 
         if (power < upgradePrice) {
           return i.update({
-            content: `Vous n'avez pas assez de puissance pour améliorer **${material.nom}**.\n(Prix:** ${upgradePrice})**\n**Vous avez :** ${power} de puissance**\n\n**Sélectionnez un matériau à améliorer**`,
+            content: `Vous n'avez pas assez de Fragments pour améliorer **${material.nom}**.\n(Prix:** ${upgradePrice})**\n**Vous avez :** ${power} Fragments de Protection**\n\n**Sélectionnez un matériau à améliorer**`,
             components: await component(),
           });
         }

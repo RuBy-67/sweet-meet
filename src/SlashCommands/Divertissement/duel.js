@@ -16,7 +16,8 @@ const cooldown = new Cooldown();
 
 module.exports = {
   name: "duel",
-  description: "Duel avec un autre joueur pour gagner de la puissance",
+  description:
+    "Duel avec un autre joueur pour gagner des Fragments de Protection",
   options: [
     {
       name: "membre",
@@ -27,7 +28,7 @@ module.exports = {
     {
       name: "paris",
       description:
-        "la puissance mise en jeu pour le duel (n'influe pas sur le résultat du duel)",
+        "Fragments mis en jeu pour le duel (n'influe pas sur le résultat du duel)",
       type: 4,
       min: 100,
       required: true,
@@ -55,7 +56,7 @@ module.exports = {
       const embed = new EmbedBuilder()
         .setTitle("Erreur")
         .setDescription(
-          `Vous n'avez pas assez de puissance pour initier ce duel avec une mise de ${paris}.`
+          `Vous n'avez pas assez de Fragments pour initier ce duel avec une mise de ${paris}.`
         )
         .setColor(color.error);
 
@@ -66,7 +67,7 @@ module.exports = {
       const embed = new EmbedBuilder()
         .setTitle("Erreur")
         .setDescription(
-          `${membre.username} n'a pas assez de puissance pour accepter ce duel avec une mise de ${paris}.`
+          `${membre.username} n'a pas assez de Fragments pour accepter ce duel avec une mise de ${paris}.`
         )
         .setColor(color.error);
 
@@ -134,7 +135,9 @@ module.exports = {
       .addFields(
         {
           name: "Vos détails",
-          value: `Power : ${userPower.power}\n\n**Materiaux :**\n ${
+          value: `Fragments de Protection : ${
+            userPower.power
+          }\n\n**Materiaux :**\n ${
             userMaterialNames.length > 0
               ? userMaterialNames.join("\n")
               : "Aucun"
@@ -143,7 +146,9 @@ module.exports = {
         },
         {
           name: `Détail de ${membre.username}`,
-          value: `Power : ${adversaryPower.power}\n\n**Materiaux :**\n ${
+          value: `Fragments de Protection : ${
+            adversaryPower.power
+          }\n\n**Materiaux :**\n ${
             adversaryMaterialNames.length > 0
               ? adversaryMaterialNames.join("\n")
               : "Aucun"
@@ -246,9 +251,9 @@ module.exports = {
                 {
                   name: `Détails de ${userName}`,
                   value:
-                    `> Power: **${duelDetail.powerUser1}**  ${emoji(
-                      emo.power
-                    )} (Gain: **${gainUserId}**)\n` +
+                    `> Fragments de Protection: **${
+                      duelDetail.powerUser1
+                    }**  ${emoji(emo.power)} (Gain: **${gainUserId}**)\n` +
                     `${
                       duelDetail.nomMateriau1
                         ? `> __Materiaux 1:__ ${emoji(
@@ -289,9 +294,9 @@ module.exports = {
                 {
                   name: `Détails de ${membre.username}`,
                   value:
-                    `> Power: **${duelDetail2.powerUser1}** ${emoji(
-                      emo.power
-                    )} (Gain: **${gainMembreId}**)\n` +
+                    `> Fragments de Protection: **${
+                      duelDetail2.powerUser1
+                    }** ${emoji(emo.power)} (Gain: **${gainMembreId}**)\n` +
                     `${
                       duelDetail2.nomMateriau1
                         ? `> __Materiaux 1:__ ${emoji(

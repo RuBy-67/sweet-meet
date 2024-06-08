@@ -32,11 +32,13 @@ module.exports = {
           powerResult[i].power
         }\n`;
       } else {
-        powerDescription += `${i + 1}. <@${user}> : ${powerResult[i].power}\n`;
+        powerDescription += `${i + 1}. <@${user}> : ${
+          powerResult[i].power
+        } ${emoji(emo.power)}\n`;
       }
     }
     embed.addFields({
-      name: "🏆 Top - Puissance",
+      name: "🏆 Top - Fragments de Protection",
       value: powerDescription,
       inline: true,
     });
@@ -77,7 +79,7 @@ module.exports = {
       }
     }
     embed.addFields({
-      name: "👎 Top - Looser__A REVOIRE",
+      name: "👎 Top - Looser",
       value: loseDescription,
       inline: true,
     });
