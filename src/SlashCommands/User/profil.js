@@ -176,7 +176,7 @@ module.exports = {
         .setTitle("Mes Matériaux")
         .setColor(color.pink)
         .setDescription(
-          "*Dans l'univers mystique où ces matériaux émergent, leur utilité est souvent ancrée dans des récits légendaires et des croyances profondément enracinées. Chacun de ces matériaux mystiques possède des propriétés uniques, non seulement physiques, mais aussi symboliques, qui influencent leur utilisation dans diverses facettes de la vie.*\n\n***Le level Influe sur les Boost***"
+          "*Dans le royaume ancien de Valoria, la magie et les éléments se mélangent pour créer des matériaux d'une puissance incommensurable. Ces matériaux sont les reliques de l'harmonie entre les forces naturelles et la magie ancestrale, et leur possession confère à leurs détenteurs des capacités extraordinaires. On raconte que ces artefacts sont les vestiges d'une époque où les dieux eux-mêmes foulaient la terre de Valoria, infusant la nature de leur puissance divine.*\n\n***Le level (des materiaux) Influe sur les Boost***"
         )
         .addFields(materiauxDetails)
         .setFooter({

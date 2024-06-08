@@ -41,7 +41,7 @@ module.exports = {
         },
         {
           name: "Prévision 📚 V 0.1.2 -> V 0.1.3",
-          value: `>>>- \n- Ajout des DayBox et Randombox dans la boutique\n- 📍+++\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
+          value: `>>>- Ajout des DayBox et Randombox dans la boutique\n- 📍+++\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
         }
       )
       .setFooter({

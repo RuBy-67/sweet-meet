@@ -35,7 +35,7 @@ async function openShop(client, shopMessage) {
     .setTitle("Boutique Ouverte")
     .setColor(color.pink)
     .setDescription(
-      `> Elowen le Marchand, vous acceuille dans sa boutique ! Sélectionnez un objet à acheter.\n\nLa boutique fermera <t:${timestamp}:R>.`
+      `> *Elowen*: ***Les routes m'ont mené jusqu'ici une fois de plus, voyageurs et aventuriers de Valoria! Ma boutique est maintenant ouverte, offrant trésors rares et artefacts enchantés. Approchez, et laissez vos yeux découvrir les merveilles que j'ai ramenées des quatre coins du royaume!***\n\nLa boutique fermera <t:${timestamp}:R>.`
     )
     .addFields(
       {
@@ -154,7 +154,7 @@ async function closeShop(client, shopMessage) {
     .setTitle("Boutique Fermée")
     .setColor(color.black)
     .setDescription(
-      `> Elowen le Marchand est actuellement en voyage à travers les contrées de Valoria, découvrant de nouveaux trésors et forçant de nouvelles alliances.\n> Revenez plus tard pour découvrir les merveilles qu'il aura ramenées de ses aventures lointaines. En attendant, que la magie de Valoria guide vos pas.\n\nMerci de votre visite ! <t:${timestamp}:R> .`
+      `> *Elowen*: ***Le vent m'appelle vers de nouveaux horizons, mes amis. ma boutique ferme ses portes pour l'instant. Mais ne désespérez pas, car je reviendrai avec de nouveaux trésors et découvertes. Que vos aventures soient prospères jusqu'à notre prochaine rencontre!***\n *En attendant, que la magie de Valoria guide vos pas.*\n\nMerci de votre visite ! <t:${timestamp}:R> .`
     )
     .setImage(
       "https://media.discordapp.net/attachments/1246893100790448198/1246964534170877982/ruby_67_Elowen_is_a_merchant_His_shop_is_a_cart_pulled_by_Mist__4813330d-83d8-486a-a496-50ecc8699eff.png?ex=66658df8&is=66643c78&hm=5d0ed0876f998bb32c36eaf79acb88b2a07ab7efb06322da905819209445853c&=&format=webp&quality=lossless&width=810&height=540"

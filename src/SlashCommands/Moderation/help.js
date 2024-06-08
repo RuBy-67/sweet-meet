@@ -67,7 +67,7 @@ module.exports = {
         .setColor(color.pink)
         .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
         .setDescription(
-          "Dans le monde de Valoria, un royaume mystérieux et magique, les joueurs se retrouvent plongés dans un univers où les duels, et la quête de pouvoir s'entremêlent. Les contrées de Valoria sont divisées en plusieurs régions, chacune gouvernée par un Roi ou une Reine. La technologie et la magie coexistent, et des guildes secrètes ainsi que des créatures fantastiques influencent la destinée des habitants, dans la campagne vous être uen de ces guildes et vous devez accomplir des missions pour gagner des Fragments de Protection"
+          "Aucune campagne solo n'a encore été créée, revenez plus tard pour plus d'information."
         )
         .setFooter({
           text: `Demandé(e) par ${interaction.user.tag}`,
@@ -97,7 +97,7 @@ module.exports = {
       .setTitle("Secret Page")
       .setColor(color.pink)
       .setDescription(
-        "Ho t'a trouvé la page secrète ! claim ton cadeau 🧧 c'est une chance sur 100 de tomber sur cette page, et te permet de claim entre 5000 et 15000 de power !\nAinsi que d'obtenir un matériaux legendaire parmis la liste suivante !"
+        "Ho t'a trouvé la page secrète ! claim ton cadeau 🧧 c'est une chance sur 1000 de tomber sur cette page, et te permet de claim entre 5000 et 15000 fragments !\nAinsi que d'obtenir un matériau legendaire parmis la liste suivante !"
       )
       .addFields({
         name: "Matériaux Légendaires Disponibles",
@@ -175,7 +175,7 @@ module.exports = {
           randomMaterial.id
         );
         await i.update({
-          content: `Claimed! reçut ${power} power et un matériel légendaire ${emoji(
+          content: `Claimed! reçut ${power} Fragments et un matériel légendaire ${emoji(
             emo[randomMaterial.nom]
           )} ${randomMaterial.nom}.`,
           embeds: [],
