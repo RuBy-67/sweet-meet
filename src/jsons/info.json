@@ -2,7 +2,7 @@
    "nom": "SweetMeet",
     "version": "0.1.21",
     "creatrice": "Ruby_67",
-    "hebergement": "Heroku",
+    "hebergement": "---",
     "langage": "JS, SQL",
     "framework": "Discord.js",
     "base_de_donnees": "PostgreSQL",
