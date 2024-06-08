@@ -99,7 +99,6 @@ module.exports = {
         const stats = await player.getStats(userId);
         const power = stats.power;
         const [material] = await dbManager.getMateriauById(selectedMaterials);
-        console.log(material);
 
         if (!material) {
           return i.reply("Matériau non trouvé.");

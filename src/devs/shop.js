@@ -34,9 +34,6 @@ async function openShop(client, shopMessage) {
   const embed = new EmbedBuilder()
     .setTitle("Boutique Ouverte")
     .setColor(color.pink)
-    .setImage(
-      "https://cdn.discordapp.com/attachments/1246893100790448198/1246895279890763846/ruby_67_a_ancien_work_shop_on_roulotte_cartoon_style_2b489696-1d8f-40f2-9b0b-0bb2afdecc34.png?ex=665e0d38&is=665cbbb8&hm=150b14e6c5595ac2871e3787ca25d954d831658bdb3dc44ed9cf069b833055c0&"
-    )
     .setDescription(
       `> Elowen le Marchand, vous acceuille dans sa boutique ! Sélectionnez un objet à acheter.\n\nLa boutique fermera <t:${timestamp}:R>.`
     )
@@ -77,6 +74,9 @@ async function openShop(client, shopMessage) {
           })
           .join("\n\n"),
       }
+    )
+    .setImage(
+      "https://cdn.discordapp.com/attachments/1246893100790448198/1246964534170877982/ruby_67_Elowen_is_a_merchant_His_shop_is_a_cart_pulled_by_Mist__4813330d-83d8-486a-a496-50ecc8699eff.png?ex=66643c78&is=6662eaf8&hm=0952c25358d275f94f26477c9fec2f24d544e4ef12738c17dbbefb40d17780bb&"
     )
     .setFooter({
       text: `created by Ruby_67 - Boutique Ouverte`,
@@ -153,11 +153,11 @@ async function closeShop(client, shopMessage) {
   const embed = new EmbedBuilder()
     .setTitle("Boutique Fermée")
     .setColor(color.black)
-    .setImage(
-      "https://cdn.discordapp.com/attachments/1246893100790448198/1246905655894479001/ruby_67_Elowen_le_Marchand_Itinerant_est_actuellement_en_voyage_c6f82e37-46c6-4c85-8f07-e6dea33a0407.png?ex=665e16e2&is=665cc562&hm=a22abb61ab4eec608e6508980aea7c49e3ceaa6ddeb10c1edd6fe5e5bdae02b9&"
-    )
     .setDescription(
       `> Elowen le Marchand est actuellement en voyage à travers les contrées de Valoria, découvrant de nouveaux trésors et forçant de nouvelles alliances.\n> Revenez plus tard pour découvrir les merveilles qu'il aura ramenées de ses aventures lointaines. En attendant, que la magie de Valoria guide vos pas.\n\nMerci de votre visite ! <t:${timestamp}:R> .`
+    )
+    .setImage(
+      "https://cdn.discordapp.com/attachments/1246893100790448198/1246964534170877982/ruby_67_Elowen_is_a_merchant_His_shop_is_a_cart_pulled_by_Mist__4813330d-83d8-486a-a496-50ecc8699eff.png?ex=66643c78&is=6662eaf8&hm=0952c25358d275f94f26477c9fec2f24d544e4ef12738c17dbbefb40d17780bb&"
     )
     .setFooter({
       text: `Boutique Fermée - Created by Ruby_67`,
