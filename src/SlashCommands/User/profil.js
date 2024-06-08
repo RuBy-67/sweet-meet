@@ -83,7 +83,7 @@ module.exports = {
 
       materiauxDetails = [...materiauxMap2.values()].map((materiau) => {
         const materiauEmoji = emoji(emo[materiau.nom]);
-        const description = `**Rareté:** ${materiau.rarete}\n**Type:** ${materiau.type}\n**Boost:** 💚 ${materiau.sante}% - ⚔️ ${materiau.attaque}% - 🛡️ ${materiau.defense}%\n**Description:** ${materiau.lore}\n**Quantité:** ${materiau.quantite}\n__~~**----------------------------------**~~__`;
+        const description = `**Rareté:** ${materiau.rarete}\n**Type:** ${materiau.type}\n**Boost:** 💚 ${materiau.sante}% - ⚔️ ${materiau.attaque}% - 🛡️ ${materiau.defense}%\n> *${materiau.lore}*\n**Quantité:** ${materiau.quantite}\n__~~**----------------------------------**~~__`;
 
         return {
           name: `${materiauEmoji} ${materiau.nom}`,

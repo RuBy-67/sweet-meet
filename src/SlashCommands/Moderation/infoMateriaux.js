@@ -53,19 +53,19 @@ module.exports = {
       result = await dbManager.getMateriau();
       title = "Infos - Matériaux";
       description =
-        "*Dans le royaume ancien de Valoria, la magie et les éléments se mélangent pour créer des matériaux d'une puissance incommensurable. Ces matériaux sont les reliques de l'harmonie entre les forces naturelles et la magie ancestrale, et leur possession confère à leurs détenteurs des capacités extraordinaires. On raconte que ces artefacts sont les vestiges d'une époque où les dieux eux-mêmes foulaient la terre de Valoria, infusant la nature de leur puissance divine.* \n\n**Liste de tous les matériaux :**";
+        "***Dans le royaume ancien de Valoria, la magie et les éléments se mélangent pour créer des matériaux d'une puissance incommensurable. Ces matériaux sont les reliques de l'harmonie entre les forces naturelles et la magie ancestrale, et leur possession confère à leurs détenteurs des capacités extraordinaires. On raconte que ces artefacts sont les vestiges d'une époque où les dieux eux-mêmes foulaient la terre de Valoria, infusant la nature de leur puissance divine.*** \n\n**Liste de tous les matériaux :**";
       category = "Matériaux";
     } else if (choice === "roles") {
       result = await dbManager.getRolesFromDB();
       title = "Infos - Roles";
       description =
-        "*Dans le royaume de Valoria, chaque individu peut choisir un rôle spécifique qui détermine son chemin et ses capacités au sein de la société. Ces rôles ne sont pas simplement des titres, mais des vocations imprégnées de pouvoir et de responsabilité. Chaque rôle confère des compétences uniques et des statuts particuliers.*\n ⚠️ Compétence des badges NON implèmentés\nLes rôles de Valoria possèdent des ils sont achetables dans la boutique\n\n**Liste de tous les rôles :**";
+        "***Dans le royaume de Valoria, chaque individu peut choisir un rôle spécifique qui détermine son chemin et ses capacités au sein de la société. Ces rôles ne sont pas simplement des titres, mais des vocations imprégnées de pouvoir et de responsabilité. Chaque rôle confère des compétences uniques et des statuts particuliers.***\n ⚠️ Compétence des badges NON implèmentés\nLes rôles de Valoria possèdent des ils sont achetables dans la boutique\n\n**Liste de tous les rôles :**";
       category = "Roles";
     } else if (choice === "badges") {
       result = await dbManager.getAllBadge();
       title = "Infos - Badges";
       description =
-        "*Dans le royaume de Valoria, les badges sont bien plus que de simples insignes. Ils représentent des statuts, Portés fièrement par leurs détenteurs, chaque badge raconte une histoire et confère des privilèges uniques ou des responsabilités spécifiques.*\n ⚠️ Compétence des badges NON implèmentés\n\n**Liste de tous les badges de Valoria :**";
+        "***Dans le royaume de Valoria, les badges sont bien plus que de simples insignes. Ils représentent des statuts, Portés fièrement par leurs détenteurs, chaque badge raconte une histoire et confère des privilèges uniques ou des responsabilités spécifiques.***\n ⚠️ Compétence des badges NON implèmentés\n\n**Liste de tous les badges de Valoria :**";
       category = "Badges";
     } else {
       interaction.reply("Choix invalide");
@@ -83,7 +83,7 @@ module.exports = {
       .setDescription(description);
 
     result.forEach((item, index) => {
-      const description = `*${item.lore}*\n__~~**----------------------------------**~~__`;
+      const description = `> *${item.lore}*\n__~~**----------------------------------**~~__`;
       currentEmbed.addFields({
         name: `${
           category === "Matériaux" || category === "Badges"
