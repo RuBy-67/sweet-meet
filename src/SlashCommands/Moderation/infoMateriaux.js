@@ -59,12 +59,13 @@ module.exports = {
       result = await dbManager.getRolesFromDB();
       title = "Infos - Roles";
       description =
-        "Les rôles de Valoria possèdent des ~~propriétés uniques~~ ils sont achetables dans la boutique\n\n**Liste de tous les rôles :**";
+        "⚠️ Compétence des badges NON implèmentés\nLes rôles de Valoria possèdent des ils sont achetables dans la boutique\n\n**Liste de tous les rôles :**";
       category = "Roles";
     } else if (choice === "badges") {
       result = await dbManager.getAllBadge();
       title = "Infos - Badges";
-      description = "**Liste de tous les badges de Valoria :**";
+      description =
+        "⚠️ Compétence des badges NON implèmentés\n\n**Liste de tous les badges de Valoria :**";
       category = "Badges";
     } else {
       interaction.reply("Choix invalide");
