@@ -167,7 +167,7 @@ module.exports = {
         if (i.customId === "material_select") {
           await dbManager.addMaterialToUser(utilisateur.id, selectedMaterialId);
           await i.update({
-            content: `Vous avez donné le matériel à ${utilisateur}.`,
+            content: `Vous avez donné un materiel à ${utilisateur}.`,
           });
         }
       });
