@@ -41,7 +41,7 @@ module.exports = {
               "**/mariage** - Mariez-vous avec un autre utilisateur",
               "**/divorce** - Divorcez de votre partenaire",
               "**/profil** - Affichez votre profil utilisateur",
-              "**/infobot** - informations sur le bot (MAJ, prévision, etc.)",
+              "**/infobot** - informations sur le bot (MAJ, prévision ...)",
             ].join("\n"),
           },
           {
