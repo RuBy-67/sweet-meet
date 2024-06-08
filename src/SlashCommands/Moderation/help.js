@@ -51,9 +51,7 @@ module.exports = {
         .setTitle("Help - Duels")
         .setColor(color.pink)
         .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-        .setDescription(
-          "Explication et commande concernant les duels\n\nAutrefois, Valoria était unifiée sous le règne d'un puissant Empereur, un alchimiste de renom ayant découvert l'Essence de l'Océan, une substance mystique dotée de propriétés inimaginables. Cependant, la mort de l'Empereur a plongé le royaume dans le chaos, et les Seigneurs de guerre se sont emparés des terres, déchirant le royaume en plusieurs régions. Les duels sont un moyen pour les habitants de Valoria de régler leurs différends, et de gagner en puissance et en gloire."
-        )
+        .setDescription("Explication et commande concernant les duels\n")
         .addFields({
           name: "Commande de Duel",
           value:
@@ -69,7 +67,7 @@ module.exports = {
         .setColor(color.pink)
         .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
         .setDescription(
-          "Dans le monde de Valoria, un royaume mystérieux et magique, les joueurs se retrouvent plongés dans un univers où les duels, et la quête de pouvoir s'entremêlent. Les contrées de Valoria sont divisées en plusieurs régions, chacune gouvernée par un Roi ou une Reine. La technologie et la magie coexistent, et des guildes secrètes ainsi que des créatures fantastiques influencent la destinée des habitants, dans la campagne vous être uen de ces guildes et vous devez accomplir des missions pour gagner en puissance et en gloire."
+          "Dans le monde de Valoria, un royaume mystérieux et magique, les joueurs se retrouvent plongés dans un univers où les duels, et la quête de pouvoir s'entremêlent. Les contrées de Valoria sont divisées en plusieurs régions, chacune gouvernée par un Roi ou une Reine. La technologie et la magie coexistent, et des guildes secrètes ainsi que des créatures fantastiques influencent la destinée des habitants, dans la campagne vous être uen de ces guildes et vous devez accomplir des missions pour gagner des Fragments de Protection"
         )
         .setFooter({
           text: `Demandé(e) par ${interaction.user.tag}`,

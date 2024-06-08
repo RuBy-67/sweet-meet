@@ -59,7 +59,7 @@ module.exports = (client) => {
       .addFields(
         {
           name: "📈 Statistiques: Duel",
-          value: `> Nombre de joueurs: **${nbJoueurs}**\n> Nombre de duels joués: **${nbDuels}**\n> Puissance totale (Distribué): **${nbPowerTotal}**\n> Puissance moyenne: **${puissanceMoyenne}**\n\n🏆 **Best Player:**\n> <@${bestPlayerId}> avec **${bestPlayerPower}** points de puissance\n> WinRate : **${WinRate}%** (${bestPlayers.winCounter}) \n__~~**----------------------------------**~~__`,
+          value: `> Nombre de joueurs: **${nbJoueurs}**\n> Nombre de duels joués: **${nbDuels}**\n> Fragments de Protection (Possédés): **${nbPowerTotal}**\n> Fragments de Protection moyen : **${puissanceMoyenne}**\n\n🏆 **Best Player:**\n> <@${bestPlayerId}> avec **${bestPlayerPower}** Fragments de Protection\n> WinRate : **${WinRate}%** (${bestPlayers.winCounter}) \n__~~**----------------------------------**~~__`,
         },
         {
           name: "📈 Statistiques: Materiaux (Possédés)",

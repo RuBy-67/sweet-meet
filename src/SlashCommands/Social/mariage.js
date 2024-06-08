@@ -15,7 +15,7 @@ const cooldown = new Cooldown();
 module.exports = {
   name: "mariage",
   cooldown: param.cooldownMariage,
-  description: `Demander en mariage un autre utilisateur (coûte ${param.Pricing.marriage.accepter} points de puissance).`,
+  description: `Demander en mariage un autre utilisateur (coûte ${param.Pricing.marriage.accepter} Fragments).`,
   options: [
     {
       name: "membre",
@@ -25,6 +25,12 @@ module.exports = {
     },
   ],
   run: async (client, interaction, args) => {
+    function emoji(id) {
+      return (
+        client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
+        "Missing Emoji"
+      );
+    }
     const commandName = "marriage";
     const cooldownDuration = param.cooldownMariage; // en secondes
     await cooldown.handleCooldown(interaction, commandName, cooldownDuration);
@@ -38,7 +44,9 @@ module.exports = {
     const authorStats = await dbManager.getStats(authorId);
     if (authorStats.power < param.Pricing.marriage.accepter) {
       return interaction.reply({
-        content: `Vous n'avez pas suffisamment de puissance pour vous marier. Vous avez besoin de ${param.Pricing.marriage.accepter} points de puissance.`,
+        content: `Vous n'avez pas suffisamment de Fragments pour vous marier. Vous avez besoin de ${
+          param.Pricing.marriage.accepter
+        }  ${emoji(emo.power)}`,
         ephemeral: true,
       });
     }
@@ -67,7 +75,9 @@ module.exports = {
       )
       .setColor(color.pink)
       .setDescription(
-        `Un mariage coûte ${param.Pricing.marriage.accepter} points de puissance. Les avantages et inconvénients du mariage seront partagés entre les deux utilisateurs. Voulez-vous accepter cette demande en mariage ? \n\nFin <t:${temps}:R> `
+        `Un mariage coûte ${param.Pricing.marriage.accepter} ${emoji(
+          emo.power
+        )}. Les avantages et inconvénients du mariage seront partagés entre les deux utilisateurs. Voulez-vous accepter cette demande en mariage ? \n\nFin <t:${temps}:R> `
       )
       .setFooter({
         text: `demandé(e) par ${interaction.user.tag}`,
@@ -126,7 +136,9 @@ module.exports = {
             param.Pricing.marriage.fees
         );
         await interaction.editReply({
-          content: `La demande en mariage de <@${authorId}> à <@${targetId}> a été refusée, ${param.Pricing.marriage.refuse} ont été rendus à <@${authorId}>`,
+          content: `La demande en mariage de <@${authorId}> à <@${targetId}> a été refusée, ${
+            param.Pricing.marriage.refuse
+          } ${emoji(emo.power)} ont été rendus à <@${authorId}>`,
           embeds: [],
           components: [],
         });
@@ -142,7 +154,9 @@ module.exports = {
             param.Pricing.marriage.fees
         );
         interaction.editReply({
-          content: `La demande en mariage a expiré car <@${targetId}> n'a pas répondu dans le temps imparti, ${param.Pricing.marriage.expire} on été rendu à <@${authorId}>.`,
+          content: `La demande en mariage a expiré car <@${targetId}> n'a pas répondu dans le temps imparti, ${
+            param.Pricing.marriage.expire
+          } ${emoji(emo.power)} on été rendu à <@${authorId}>.`,
           components: [],
           embeds: [],
         });

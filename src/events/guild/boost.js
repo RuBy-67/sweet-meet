@@ -21,7 +21,7 @@ module.exports = {
 
           await db.updatePower(userId, powerToAdd);
           await member.send(
-            `Merci pour votre boost! Vous avez reçu ${powerToAdd} points de puissance!`
+            `Merci pour votre boost! Vous avez reçu ${powerToAdd} Fragments de Protection`
           );
           await db.updateBadge(userId, "Booster");
         }

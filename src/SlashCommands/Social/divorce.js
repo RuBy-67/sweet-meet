@@ -12,16 +12,24 @@ const dbManager = new DatabaseManager();
 
 module.exports = {
   name: "divorce",
-  description: `Demander le divorce à votre partenaire (coûte ${param.Pricing.divorce.prix} points de puissance).`,
+  description: `Demander le divorce à votre partenaire (coûte ${param.Pricing.divorce.prix} Fragments).`,
 
   run: async (client, interaction, args) => {
+    function emoji(id) {
+      return (
+        client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
+        "Missing Emoji"
+      );
+    }
     const authorId = interaction.user.id;
 
     // Verify if the author has enough power to get
     const authorStats = await dbManager.getStats(authorId);
     if (authorStats.power < param.Pricing.divorce.prix) {
       return interaction.reply({
-        content: `Vous n'avez pas suffisamment de puissance pour demander un divorce. Vous avez besoin de ${param.Pricing.divorce.prix} points de puissance. `,
+        content: `Vous n'avez pas suffisamment de Fragments pour demander un divorce. Vous avez besoin de ${
+          param.Pricing.divorce.prix
+        } ${emoji(emo.power)}`,
         ephemeral: true,
       });
     }
@@ -99,7 +107,9 @@ module.exports = {
           param.Pricing.divorce.refus * param.Pricing.divorce.fees
         );
         await interaction.editReply({
-          content: `La demande de divorce a été refusée. coût : ${param.Pricing.divorce.refus} points de puissance.`,
+          content: `La demande de divorce a été refusée. coût : ${
+            param.Pricing.divorce.refus
+          }  ${emoji(emo.power)}`,
           embeds: [],
           components: [],
         });
@@ -110,7 +120,9 @@ module.exports = {
       if (collected.size === 0) {
         dbManager.updatePower(authorId, param.Pricing.divorce.refus);
         interaction.editReply({
-          content: `La demande de divorce a expiré. coût : ${param.Pricing.divorce.refus} points de puissance.`,
+          content: `La demande de divorce a expiré. coût : ${
+            param.Pricing.divorce.refus
+          }  ${emoji(emo.power)}`,
           components: [],
           embeds: [],
         });
