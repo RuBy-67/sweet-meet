@@ -33,11 +33,11 @@ module.exports = {
       .addFields(
         {
           name: "📚 ChangeLog (MAJ) V 0.1.0 -> V 0.1.01",
-          value: `>>>- 📉 Rewiew à la baisse des ajouts de power lors des discussions\n- 🏪 Ajout du rôle Manquant dans la boutique Hunter\n- 📍Ajout Ping lancement duel\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
+          value: `>>> - 📉 Rewiew à la baisse des ajouts de power lors des discussions\n- 🏪 Ajout du rôle Manquant dans la boutique Hunter\n- 📍Ajout Ping lancement duel\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
         },
         {
           name: "📚 V 0.1.01 -> V 0.1.2",
-          value: `>>>  - 📉 Rewiew à la baisse des ajouts de ${emoji(
+          value: `>>> - 📉 Rewiew à la baisse des ajouts de ${emoji(
             emo.power
           )} lors des discussions\n- 🎙️ Ajout de ${emoji(
             emo.power
@@ -45,7 +45,11 @@ module.exports = {
         },
         {
           name: "Prévision 📚 V 0.1.2 -> V1",
-          value: `>>>  - Ajout des DayBox et Randombox dans la boutique\n- Reset des puissances\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
+          value: `>>> - ${emoji(
+            emo.randomlootbox
+          )} Ajout des DayBox et Randombox dans la boutique\n- ${emoji(
+            emo.power
+          )} Reset des puissances\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
         }
       )
       .setFooter({
