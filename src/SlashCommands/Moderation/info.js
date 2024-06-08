@@ -36,12 +36,8 @@ module.exports = {
           value: `>>> - 📉 Rewiew à la baisse des ajouts de power lors des discussions\n- 🏪 Ajout du rôle Manquant dans la boutique Hunter\n- 📍Ajout Ping lancement duel\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
         },
         {
-          name: "Mid-Update V 0.1.01",
-          value: `>>> - 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
-        },
-        {
           name: "📚 Prévision V 0.1.01 -> V 0.1.2",
-          value: `>>> Ajout d'ajout de power -> voc\n- 📍Ajout dans */infoobjet* des infos Role et Badge\n- 📍Ajout Achat des RandomBox et DaysBox disponible dans la boutique\n- 📍+++\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
+          value: `>>> 🎙️ Ajout de power via voc\n- 📍Ajout dans */infoobjet* des infos Role et Badge\n- 📍Ajout Achat des RandomBox et DaysBox disponible dans la boutique\n- 📍+++\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
         }
       )
       .setFooter({

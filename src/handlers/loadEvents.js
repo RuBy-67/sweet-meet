@@ -16,8 +16,11 @@ function loadEvents(client) {
     clientEvent("messageCreate").execute(client, message)
   );
   client.on("guildUpdate", (oldGuild, newGuild) =>
-    guildEvent("boost").execute(client, oldGuild, newGuild)
+    guildEvent("boost").execute(oldGuild, newGuild)
   );
+  client.on("voiceStateUpdate", (newState, oldState) => {
+    clientEvent("voiceStateUpdate").execute(client, newState, oldState);
+  });
 }
 
 module.exports = {

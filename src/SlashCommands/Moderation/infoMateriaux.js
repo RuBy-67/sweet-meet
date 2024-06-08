@@ -10,9 +10,30 @@ const DatabaseManager = require("../../class/dbManager");
 const dbManager = new DatabaseManager();
 
 module.exports = {
-  name: "infosobjet",
+  name: "infos",
   description: "informations sur les Objets Roles et Badges disponible",
-  options: null,
+  options: [
+    {
+      name: "categorie",
+      description: "Choisissez la catégorie d'objets à afficher",
+      type: 3, // Type 3 pour une chaîne de caractères (string)
+      required: true,
+      choices: [
+        {
+          name: "Matériaux",
+          value: "materiaux",
+        },
+        {
+          name: "Rôles",
+          value: "roles",
+        },
+        {
+          name: "Badges",
+          value: "badges",
+        },
+      ],
+    },
+  ],
   run: async (client, interaction, args) => {
     function emoji(id) {
       return (
@@ -20,30 +41,64 @@ module.exports = {
         "Missing Emoji"
       );
     }
-    const materiauResult = await dbManager.getMateriau();
-    const materialEmbeds = [];
+
+    const choice = interaction.options.getString("categorie");
+    console.log(choice);
+    let result = null;
+    let title = "";
+    let description = "";
+    let category = "";
+
+    if (choice === "materiaux") {
+      result = await dbManager.getMateriau();
+      title = "Infos - Matériaux";
+      description =
+        "Les matériaux de Valoria possèdent des propriétés uniques et sont recherchés par les guerriers pour leurs pouvoirs : \n\n**Liste de tous les matériaux :**";
+      category = "Matériaux";
+    } else if (choice === "roles") {
+      result = await dbManager.getRolesFromDB();
+      title = "Infos - Roles";
+      description =
+        "Les rôles de Valoria possèdent des ~~propriétés uniques~~ ils sont achetables dans la boutique\n\n**Liste de tous les rôles :**";
+      category = "Roles";
+    } else if (choice === "badges") {
+      result = await dbManager.getAllBadge();
+      title = "Infos - Badges";
+      description = "**Liste de tous les badges de Valoria :**";
+      category = "Badges";
+    } else {
+      interaction.reply("Choix invalide");
+      return;
+    }
+
+    const embeds = [];
     let currentEmbed = new EmbedBuilder()
-      .setTitle("Help - Matériaux")
+      .setTitle(title)
       .setColor(color.pink)
       .setFooter({
         text: `Demandé(e) par ${interaction.user.tag}`,
         iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
       })
-      .setDescription(
-        "Les matériaux de Valoria possèdent des propriétés uniques et sont recherchés par les guerriers pour leurs pouvoirs : \n\n**Liste de tous les matériaux :**"
-      );
-    materiauResult.forEach((material, index) => {
-      const materialEmoji = emoji(emo[material.nom]);
-      const description = `**Rareté:** ${material.rarete}\n**Type:** ${material.type}\n**Bonus:** 💚 ${material.santeBoost}% - ⚔️ ${material.attaqueBoost}% - 🛡️ ${material.defenseBoost}%\n**Description:** ${material.lore}\n__~~**----------------------------------**~~__`;
+      .setDescription(description);
+
+    result.forEach((item, index) => {
+      const description = `*${item.lore}*\n__~~**----------------------------------**~~__`;
       currentEmbed.addFields({
-        name: `${materialEmoji} ${material.nom}`,
+        name: `${
+          category === "Matériaux" || category === "Badges"
+            ? emoji(emo[item.nom]) + " " + item.nom
+            : category === "Rôles"
+            ? `<@&${item.id}>`
+            : item.nom
+        }`,
+
         value: description,
       });
 
       if ((index + 1) % 3 === 0) {
-        materialEmbeds.push(currentEmbed);
+        embeds.push(currentEmbed);
         currentEmbed = new EmbedBuilder()
-          .setTitle("Help - Matériaux")
+          .setTitle(title)
           .setColor(color.pink)
           .setFooter({
             text: `Demandé(e) par ${interaction.user.tag}`,
@@ -51,32 +106,8 @@ module.exports = {
           });
       }
     });
-    if (currentEmbed && currentEmbed.fields && currentEmbed.fields.length > 0) {
-      materialEmbeds.push(currentEmbed);
-    }
-    const pages = [...materialEmbeds];
-    const legendaryMaterials = await dbManager.getMateriauxByRarity(
-      "Legendaire"
-    );
 
-    const legendaryMaterialsDescription = legendaryMaterials
-      .map((mat) => `${emoji(emo[mat.nom])} : ${mat.nom}`)
-      .join("\n");
-
-    const hiddenPage = new EmbedBuilder()
-      .setTitle("Secret Page")
-      .setColor(color.pink)
-      .setDescription(
-        "Ho t'a trouvé la page secrète ! claim ton cadeau 🧧 c'est une chance sur 100 de tomber sur cette page, et te permet de claim entre 5000 et 15000 de power !\nAinsi que d'obtenir un matériaux legendaire parmis la liste suivante !"
-      )
-      .addFields({
-        name: "Matériaux Légendaires Disponibles",
-        value: legendaryMaterialsDescription,
-      })
-      .setFooter({
-        text: `Demandé(e) par ${interaction.user.tag}`,
-        iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
-      });
+    embeds.push(currentEmbed);
 
     // Determine if the rare button should appear
     const showRareButton = Math.random() < 0.01; // 1 in 100 chance
@@ -102,7 +133,7 @@ module.exports = {
     }
     let currentPage = 0;
     const message = await interaction.reply({
-      embeds: [pages[currentPage]],
+      embeds: [embeds[currentPage]],
       components: [row],
       fetchReply: true,
     });
@@ -117,15 +148,15 @@ module.exports = {
     });
     collector.on("collect", async (i) => {
       if (i.customId === "next") {
-        currentPage = (currentPage + 1) % pages.length;
+        currentPage = (currentPage + 1) % embeds.length;
         await i.update({
-          embeds: [pages[currentPage]],
+          embeds: [embeds[currentPage]],
           components: [row],
         });
       } else if (i.customId === "previous") {
-        currentPage = (currentPage - 1 + pages.length) % pages.length;
+        currentPage = (currentPage - 1 + embeds.length) % embeds.length;
         await i.update({
-          embeds: [pages[currentPage]],
+          embeds: [embeds[currentPage]],
           components: [row],
         });
       } else if (i.customId === "secret") {
@@ -148,7 +179,7 @@ module.exports = {
           randomMaterial.id
         );
         await i.update({
-          content: `Claimed! reçut ${power} power et un matériel légendaire ${emoji(
+          content: `Claimed! reçu ${power} power et un matériel légendaire ${emoji(
             emo[randomMaterial.nom]
           )} ${randomMaterial.nom}.`,
           embeds: [],

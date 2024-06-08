@@ -2,12 +2,6 @@ const { Client, Collection, GatewayIntentBits } = require("discord.js");
 const { loadEvents } = require("./src/handlers/loadEvents");
 const { loadSlashCommands } = require("./src/handlers/loadSlashCommands");
 const { botToken, botToken2Test, auth } = require("./src/jsons/config.json");
-const {
-  openShop,
-  randomLootBox,
-  daysBox,
-  buyMaterial,
-} = require("./src/devs/shop");
 
 // Declaring our Discord Client
 const client = new Client({

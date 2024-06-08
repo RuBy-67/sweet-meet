@@ -20,10 +20,10 @@ module.exports = {
     }
     userLastMessage.set(userId, currentTime);
     const ranges = [
-      { min: 100, max: 250, probability: 0.3 }, // 30%
-      { min: 251, max: 700, probability: 0.4 }, // 40%
-      { min: 701, max: 1000, probability: 0.2 }, // 20%
-      { min: 1001, max: 1500, probability: 0.1 }, // 10%
+      { min: 15, max: 30, probability: 0.4 }, // 40%
+      { min: 31, max: 60, probability: 0.3 }, // 30%
+      { min: 61, max: 120, probability: 0.2 }, // 20%
+      { min: 121, max: 240, probability: 0.1 }, // 10%
     ];
     function selectRange() {
       const rand = Math.random();
