@@ -87,7 +87,11 @@ module.exports = {
       currentEmbed.addFields({
         name: `${
           category === "Matériaux" || category === "Badges"
-            ? emoji(emo[item.nom]) + " " + item.nom
+            ? emoji(emo[item.nom]) +
+              " " +
+              item.nom +
+              "\n**Rarete :**" +
+              item.rarete
             : category === "Rôles"
             ? `<@&${item.id}>`
             : item.nom

@@ -35,12 +35,22 @@ module.exports = {
         .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
         .addFields(
           {
-            name: "Social",
-            value: "**/social**, **/mariage**, **/divorce**, **/profil**",
+            name: "🌐 Social",
+            value: [
+              "**/social** - Gérez vos interactions sociales",
+              "**/mariage** - Mariez-vous avec un autre utilisateur",
+              "**/divorce** - Divorcez de votre partenaire",
+              "**/profil** - Affichez votre profil utilisateur",
+              "**/infobot** - informations sur le bot (MAJ, prévision, etc.)",
+            ].join("\n"),
           },
           {
-            name: "Divertissement",
-            value: "**/Divertissement** " + commandNamesString,
+            name: "🎉 Divertissement",
+            value: [
+              "**/Divertissement** - " +
+                commandNamesString +
+                "\n- *Amusez-vous avec diverses commandes*",
+            ].join("\n"),
           }
         )
         .setFooter({
@@ -48,14 +58,21 @@ module.exports = {
           iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
         }),
       new EmbedBuilder()
-        .setTitle("Help - Duels")
+        .setTitle("Help - Valoria")
         .setColor(color.pink)
         .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-        .setDescription("Explication et commande concernant les duels\n")
+        .setDescription("Explication et commande concernant le lore de valoria")
         .addFields({
-          name: "Commande de Duel",
-          value:
-            "**/duel @user** pour défier un guerrier\n**/setmateriaux** pour choisir les matériaux à utiliser\n**/upgrade** pour améliorer vos matériaux\n**/sell** Pour vendre vos materiaux\n**/classement** pour voir le classement des joueurs",
+          name: "⚔️ Commande de Duel",
+          value: [
+            "**/duel @user** - Défiez un guerrier",
+            "**/setmateriaux** - Choisissez les matériaux à utiliser",
+            "**/upgrade** - Améliorez vos matériaux",
+            "**/sell** - Vendez vos matériaux",
+            "**/classement** - Consultez le classement des joueurs",
+            "**/infos [ ]** - Consultez les informations sur les matériaux, roles, badges, etc.",
+            "**/infolore** - Consultez les informations sur le lore de Valoria",
+          ].join("\n"),
         })
         .setFooter({
           text: `Demandé(e) par ${interaction.user.tag}`,

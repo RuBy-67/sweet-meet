@@ -37,11 +37,15 @@ module.exports = {
         },
         {
           name: "📚 V 0.1.01 -> V 0.1.2",
-          value: `>>>- 📉 Rewiew à la baisse des ajouts de Fragments lors des discussions\n- 🎙️ Ajout de Fragments via vocal\n- 📍Ajout dans */infos* des infos Role et Badge\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
+          value: `>>> - 📉 Rewiew à la baisse des ajouts de ${emoji(
+            emo.power
+          )} lors des discussions\n- 🎙️ Ajout de ${emoji(
+            emo.power
+          )} via vocal\n- 📍Ajout dans ***/infos*** des infos Roles et Badges\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
         },
         {
           name: "Prévision 📚 V 0.1.2 -> V 0.1.3",
-          value: `>>>- Ajout des DayBox et Randombox dans la boutique\n- 📍+++\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
+          value: `>>> - Ajout des DayBox et Randombox dans la boutique\n- 📍+++\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
         }
       )
       .setFooter({
