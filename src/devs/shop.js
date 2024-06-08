@@ -89,12 +89,12 @@ async function openShop(client, shopMessage) {
       [
         {
           label: "RandomLootBox",
-          description: `Prix: ${param.boutique.achat.prix.RndLootBox}⚡`,
+          description: `Prix: ${param.boutique.achat.prix.RndLootBox} 🌟`,
           value: "randomlootbox",
         },
         {
           label: "DaysBox",
-          description: `Prix:  ${param.boutique.achat.prix.LootBox}⚡`,
+          description: `Prix:  ${param.boutique.achat.prix.LootBox} 🌟`,
           value: "daysbox",
         },
       ]
@@ -114,7 +114,7 @@ async function openShop(client, shopMessage) {
             return new StringSelectMenuOptionBuilder()
               .setEmoji(emo[material.nom] || "❔")
               .setLabel(`${material.nom} (lvl: ${level})`)
-              .setDescription(`Prix: ${price}⚡`)
+              .setDescription(`Prix: ${price} 🌟`)
               .setValue(`material_${material.id}_${level}`);
           }),
           role.map((role) => {
@@ -122,7 +122,7 @@ async function openShop(client, shopMessage) {
               .setEmoji("1246899778726531142")
               .setLabel(`${role.nom}`)
               .setDescription(
-                `Prix: ${param.boutique.achat.prix.role[role.id]}⚡`
+                `Prix: ${param.boutique.achat.prix.role[role.id]} 🌟`
               )
               .setValue(`role_${role.id}`);
           })
