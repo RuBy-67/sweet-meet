@@ -4,7 +4,7 @@ const color = require(`../../jsons/color.json`);
 
 module.exports = {
   name: "infolore",
-  description: "",
+  description: "informations sur l'histoire de Valoria",
   options: null,
   run: async (client, interaction, args) => {
     function emoji(id) {

@@ -43,7 +43,6 @@ module.exports = {
     }
 
     const choice = interaction.options.getString("categorie");
-    console.log(choice);
     let result = null;
     let title = "";
     let description = "";

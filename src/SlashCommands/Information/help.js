@@ -67,6 +67,7 @@ module.exports = {
           value: [
             "**/duel @user** - Défiez un guerrier",
             "**/setmateriaux** - Choisissez les matériaux à utiliser",
+            "**/freedaylibox** - Réclamez votre free daily box",
             "**/upgrade** - Améliorez vos matériaux",
             "**/sell** - Vendez vos matériaux",
             "**/classement** - Consultez le classement des joueurs",

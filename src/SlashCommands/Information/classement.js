@@ -26,7 +26,6 @@ module.exports = {
     let powerDescription = "";
     for (let i = 0; i < powerResult.length; i++) {
       const user = `${powerResult[i].discordId}`;
-      console.log(user);
       if (user === undefined) {
         powerDescription += `${i + 1}. Utilisateur inconnu : ${
           powerResult[i].power
