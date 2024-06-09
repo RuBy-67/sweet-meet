@@ -15,8 +15,8 @@ module.exports = {
       );
     }
     const embed = new EmbedBuilder()
-      .setTitle("Info Bot VERSION BETA-TESTING")
-      .setColor("#FFC0CB") // Code couleur pour rose
+      .setTitle("Info Bot ")
+      .setColor(color.pink) // Code couleur pour rose
       .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
       .setDescription(
         `
