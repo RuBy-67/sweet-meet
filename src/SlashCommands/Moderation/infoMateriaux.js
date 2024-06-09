@@ -43,7 +43,6 @@ module.exports = {
     }
 
     const choice = interaction.options.getString("categorie");
-    console.log(choice);
     let result = null;
     let title = "";
     let description = "";
@@ -59,7 +58,7 @@ module.exports = {
       result = await dbManager.getRolesFromDB();
       title = "Infos - Roles";
       description =
-        "***Dans le royaume de Valoria, chaque individu peut choisir un rôle spécifique qui détermine son chemin et ses capacités au sein de la société. Ces rôles ne sont pas simplement des titres, mais des vocations imprégnées de pouvoir et de responsabilité. Chaque rôle confère des compétences uniques et des statuts particuliers.***\n ⚠️ Compétence des badges NON implèmentés\nLes rôles de Valoria possèdent des ils sont achetables dans la boutique\n\n**Liste de tous les rôles :**";
+        "***Dans le royaume de Valoria, chaque individu peut choisir un rôle spécifique qui détermine son chemin et ses capacités au sein de la société. Ces rôles ne sont pas simplement des titres, mais des vocations imprégnées de pouvoir et de responsabilité. Chaque rôle confère des compétences uniques et des statuts particuliers.***\n ⚠️ Compétence des badges NON implèmentés\nLes rôles de Valoria, ils sont achetables dans la boutique\n\n**Liste de tous les rôles :**";
       category = "Roles";
     } else if (choice === "badges") {
       result = await dbManager.getAllBadge();

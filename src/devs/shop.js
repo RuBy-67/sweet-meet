@@ -65,12 +65,16 @@ async function openShop(client, shopMessage) {
         }).join("\n\n"),
       },
       {
-        name: "Rôle",
+        name: "Rôles",
         value: role
           .map((role) => {
+            let lore =
+              role.lore.length > 100
+                ? `${role.lore.slice(0, 97)}...`
+                : role.lore;
             return `- **${role.nom}**, **Prix: ${
               param.boutique.achat.prix.role[role.id]
-            } ${emoji(emo.power)} **\n> ${role.lore}`;
+            } ${emoji(emo.power)} **\n> ${lore} [...]`;
           })
           .join("\n\n"),
       }

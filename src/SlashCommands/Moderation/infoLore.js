@@ -4,7 +4,7 @@ const color = require(`../../jsons/color.json`);
 
 module.exports = {
   name: "infolore",
-  description: "",
+  description: "Information sur le lore de Valoria",
   options: null,
   run: async (client, interaction, args) => {
     function emoji(id) {
@@ -14,7 +14,7 @@ module.exports = {
       );
     }
     const embed = new EmbedBuilder()
-      .setTitle("")
+      .setTitle("InfoLore - Valoria")
       .setColor(color.pink)
       .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
       .setDescription()
@@ -42,7 +42,7 @@ module.exports = {
         {
           name: `${emoji(emo.power)} - Fragments de Protection`,
           value:
-            "Ces fragments, représentant l'énergie vitale et la force de défense des habitants du royaume, sont convoités par tous. Ils sont utilisés comme monnaie pour acquérir des biens, des services et des compétences. Les joueurs se lancent dans des duels acharnés pour obtenir ces précieux fragments et renforcer leur position dans le royaume.",
+            "Ces fragments, représente l'énergie vitale et la force de défense des habitants du royaume, sont convoités par tous. Ils sont utilisés comme monnaie pour acquérir des biens, des services et des compétences. Les joueurs se lancent dans des duels acharnés pour obtenir ces précieux fragments et renforcer leur position dans le royaume.",
         }
       )
       .setFooter({

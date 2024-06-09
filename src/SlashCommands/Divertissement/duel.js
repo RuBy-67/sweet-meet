@@ -135,9 +135,9 @@ module.exports = {
       .addFields(
         {
           name: "Vos détails",
-          value: `Fragments de Protection : ${
-            userPower.power
-          }\n\n**Materiaux :**\n ${
+          value: `Fragments de Protection : ${userPower.power} ${emoji(
+            emo.power
+          )}\n\n**Materiaux :**\n ${
             userMaterialNames.length > 0
               ? userMaterialNames.join("\n")
               : "Aucun"
@@ -146,9 +146,9 @@ module.exports = {
         },
         {
           name: `Détail de ${membre.username}`,
-          value: `Fragments de Protection : ${
-            adversaryPower.power
-          }\n\n**Materiaux :**\n ${
+          value: `Fragments de Protection : ${adversaryPower.power}${emoji(
+            emo.power
+          )}\n\n**Materiaux :**\n ${
             adversaryMaterialNames.length > 0
               ? adversaryMaterialNames.join("\n")
               : "Aucun"
