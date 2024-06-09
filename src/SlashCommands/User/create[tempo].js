@@ -3,6 +3,7 @@ const { EmbedBuilder } = require("discord.js");
 const emo = require(`../../jsons/emoji.json`);
 const color = require(`../../jsons/color.json`);
 const { connection } = require("../../db");
+const bonus = require("../../jsons/userBonus.json");
 
 module.exports = {
   name: "create-accounts",
@@ -39,7 +40,7 @@ module.exports = {
           await connection
             .promise()
             .query(
-              "INSERT INTO user (discordId, power, winCounter, loseCounter) VALUES (?, 20000, 0, 0)",
+              "INSERT INTO user (discordId, power, winCounter, loseCounter) VALUES (?, 5000, 0, 0)",
               [member.id]
             );
 
@@ -49,6 +50,26 @@ module.exports = {
             .query("INSERT INTO badge_user (idUser, idBadge) VALUES (?, 1)", [
               member.id,
             ]);
+          if (bonus[member.id]) {
+            // Insert the badge corresponding to the user's ID from userBonus.json
+            await connection
+              .promise()
+              .query(
+                "INSERT INTO badge_user (idUser, idBadge) VALUES (?, 13)",
+                [member.id]
+              );
+            await connection
+              .promise()
+              .query(
+                `UPDATE user SET power = power + ${
+                  bonus[member.id]
+                }  WHERE discordId = ?`,
+                [member.id]
+              );
+            console.log(
+              `Badge TESTER AND power Bonus applied to user ${member.user.tag}`
+            );
+          }
 
           console.log(`Account created for user ${member.user.tag}`);
           i++;
