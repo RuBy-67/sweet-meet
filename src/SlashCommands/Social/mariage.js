@@ -33,7 +33,12 @@ module.exports = {
     }
     const commandName = "marriage";
     const cooldownDuration = param.cooldownMariage; // en secondes
-    await cooldown.handleCooldown(interaction, commandName, cooldownDuration);
+    const cooldownInfo = await cooldown.handleCooldown(
+      interaction,
+      commandName,
+      cooldownDuration
+    );
+    if (cooldownInfo) return;
 
     const target = interaction.options.getMember("membre");
     const targetUser = await client.users.fetch(target.user.id);

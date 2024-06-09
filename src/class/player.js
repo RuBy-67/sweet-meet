@@ -387,6 +387,103 @@ class Player extends DatabaseManager {
       return "🟡";
     }
   }
+
+  async randomBox() {
+    const material = await this.getMateriau();
+    let numberOfMaterials;
+    const randomValue = Math.random();
+    if (randomValue < 0.6) {
+      numberOfMaterials = 1; // 60% de chance
+    } else if (randomValue < 0.9) {
+      numberOfMaterials = 2; // 30% de chance
+    } else {
+      numberOfMaterials = 3; // 10% de chance
+    }
+    const selectedMaterials = [];
+    for (let i = 0; i < numberOfMaterials; i++) {
+      const randomIndex = Math.floor(Math.random() * material.length);
+      selectedMaterials.push(material[randomIndex]);
+    }
+
+    return selectedMaterials;
+  }
+  async dayliBox() {
+    const material = await this.getMateriau();
+    const selectedMaterial = await this.selectRandomMaterial(material, "dayli");
+    let dayPower = await this.generateRandomPower();
+    Math.floor((dayPower = dayPower / 3));
+    return { dayMaterial: selectedMaterial, dayPower };
+  }
+  async freeDayliBox(userId) {
+    const material = await this.getMateriau();
+    const selectedMaterial = await this.selectRandomMaterial(
+      material,
+      "freeDayli"
+    );
+    let power = await this.generateRandomPower();
+    power = Math.floor(power / 5);
+    return { userId, material: selectedMaterial, power };
+  }
+
+  async selectRandomMaterial(materials, boxType) {
+    let rarityWeights;
+
+    const probabilities = {
+      freeDayli: 0.5, // 50% de chances de ne pas obtenir de matériau
+      random: 0, // 0% de chances de ne pas obtenir de matériau
+      dayli: 0.2, // 20% de chances de ne pas obtenir de matériau
+    };
+
+    const randomValue = Math.random();
+    if (randomValue < probabilities[boxType]) {
+      return null;
+    }
+
+    switch (boxType) {
+      case "randomBox":
+        rarityWeights = {
+          Legendaire: 5,
+          Épique: 10,
+          "Très Rare": 15,
+          Rare: 30,
+          Commun: 40,
+        };
+        break;
+      case "dayliBox":
+        rarityWeights = {
+          Legendaire: 3,
+          Épique: 7,
+          "Très Rare": 15,
+          Rare: 25,
+          Commun: 50,
+        };
+        break;
+      case "freeDayli":
+        rarityWeights = {
+          Legendaire: 1,
+          Épique: 5,
+          "Très Rare": 10,
+          Rare: 20,
+          Commun: 64,
+        };
+        break;
+      default:
+        rarityWeights = {
+          Legendaire: 5,
+          Épique: 10,
+          "Très Rare": 15,
+          Rare: 30,
+          Commun: 40,
+        };
+    }
+
+    const weightedMaterials = materials.flatMap((material) =>
+      Array(rarityWeights[material.rarete]).fill(material)
+    );
+
+    const randomIndex = Math.floor(Math.random() * weightedMaterials.length);
+    return weightedMaterials[randomIndex];
+  }
 }
 
 module.exports = Player;

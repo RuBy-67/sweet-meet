@@ -74,7 +74,7 @@ module.exports = {
             iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
           });
 
-        return interaction.reply({ embeds: [errorEmbed] });
+        return interaction.reply({ embeds: [errorEmbed], ephemeral: true });
       }
     }
     const type = interaction.options.getString("type");

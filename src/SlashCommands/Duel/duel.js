@@ -37,7 +37,12 @@ module.exports = {
   run: async (client, interaction, args) => {
     const commandName = "duel";
     const cooldownDuration = param.cooldownDuel;
-    await cooldown.handleCooldown(interaction, commandName, cooldownDuration);
+    const cooldownInfo = await cooldown.handleCooldown(
+      interaction,
+      commandName,
+      cooldownDuration
+    );
+    if (cooldownInfo) return;
     function emoji(id) {
       return (
         client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||

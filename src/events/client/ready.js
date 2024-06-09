@@ -7,6 +7,8 @@ const {
 } = require("discord.js");
 const { activityInterval } = require("../../jsons/config.json");
 const dbManager = require("../../class/dbManager");
+const Player = require("../../class/player");
+const player = new Player();
 const os = require("os-utils");
 const color = require("../../jsons/color.json");
 const db = new dbManager();
@@ -109,14 +111,18 @@ module.exports = (client) => {
       if (selectedItem.startsWith("material_")) {
         const materialId = selectedItem.split("_")[1];
         const level = selectedItem.split("_")[2];
-        await buyMaterial(client, interaction, userId, materialId, level);
+        await buyMaterial(client, interaction, materialId, level);
       } else if (selectedItem.startsWith("role_")) {
         const roleId = selectedItem.split("_")[1];
         await buyRole(client, interaction, userId, roleId);
       } else if (selectedItem === "randomlootbox") {
-        await randomLootBox(interaction);
-      } else if (selectedItem === "daysbox") {
-        await daysBox(interaction);
+        const selectedMaterials = await player.randomBox();
+        const materialIds = selectedMaterials.map((material) => material.id);
+        await randomLootBox(client, interaction, ...materialIds);
+      } else if (selectedItem.startsWith("daysbox_")) {
+        const materialId = selectedItem.split("_")[2];
+        const power = selectedItem.split("_")[1];
+        await daysBox(client, interaction, power, materialId);
       } else {
         await interaction.reply(`Sélection invalide.`);
       }

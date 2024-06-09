@@ -38,8 +38,10 @@ class Cooldown {
         content: `Vous êtes en cooldown pour cette commande. Veuillez réessayer <t:${timestamp}:R>`,
         ephemeral: true,
       });
+      return true;
     } else {
       await this.setCooldown(userId, commandName, cooldownDuration * 1000);
+      return false;
     }
   }
 }

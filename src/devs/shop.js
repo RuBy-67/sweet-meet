@@ -11,10 +11,22 @@ const emo = require(`../jsons/emoji.json`);
 const color = require(`../jsons/color.json`);
 const param = require("../jsons/param.json");
 const config = require("../jsons/config.json");
+const Player = require("../class/player");
+const player = new Player();
 const DatabaseManager = require("../class/dbManager");
 const dbManager = new DatabaseManager();
+const Cooldown = require("../class/cooldown");
+const cooldown = new Cooldown();
 
 async function openShop(client, shopMessage) {
+  let dayBox = "";
+  const { dayMaterial, dayPower } = await player.dayliBox();
+  if (dayMaterial != null) {
+    dayBox = `daysbox_${dayPower}_${dayMaterial.id}`;
+  } else {
+    dayBox = `daysbox_${dayPower}`;
+  }
+
   function emoji(id) {
     return (
       client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
@@ -41,12 +53,12 @@ async function openShop(client, shopMessage) {
       {
         name: `LootBox`,
         value: `- ${emoji(
-          emo.randomlootbox
-        )} **RandomLootBox**:\n> Une boîte aléatoire, Prix : **${
+          emo.RandomLootBox
+        )} **RandomLootBox**:\n> Une boîte aléatoire contient entre 1 et 3 matériels, Prix : **${
           param.boutique.achat.prix.RndLootBox
         }** ${emoji(emo.power)}\n\n- ${emoji(
-          emo.daysbox
-        )} **DaysBox:** \n> Boite journalière, Prix : **${
+          emo.DaysBox
+        )} **DaysBox:** \n> Boite journalière contient 0 ou 1 matériels et de la puissance, Prix : **${
           param.boutique.achat.prix.LootBox
         } ${emoji(emo.power)}**`,
       },
@@ -99,12 +111,12 @@ async function openShop(client, shopMessage) {
         {
           label: "DaysBox",
           description: `Prix:  ${param.boutique.achat.prix.LootBox} 🌟`,
-          value: "daysbox",
+          value: dayBox,
         },
       ]
         .map((option) =>
           new StringSelectMenuOptionBuilder()
-            .setEmoji(emo[option.value] || "❔")
+            .setEmoji(emo[option.label] || "❔")
             .setLabel(option.label)
             .setDescription(option.description)
             .setValue(option.value)
@@ -171,30 +183,97 @@ async function closeShop(client, shopMessage) {
 
   setTimeout(() => openShop(client, shopMessage), param.closeInterval * 1000);
 }
-
-async function randomLootBox(interaction) {
-  // Logique pour la RandomLootBox
-  await interaction.reply({
-    content: `Vous avez choisi la RandomLootBox. Voici vos récompenses...(🚧)`,
-    ephemeral: true,
-  });
-}
-
-async function daysBox(interaction) {
-  // Logique pour la DaysBox
-  await interaction.reply({
-    content: `Vous avez choisi la DaysBox. Voici vos récompenses pour aujourd'hui...(🚧)`,
-    ephemeral: true,
-  });
-}
-async function buyMaterial(client, interaction, userId, materialId, level) {
+///-----------------------///
+async function randomLootBox(client, interaction, ...materialIds) {
   function emoji(id) {
     return (
       client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
       "Missing Emoji"
     );
   }
+  const userPower = await dbManager.getStats(interaction.user.id);
+  const totalPrice = param.boutique.achat.prix.RndLootBox;
 
+  if (userPower.power < totalPrice) {
+    return interaction.reply({
+      content: `Vous n'avez pas assez de ${emoji(
+        emo.power
+      )} pour acheter la RandomLootBox`,
+      ephemeral: true,
+    });
+  }
+  let message = "Vous avez obtenu les récompenses suivantes :\n>>> ";
+  for (const materialId of materialIds) {
+    const [selectedItem] = await dbManager.getDataMateriauById(materialId);
+    message += `- ${emoji(emo[selectedItem.nom])} **${selectedItem.nom}** \n`;
+
+    await dbManager.addMaterialToUser(interaction.user.id, materialId);
+  }
+  await dbManager.updatePower(interaction.user.id, -totalPrice);
+
+  await interaction.reply({
+    content: message,
+    ephemeral: true,
+  });
+}
+
+///-----------------------///
+
+async function daysBox(client, interaction, power, materialId) {
+  power = Math.floor(power);
+  const commandName = "daylibox";
+  const cooldownDuration = param.cooldownBox;
+  const cooldownInfo = await cooldown.handleCooldown(
+    interaction,
+    commandName,
+    cooldownDuration
+  );
+  if (cooldownInfo) return;
+  function emoji(id) {
+    return (
+      client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
+      "Missing Emoji"
+    );
+  }
+  const userPower = await dbManager.getStats(interaction.user.id);
+  if (userPower.power < param.boutique.achat.prix.LootBox) {
+    return interaction.reply({
+      content: `Vous n'avez pas assez de ${emoji(
+        emo.power
+      )} pour acheter la DaysBox`,
+      ephemeral: true,
+    });
+  }
+  let message = "Vous avez obtenu les récompenses suivantes :\n>>> ";
+  if (materialId != null) {
+    await dbManager.addMaterialToUser(interaction.user.id, materialId);
+    const [selectedItem] = await dbManager.getDataMateriauById(materialId);
+    message += `- ${emoji(emo[selectedItem.nom])} **${
+      selectedItem.nom
+    }** \n- **${power}** ${emoji(emo.power)}\n`;
+  } else {
+    message += `- **${power}** ${emoji(emo.power)}\n`;
+  }
+  await dbManager.updatePower(
+    interaction.user.id,
+    power - param.boutique.achat.prix.LootBox
+  );
+
+  await interaction.reply({
+    content: message,
+    ephemeral: true,
+  });
+}
+
+///-----------------------///
+
+async function buyMaterial(client, interaction, materialId, level) {
+  function emoji(id) {
+    return (
+      client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
+      "Missing Emoji"
+    );
+  }
   const [m] = await dbManager.getDataMateriauById(materialId);
   const prix = Math.floor(
     param.boutique.achat.prix.materiaux[m.rarete] * level * 0.6
