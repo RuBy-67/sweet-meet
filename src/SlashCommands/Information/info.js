@@ -8,6 +8,7 @@ module.exports = {
   description: "info sur le bot",
   options: null,
   run: async (client, interaction, args) => {
+    const botPing = Math.round(client.ws.ping);
     function emoji(id) {
       return (
         client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
@@ -15,8 +16,8 @@ module.exports = {
       );
     }
     const embed = new EmbedBuilder()
-      .setTitle("Info Bot VERSION BETA-TESTING")
-      .setColor("#FFC0CB") // Code couleur pour rose
+      .setTitle("Info Bot SweetMeet")
+      .setColor(color.pink) // Code couleur pour rose
       .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
       .setDescription(
         `
@@ -27,7 +28,7 @@ module.exports = {
 **Langage**: ${info.langage}
 **Framework**: ${info.framework}
 **Base de Données**: ${info.base_de_donnees}
-**URL Git**: [GitHub Repository](${info.url_git})\n\n__~~**----------------------------------------**~~__
+**URL Git**: [GitHub Repository](${info.url_git})\n**Ping du bot**: ${botPing} ms\n\n__~~**----------------------------------------**~~__
   `
       )
       .addFields(
