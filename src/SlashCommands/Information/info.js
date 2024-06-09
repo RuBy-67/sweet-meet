@@ -40,11 +40,11 @@ module.exports = {
           )} via vocal\n- 📍Ajout dans ***/infos*** des infos Roles et Badges\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
         },
         {
-          name: "📚 V 0.1.2 -> V 1 Sortie de béta",
-          value: `>>> - Ajout des DayBox et Randombox dans la boutique\n- Reset des Fragements\n- Ajout des Dayli free box\n- Ajout Roulette Russe (Admin)\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
+          name: "📚 V 0.1.2 -> V 1.0.0",
+          value: `>>> - Ajout des DayBox et Randombox dans la boutique\n- Reset des Fragements\n- Ajout des Dayli free box\n- Ajout Roulette Russe (Admin) et solo \n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
         },
         {
-          name: "📚 V 0.1.2 -> ...",
+          name: "📚 V 1 -> ...",
           value: `>>> - Ajout d'une campagne solo\n- Ajout des royaumes (Empereur)\n- Ajout Duel 'Publique'\n- Ajout de l'utilité des role, badge, mariage \n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
         }
       )
