@@ -7,6 +7,7 @@ const config = require("../../jsons/config.json");
 module.exports = {
   name: Events.MessageCreate,
   async execute(client, message) {
+    const guildId = message.guild.id;
     // Ignore bot messages
     if (message.author.bot) return;
     if (config.maintenance) return;
@@ -52,7 +53,7 @@ module.exports = {
     }
 
     try {
-      await db.updatePower(userId, powerIncrement);
+      await db.updatePower(userId, powerIncrement, guildId);
     } catch (error) {
       console.error(
         `Failed to add Fragments of Protection to user ${userId}:`,

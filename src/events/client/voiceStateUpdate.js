@@ -1,4 +1,4 @@
-const { Events } = require("discord.js");
+const { Events, Guild } = require("discord.js");
 const DatabaseManager = require("../../class/dbManager");
 const db = new DatabaseManager();
 const param = require("../../jsons/param.json");
@@ -7,6 +7,8 @@ const userVoiceTimes = new Map();
 module.exports = {
   name: Events.VoiceStateUpdate,
   async execute(client, oldState, newState) {
+    const guildFromOldStateId = oldState.guild.id;
+
     const userId = newState.id;
     const currentTime = Date.now();
     if (param.maintenance) return;
@@ -27,20 +29,26 @@ module.exports = {
         await handleVoiceReward(
           userId,
           userVoiceData.totalTime,
-          oldState.channel
+          oldState.channel,
+          guildFromOldStateId
         );
       }
     }
   },
 };
 
-async function handleVoiceReward(userId, totalTime, channel) {
+async function handleVoiceReward(
+  userId,
+  totalTime,
+  channel,
+  guildFromOldStateId
+) {
   const totalMinutes = Math.floor(totalTime / 60000);
   const fiveMinuteChunks = Math.floor(totalMinutes / 5);
   const powerIncrement = fiveMinuteChunks * 105;
   if (powerIncrement > 0) {
     try {
-      await db.updatePower(userId, powerIncrement);
+      await db.updatePower(userId, powerIncrement, guildFromOldStateId);
     } catch (error) {
       console.error(
         `Failed to add Fragments of Protection to user ${userId}:`,

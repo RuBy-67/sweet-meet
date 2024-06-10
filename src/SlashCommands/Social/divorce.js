@@ -16,6 +16,7 @@ module.exports = {
   description: `Demander le divorce à votre partenaire (coûte ${param.Pricing.divorce.prix} Fragments).`,
 
   run: async (client, interaction, args) => {
+    const guildId = interaction.guild.id;
     if (config.maintenance) {
       const embed = new EmbedBuilder()
         .setTitle("⚒️ Maintenance ⚒️")
@@ -98,7 +99,6 @@ module.exports = {
 
     collector.on("collect", async (interaction) => {
       await interaction.deferUpdate();
-
       if (interaction.customId === "accepter") {
         dbManager.deleteMarriage(authorId, targetId);
         dbManager.updateBadge(targetId, "loveb");
@@ -112,10 +112,11 @@ module.exports = {
           components: [],
         });
       } else if (interaction.customId === "refuser") {
-        dbManager.updatePower(authorId, param.Pricing.divorce.refus);
+        dbManager.updatePower(authorId, param.Pricing.divorce.refus, guildId);
         dbManager.updatePowerByBadgeId(
           5,
-          param.Pricing.divorce.refus * param.Pricing.divorce.fees
+          param.Pricing.divorce.refus * param.Pricing.divorce.fees,
+          guildId
         );
         await interaction.editReply({
           content: `La demande de divorce a été refusée. coût : ${
@@ -129,7 +130,7 @@ module.exports = {
 
     collector.on("end", (collected) => {
       if (collected.size === 0) {
-        dbManager.updatePower(authorId, param.Pricing.divorce.refus);
+        dbManager.updatePower(authorId, param.Pricing.divorce.refus, guildId);
         interaction.editReply({
           content: `La demande de divorce a expiré. coût : ${
             param.Pricing.divorce.refus

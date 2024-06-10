@@ -139,7 +139,8 @@ module.exports = {
         const multiplier = [1.2, 1.9, 3, 5, 10][shots - 1];
         const powerGain = Math.floor(bet * multiplier);
         console.log(powerGain);
-        await db.updatePower(userId, powerGain);
+        const guildId = interaction.guild.id;
+        await db.updatePower(userId, powerGain, guildId);
         const successEmbed = new EmbedBuilder()
           .setTitle("Roulette Russe - Victoire")
           .setColor(color.pink)
@@ -156,7 +157,8 @@ module.exports = {
         await i.update({ embeds: [successEmbed], components: [] });
       } else {
         const powerLoss = Math.floor(userPower.power * 0.05) + bet;
-        await db.updatePower(userId, -powerLoss);
+        const guildId = interaction.guild.id;
+        await db.updatePower(userId, -powerLoss, guildId);
         const member = await interaction.guild.members.fetch(userId);
         await member.timeout(30 * 60 * 1000, "Perdu à la roulette russe");
         const failEmbed = new EmbedBuilder()

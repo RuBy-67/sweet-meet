@@ -26,6 +26,7 @@ module.exports = {
     },
   ],
   run: async (client, interaction, args) => {
+    const guildId = interaction.guild.id;
     if (config.maintenance) {
       const embed = new EmbedBuilder()
         .setTitle("⚒️ Maintenance ⚒️")
@@ -136,7 +137,8 @@ module.exports = {
         dbManager.updateBadge(authorId, "love");
         dbManager.updatePowerByBadgeId(
           5,
-          param.Pricing.marriage.accepter * param.Pricing.marriage.fees
+          param.Pricing.marriage.accepter * param.Pricing.marriage.fees,
+          guildId
         );
 
         await interaction.editReply({
@@ -145,11 +147,12 @@ module.exports = {
           components: [],
         });
       } else if (interaction.customId === "refuser") {
-        dbManager.updatePower(authorId, param.Pricing.marriage.refuse);
+        dbManager.updatePower(authorId, param.Pricing.marriage.refuse, guildId);
         dbManager.updatePowerByBadgeId(
           5,
           (param.Pricing.marriage.accepter - param.Pricing.marriage.refuse) *
-            param.Pricing.marriage.fees
+            param.Pricing.marriage.fees,
+          guildId
         );
         await interaction.editReply({
           content: `La demande en mariage de <@${authorId}> à <@${targetId}> a été refusée, ${
@@ -167,7 +170,8 @@ module.exports = {
         dbManager.updatePowerByBadgeId(
           5,
           (param.Pricing.marriage.accepter - param.Pricing.marriage.expire) *
-            param.Pricing.marriage.fees
+            param.Pricing.marriage.fees,
+          guildId
         );
         interaction.editReply({
           content: `La demande en mariage a expiré car <@${targetId}> n'a pas répondu dans le temps imparti, ${

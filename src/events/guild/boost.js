@@ -19,7 +19,7 @@ module.exports = {
           const userId = member.user.id;
           const powerToAdd = 50000;
 
-          await db.updatePower(userId, powerToAdd);
+          await db.updatePower(userId, powerToAdd, newGuild.id);
           await member.send(
             `Merci pour votre boost! Vous avez reçu ${powerToAdd} Fragments de Protection`
           );

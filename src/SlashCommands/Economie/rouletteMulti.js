@@ -89,7 +89,8 @@ module.exports = {
     for (const member of losers) {
       const userPower = await db.getStats(member.id);
       const powerLoss = Math.floor(userPower.power * 0.05);
-      await db.updatePower(member.id, -powerLoss);
+      const guildId = interaction.guild.id;
+      await db.updatePower(member.id, -powerLoss, guildId);
       try {
         await member.timeout(30 * 60 * 1000, "Perdu à la roulette russe");
       } catch (error) {

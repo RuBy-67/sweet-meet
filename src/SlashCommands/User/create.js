@@ -27,36 +27,42 @@ module.exports = {
     let i = 0;
     // Get all members of the server
     const members = await interaction.guild.members.fetch();
+    const guild = interaction.guild;
 
     // Loop through all members and create an account for them if they are not bots
     for (const member of members.values()) {
       if (!member.user.bot) {
         const result = await connection
           .promise()
-          .query("SELECT * FROM user WHERE discordId = ?", [member.id]);
+          .query("SELECT * FROM user WHERE guildId = ? AND discordId = ?", [
+            guild.id,
+            member.id,
+          ]);
 
         if (result[0].length === 0) {
           // User does not exist in the database, create an account for them
+
           await connection
             .promise()
             .query(
-              "INSERT INTO user (discordId, power, winCounter, loseCounter) VALUES (?, 5000, 0, 0)",
-              [member.id]
+              "INSERT INTO user (discordId, power, winCounter, loseCounter, guildId) VALUES (?, 5000, 0, 0,?)",
+              [member.id, guild.id]
             );
 
           // Insert the 'first-arrival' badge into the user's badge collection
           await connection
             .promise()
-            .query("INSERT INTO badge_user (idUser, idBadge) VALUES (?, 1)", [
-              member.id,
-            ]);
+            .query(
+              "INSERT INTO badge_user (idUser, idBadge, guildId) VALUES (?, 1, ?)",
+              [member.id, , guild.id]
+            );
           if (bonus[member.id]) {
             // Insert the badge corresponding to the user's ID from userBonus.json
             await connection
               .promise()
               .query(
-                "INSERT INTO badge_user (idUser, idBadge) VALUES (?, 13)",
-                [member.id]
+                "INSERT INTO badge_user (idUser, idBadge, guildId) VALUES (?, 13,?)",
+                [member.id, guild.id]
               );
             await connection
               .promise()
@@ -83,7 +89,7 @@ module.exports = {
       .setTitle("Accounts Created")
       .setColor(color.pink)
       .setDescription(
-        `Les comptes ont été créés et les badges donnés à ${i} membres. 20 000 Fragments ont été crédités à chaque membre.`
+        `Les comptes ont été créés et les badges donnés à ${i} membres. des Fragments ont été crédités à chaque membre.`
       )
       .setFooter({
         text: `Demandé par :  ${interaction.user.tag}`,

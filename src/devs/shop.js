@@ -188,6 +188,7 @@ async function closeShop(client, shopMessage) {
 }
 ///-----------------------///
 async function randomLootBox(client, interaction, ...materialIds) {
+  const guildId = interaction.guild.id;
   function emoji(id) {
     return (
       client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
@@ -210,9 +211,9 @@ async function randomLootBox(client, interaction, ...materialIds) {
     const [selectedItem] = await dbManager.getDataMateriauById(materialId);
     message += `- ${emoji(emo[selectedItem.nom])} **${selectedItem.nom}** \n`;
 
-    await dbManager.addMaterialToUser(interaction.user.id, materialId);
+    await dbManager.addMaterialToUser(interaction.user.id, materialId, guildId);
   }
-  await dbManager.updatePower(interaction.user.id, -totalPrice);
+  await dbManager.updatePower(interaction.user.id, -totalPrice, guildId);
 
   await interaction.reply({
     content: message,
@@ -248,8 +249,9 @@ async function daysBox(client, interaction, power, materialId) {
     });
   }
   let message = "Vous avez obtenu les récompenses suivantes :\n>>> ";
+  const guildId = interaction.guild.id;
   if (materialId != null) {
-    await dbManager.addMaterialToUser(interaction.user.id, materialId);
+    await dbManager.addMaterialToUser(interaction.user.id, materialId, guildId);
     const [selectedItem] = await dbManager.getDataMateriauById(materialId);
     message += `- ${emoji(emo[selectedItem.nom])} **${
       selectedItem.nom
@@ -257,9 +259,11 @@ async function daysBox(client, interaction, power, materialId) {
   } else {
     message += `- **${power}** ${emoji(emo.power)}\n`;
   }
+
   await dbManager.updatePower(
     interaction.user.id,
-    power - param.boutique.achat.prix.LootBox
+    power - param.boutique.achat.prix.LootBox,
+    guildId
   );
 
   await interaction.reply({
@@ -271,6 +275,7 @@ async function daysBox(client, interaction, power, materialId) {
 ///-----------------------///
 
 async function buyMaterial(client, interaction, materialId, level) {
+  const guildId = interaction.guild.id;
   function emoji(id) {
     return (
       client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
@@ -290,11 +295,12 @@ async function buyMaterial(client, interaction, materialId, level) {
       ephemeral: true,
     });
   } else {
-    await dbManager.updatePower(interaction.user.id, -prix);
+    await dbManager.updatePower(interaction.user.id, -prix, guildId);
     await dbManager.addMaterialToUser(
       interaction.user.id,
       materialId,
-      level - 1
+      level - 1,
+      guildId
     );
     await interaction.reply({
       content: `Vous avez acheté le matériau **${m.nom}** (lvl : ${
@@ -305,6 +311,7 @@ async function buyMaterial(client, interaction, materialId, level) {
   }
 }
 async function buyRole(client, interaction, userId, roleId) {
+  const guildId = interaction.guild.id;
   function emoji(id) {
     return (
       client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
@@ -332,8 +339,8 @@ async function buyRole(client, interaction, userId, roleId) {
   } else {
     const prix = param.boutique.achat.prix.role[roleId];
     const member = await interaction.guild.members.fetch(interaction.user.id);
-    await dbManager.updatePower(interaction.user.id, -prix);
-    await dbManager.addRoleToUser(interaction.user.id, roleId);
+    await dbManager.updatePower(interaction.user.id, -prix, guildId);
+    await dbManager.addRoleToUser(interaction.user.id, roleId, guildId);
     await member.roles.add(roleId);
 
     await interaction.reply({
