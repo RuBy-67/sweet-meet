@@ -91,7 +91,7 @@ module.exports = {
     const type = interaction.options.getString("type");
     const target = interaction.options.getMember("membre");
     const utilisateur = await client.users.fetch(target.user.id);
-    const valeur = interaction.options.getInteger("valeur") || 0;
+    const valeur = interaction.options.getInteger("nombre") || 0;
     const materials = await dbManager.getMateriau();
     const badges = await dbManager.getBadgeNoL();
 
