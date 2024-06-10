@@ -16,7 +16,7 @@ module.exports = {
       );
     }
     const embed = new EmbedBuilder()
-      .setTitle("Info Bot SweetMeet")
+      .setTitle("Info Bot ")
       .setColor(color.pink) // Code couleur pour rose
       .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
       .setDescription(
