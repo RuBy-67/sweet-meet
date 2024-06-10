@@ -9,7 +9,7 @@ const color = require(`../../jsons/color.json`);
 const dbManager = require("../../class/dbManager");
 const db = new dbManager();
 const param = require("../../jsons/param.json");
-const config = require("../../config.json");
+const config = require("../../jsons/config.json");
 
 module.exports = {
   name: "roulette",

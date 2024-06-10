@@ -1,4 +1,5 @@
 const divertissementCommands = require("../../devs/command");
+const config = require("../../jsons/config.json");
 
 module.exports = {
   name: "divertissement",

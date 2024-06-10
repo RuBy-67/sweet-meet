@@ -4,7 +4,8 @@
   "description": "BOT",
   "main": "index.js",
   "scripts": {
-    "test": "/test"
+    "test": "/test",
+    "start": "node index.js"
   },
   "keywords": [
     "sondage"

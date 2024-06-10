@@ -11,7 +11,7 @@ const DatabaseManager = require("../../class/dbManager");
 const dbManager = new DatabaseManager();
 const Cooldown = require("../../class/cooldown");
 const cooldown = new Cooldown();
-const config = require("../../config.json");
+const config = require("../../jsons/config.json");
 
 module.exports = {
   name: "mariage",

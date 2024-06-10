@@ -10,7 +10,7 @@ const DatabaseManager = require("../../class/dbManager");
 const dbManager = new DatabaseManager();
 const Player = require("../../class/player");
 const player = new Player();
-const config = require("../../config.json");
+const config = require("../../jsons/config.json");
 
 module.exports = {
   name: "profil",

@@ -8,7 +8,7 @@ const Player = require("../../class/player");
 const player = new Player();
 const Cooldown = require("../../class/cooldown");
 const cooldown = new Cooldown();
-const config = require("../../config.json");
+const config = require("../../jsons/config.json");
 
 module.exports = {
   name: "freedaylibox",

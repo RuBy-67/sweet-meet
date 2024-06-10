@@ -9,7 +9,7 @@ const color = require(`../../jsons/color.json`);
 const param = require(`../../jsons/param.json`);
 const DatabaseManager = require("../../class/dbManager");
 const dbManager = new DatabaseManager();
-const config = require("../../config.json");
+const config = require("../../jsons/config.json");
 
 module.exports = {
   name: "divorce",

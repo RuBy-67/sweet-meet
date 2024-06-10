@@ -11,7 +11,7 @@ const DatabaseManager = require("../../class/dbManager");
 const dbManager = new DatabaseManager();
 const player = new Player();
 const params = require("../../jsons/param.json");
-const config = require("../../config.json");
+const config = require("../../jsons/config.json");
 
 module.exports = {
   name: "upgrade",

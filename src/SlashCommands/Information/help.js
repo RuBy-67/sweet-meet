@@ -9,7 +9,7 @@ const color = require("../../jsons/color.json");
 const DatabaseManager = require("../../class/dbManager");
 const dbManager = new DatabaseManager();
 const commands = require("../../devs/command");
-const config = require("../../config.json");
+const config = require("../../jsons/config.json");
 
 const commandNames = Object.keys(commands).map(
   (key) => "`[" + commands[key].name + "]`, "

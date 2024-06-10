@@ -3,7 +3,7 @@ const emo = require(`../../jsons/emoji.json`);
 const color = require(`../../jsons/color.json`);
 const DatabaseManager = require("../../class/dbManager");
 const dbManager = new DatabaseManager();
-const config = require("../../config.json");
+const config = require("../../jsons/config.json");
 
 module.exports = {
   name: "classement",
