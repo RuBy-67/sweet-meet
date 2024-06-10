@@ -9,6 +9,7 @@ module.exports = {
   async execute(client, oldState, newState) {
     const userId = newState.id;
     const currentTime = Date.now();
+    if (param.maintenance) return;
     // Handle user joining a voice channel
     if (!oldState.channelId && newState.channelId) {
       userVoiceTimes.set(userId, { joinTime: currentTime, totalTime: 0 });

@@ -2,12 +2,14 @@ const { Events } = require("discord.js");
 const DatabaseManager = require("../../class/dbManager");
 const db = new DatabaseManager();
 const userLastMessage = new Map();
+const config = require("../../jsons/config.json");
 
 module.exports = {
   name: Events.MessageCreate,
   async execute(client, message) {
     // Ignore bot messages
     if (message.author.bot) return;
+    if (config.maintenance) return;
 
     const userId = message.author.id;
     const currentTime = Date.now();
