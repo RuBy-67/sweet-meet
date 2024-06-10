@@ -9,6 +9,7 @@ const color = require("../../jsons/color.json");
 const DatabaseManager = require("../../class/dbManager");
 const dbManager = new DatabaseManager();
 const commands = require("../../devs/command");
+const config = require("../../config.json");
 
 const commandNames = Object.keys(commands).map(
   (key) => "`[" + commands[key].name + "]`, "
@@ -20,6 +21,16 @@ module.exports = {
   description: "help command",
   options: null,
   run: async (client, interaction, args) => {
+    if (config.maintenance) {
+      const embed = new EmbedBuilder()
+        .setTitle("⚒️ Maintenance ⚒️")
+        .setColor(color.error)
+        .setDescription(
+          `> Le bot est actuellement en maintenance, veuillez réessayer plus tard.`
+        )
+        .setColor(color.error);
+      return interaction.reply({ embeds: [embed] });
+    }
     function emoji(id) {
       return (
         client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||

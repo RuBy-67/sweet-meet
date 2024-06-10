@@ -8,12 +8,23 @@ const Player = require("../../class/player");
 const player = new Player();
 const Cooldown = require("../../class/cooldown");
 const cooldown = new Cooldown();
+const config = require("../../config.json");
 
 module.exports = {
   name: "freedaylibox",
   description: "Réclamez votre free daily box",
   options: null,
   run: async (client, interaction, args) => {
+    if (config.maintenance) {
+      const embed = new EmbedBuilder()
+        .setTitle("⚒️ Maintenance ⚒️")
+        .setColor(color.error)
+        .setDescription(
+          `> Le bot est actuellement en maintenance, veuillez réessayer plus tard.`
+        )
+        .setColor(color.error);
+      return interaction.reply({ embeds: [embed] });
+    }
     const commandName = "freedaylibox";
     const cooldownDuration = param.cooldownBox;
     const cooldownInfo = await cooldown.handleCooldown(

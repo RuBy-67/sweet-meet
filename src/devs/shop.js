@@ -19,6 +19,9 @@ const Cooldown = require("../class/cooldown");
 const cooldown = new Cooldown();
 
 async function openShop(client, shopMessage) {
+  if (config.maintenance) {
+    return;
+  }
   let dayBox = "";
   const { dayMaterial, dayPower } = await player.dayliBox();
   if (dayMaterial != null) {

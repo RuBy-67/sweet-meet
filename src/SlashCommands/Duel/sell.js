@@ -13,12 +13,23 @@ const DatabaseManager = require("../../class/dbManager");
 const { getMaterialsById } = require("../../class/sqlQueriesPlayer");
 const dbManager = new DatabaseManager();
 const player = new Player();
+const config = require("../../jsons/config.json");
 
 module.exports = {
   name: "sell",
   description: "Vendre un objet dans la boutique",
   options: null,
   run: async (client, interaction, args) => {
+    if (config.maintenance) {
+      const embed = new EmbedBuilder()
+        .setTitle("⚒️ Maintenance ⚒️")
+        .setColor(color.error)
+        .setDescription(
+          `> Le bot est actuellement en maintenance, veuillez réessayer plus tard.`
+        )
+        .setColor(color.error);
+      return interaction.reply({ embeds: [embed] });
+    }
     function emoji(id) {
       return (
         client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||

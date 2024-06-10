@@ -1,12 +1,23 @@
 const { EmbedBuilder } = require("discord.js");
 const emo = require(`../../jsons/emoji.json`);
 const color = require(`../../jsons/color.json`);
+const config = require("../../config.json");
 
 module.exports = {
   name: "social",
   description: "Social link of my queen (devs)",
   options: null,
   run: async (client, interaction, args) => {
+    if (config.maintenance) {
+      const embed = new EmbedBuilder()
+        .setTitle("⚒️ Maintenance ⚒️")
+        .setColor(color.error)
+        .setDescription(
+          `> Le bot est actuellement en maintenance, veuillez réessayer plus tard.`
+        )
+        .setColor(color.error);
+      return interaction.reply({ embeds: [embed] });
+    }
     function emoji(id) {
       return (
         client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||

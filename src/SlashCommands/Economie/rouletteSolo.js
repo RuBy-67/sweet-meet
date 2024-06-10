@@ -9,6 +9,7 @@ const color = require(`../../jsons/color.json`);
 const dbManager = require("../../class/dbManager");
 const db = new dbManager();
 const param = require("../../jsons/param.json");
+const config = require("../../config.json");
 
 module.exports = {
   name: "roulette",
@@ -22,6 +23,16 @@ module.exports = {
     },
   ],
   run: async (client, interaction, args) => {
+    if (config.maintenance) {
+      const embed = new EmbedBuilder()
+        .setTitle("⚒️ Maintenance ⚒️")
+        .setColor(color.error)
+        .setDescription(
+          `> Le bot est actuellement en maintenance, veuillez réessayer plus tard.`
+        )
+        .setColor(color.error);
+      return interaction.reply({ embeds: [embed] });
+    }
     const commandName = "roulette";
     const cooldownDuration = param.cooldownroulette;
     const cooldownInfo = await cooldown.handleCooldown(
