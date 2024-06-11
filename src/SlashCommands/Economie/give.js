@@ -196,6 +196,7 @@ module.exports = {
         } else if (i.customId === "badge_UnSelect") {
           const selectedMaterials = i.values;
           const selectedMaterialId = selectedMaterials[0];
+          console.log(selectedMaterialId);
           const badge = await dbManager.getBadgeById(selectedMaterialId);
           if (badge.length === 0) {
             await i.update({
