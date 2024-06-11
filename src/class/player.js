@@ -429,9 +429,9 @@ class Player extends DatabaseManager {
     let rarityWeights;
 
     const probabilities = {
-      freeDayli: 0.5, // 50% de chances de ne pas obtenir de matériau
+      freeDayli: 0.85, // 85% de chances de ne pas obtenir de matériau
       random: 0, // 0% de chances de ne pas obtenir de matériau
-      dayli: 0.2, // 20% de chances de ne pas obtenir de matériau
+      dayli: 0.4, // 40% de chances de ne pas obtenir de matériau
     };
 
     const randomValue = Math.random();
