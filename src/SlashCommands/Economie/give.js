@@ -52,16 +52,6 @@ module.exports = {
     },
   ],
   run: async (client, interaction, args) => {
-    if (config.maintenance) {
-      const embed = new EmbedBuilder()
-        .setTitle("⚒️ Maintenance ⚒️")
-        .setColor(color.error)
-        .setDescription(
-          `> Le bot est actuellement en maintenance, veuillez réessayer plus tard.`
-        )
-        .setColor(color.error);
-      return interaction.reply({ embeds: [embed] });
-    }
     function emoji(id) {
       return (
         client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
