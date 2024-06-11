@@ -206,7 +206,6 @@ module.exports = {
         } else if (i.customId === "badge_UnSelect") {
           const selectedMaterials = i.values;
           const selectedMaterialId = selectedMaterials[0];
-          //appartient à qq ? si oui, retirer si non erreur
           const badge = await dbManager.getBadgeById(selectedMaterialId);
           if (badge.length === 0) {
             await i.update({
@@ -214,7 +213,7 @@ module.exports = {
             });
             return;
           } else {
-            await dbManager.removeBadgeById(utilisateur.id, selectedMaterialId);
+            await dbManager.removeBadgeById(selectedMaterialId);
             await i.update({
               content: `Vous avez retiré le badge à un user.`,
             });
