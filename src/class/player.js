@@ -14,16 +14,12 @@ class Player extends DatabaseManager {
   }
 
   async userExists(userId) {
-    const [result] = await this.connection
-      .promise()
-      .query(sqlQueries.userExists, [userId]);
+    const [result] = await pool.query(sqlQueries.userExists, [userId]);
     return result;
   }
 
   async getStatsById(userId) {
-    const [result] = await this.connection
-      .promise()
-      .query(sqlQueries.getUserPower, [userId]);
+    const [result] = await pool.query(sqlQueries.getUserPower, [userId]);
     if (!result[0]) {
       throw new Error(`User with discordId ${userId} not found`);
     }
@@ -117,18 +113,12 @@ class Player extends DatabaseManager {
   }
 
   async fightBattle(userId, opponentId) {
-    await this.connection.promise().query(sqlQueries.insertDuel);
-    const [rows] = await this.connection
-      .promise()
-      .query(sqlQueries.getLastInsertId);
+    await pool.query(sqlQueries.insertDuel);
+    const [rows] = await pool.query(sqlQueries.getLastInsertId);
     const duelId = rows[0].duel_id;
 
-    await this.connection
-      .promise()
-      .query(sqlQueries.insertDuelDetails, [duelId, userId]);
-    await this.connection
-      .promise()
-      .query(sqlQueries.insertDuelDetails, [duelId, opponentId]);
+    await pool.query(sqlQueries.insertDuelDetails, [duelId, userId]);
+    await pool.query(sqlQueries.insertDuelDetails, [duelId, opponentId]);
 
     const { playerScore, opponentScore } = await this.calculateFightScoreBattle(
       userId,
@@ -147,37 +137,25 @@ class Player extends DatabaseManager {
       opponentId
     );
     if (winner === null) {
-      await this.connection
-        .promise()
-        .query(sqlQueries.updateDuelDetailsDraw, [duelId]);
+      await pool.query(sqlQueries.updateDuelDetailsDraw, [duelId]);
     } else if (winner === userId) {
-      await this.connection
-        .promise()
-        .query(sqlQueries.updateDuelDetailsWin, [1, userId, duelId]);
-      await this.connection
-        .promise()
-        .query(sqlQueries.updateUserWinCounter, [userId]);
-      await this.connection
-        .promise()
-        .query(sqlQueries.updateUserLoseCounter, [opponentId]);
+      await pool.query(sqlQueries.updateDuelDetailsWin, [1, userId, duelId]);
+      await pool.query(sqlQueries.updateUserWinCounter, [userId]);
+      await pool.query(sqlQueries.updateUserLoseCounter, [opponentId]);
     } else if (winner === opponentId) {
-      await this.connection
-        .promise()
-        .query(sqlQueries.updateDuelDetailsWin, [1, opponentId, duelId]);
-      await this.connection
-        .promise()
-        .query(sqlQueries.updateUserWinCounter, [opponentId]);
-      await this.connection
-        .promise()
-        .query(sqlQueries.updateUserLoseCounter, [userId]);
+      await pool.query(sqlQueries.updateDuelDetailsWin, [
+        1,
+        opponentId,
+        duelId,
+      ]);
+      await pool.query(sqlQueries.updateUserWinCounter, [opponentId]);
+      await pool.query(sqlQueries.updateUserLoseCounter, [userId]);
     }
     return [winner, duelId];
   }
 
   async getMateriaux(userId) {
-    const [result] = await this.connection
-      .promise()
-      .query(sqlQueries.getMateriaux, [userId]);
+    const [result] = await pool.query(sqlQueries.getMateriaux, [userId]);
     if (result.length === 0) {
       this.materiaux = [];
     } else {
@@ -220,9 +198,7 @@ class Player extends DatabaseManager {
   }
 
   async getMaterialsById(userId, duelId) {
-    const [result] = await this.connection
-      .promise()
-      .query(sqlQueries.getMaterialsById, [userId]);
+    const [result] = await pool.query(sqlQueries.getMaterialsById, [userId]);
 
     if (duelId !== null) {
       const materialIds = result.map((material) => material.id);
@@ -281,24 +257,22 @@ class Player extends DatabaseManager {
   }
 
   async getMaterialsByIdEtat0(userId) {
-    const [result] = await this.connection
-      .promise()
-      .query(sqlQueries.getMaterialsByIdEtat0, [userId]);
+    const [result] = await pool.query(sqlQueries.getMaterialsByIdEtat0, [
+      userId,
+    ]);
     return result || [];
   }
 
   async insertMaterialsIntoDuelDetail(duelId, userId, materialIds) {
     const [materialId1, materialId2, materialId3, materialId4] = materialIds;
-    await this.connection
-      .promise()
-      .query(sqlQueries.insertMaterialsIntoDuelDetail, [
-        materialId1,
-        materialId2,
-        materialId3,
-        materialId4,
-        duelId,
-        userId,
-      ]);
+    await pool.query(sqlQueries.insertMaterialsIntoDuelDetail, [
+      materialId1,
+      materialId2,
+      materialId3,
+      materialId4,
+      duelId,
+      userId,
+    ]);
   }
   async getRandomMessage(stage) {
     const messages = duelMessages.duelMessages[stage];

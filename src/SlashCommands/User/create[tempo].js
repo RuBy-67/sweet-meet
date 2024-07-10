@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const emo = require(`../../jsons/emoji.json`);
 const color = require(`../../jsons/color.json`);
-const { connection } = require("../../db");
+const { pool } = require("../../db");
 
 module.exports = {
   name: "create-accounts",
@@ -28,18 +28,17 @@ module.exports = {
     // Loop through all members and create an account for them if they are not bots
     for (const member of members.values()) {
       if (!member.user.bot) {
-        const result = await connection
-          .promise()
-          .query("SELECT * FROM user WHERE discordId = ?", [member.id]);
+        const [result] = await pool.execute(
+          "SELECT * FROM user WHERE discordId = ?",
+          [member.id]
+        );
 
-        if (result[0].length === 0) {
+        if (result.length === 0) {
           // User does not exist in the database, create an account for them
-          await connection
-            .promise()
-            .query(
-              "INSERT INTO user (discordId, power, winCounter, loseCounter) VALUES (?, 5000, 0, 0)",
-              [member.id]
-            );
+          await pool.execute(
+            "INSERT INTO user (discordId, power, winCounter, loseCounter) VALUES (?, 5000, 0, 0)",
+            [member.id]
+          );
 
           console.log(`Account created for user ${member.user.tag}`);
           i++;
