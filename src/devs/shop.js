@@ -291,15 +291,12 @@ async function buyMaterial(client, interaction, materialId, level) {
     });
   } else {
     await dbManager.updatePower(interaction.user.id, -prix);
-    await dbManager.addMaterialToUser(
-      interaction.user.id,
-      materialId,
-      level - 1
-    );
+    level = Math.min(Math.max(level, 1), 5);
+    await dbManager.addMaterialToUser(interaction.user.id, materialId, level);
     await interaction.reply({
-      content: `Vous avez acheté le matériau **${m.nom}** (lvl : ${
-        level - 1
-      }),prix: ${prix} ${emoji(emo.power)}`,
+      content: `Vous avez acheté le matériau **${
+        m.nom
+      }** (lvl : ${level}),prix: ${prix} ${emoji(emo.power)}`,
       ephemeral: true,
     });
   }

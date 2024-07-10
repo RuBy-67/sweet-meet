@@ -1,14 +1,11 @@
-/// Take all users from the server and create an account for them in the database + bonus power-up + "first-arrival" profile badge
 const { EmbedBuilder } = require("discord.js");
 const emo = require(`../../jsons/emoji.json`);
 const color = require(`../../jsons/color.json`);
 const { connection } = require("../../db");
-const bonus = require("../../jsons/userBonus.json");
 
 module.exports = {
   name: "create-accounts",
-  description:
-    "Créer un compte et donne le rôle first Arrival à tous les membres du serveur.",
+  description: "Créer un compte pour tous les membres du serveur.",
   options: null,
   run: async (client, interaction, args) => {
     // Check if user have the permission to use this command
@@ -44,33 +41,6 @@ module.exports = {
               [member.id]
             );
 
-          // Insert the 'first-arrival' badge into the user's badge collection
-          await connection
-            .promise()
-            .query("INSERT INTO badge_user (idUser, idBadge) VALUES (?, 1)", [
-              member.id,
-            ]);
-          if (bonus[member.id]) {
-            // Insert the badge corresponding to the user's ID from userBonus.json
-            await connection
-              .promise()
-              .query(
-                "INSERT INTO badge_user (idUser, idBadge) VALUES (?, 13)",
-                [member.id]
-              );
-            await connection
-              .promise()
-              .query(
-                `UPDATE user SET power = power + ${
-                  bonus[member.id]
-                }  WHERE discordId = ?`,
-                [member.id]
-              );
-            console.log(
-              `Badge TESTER AND power Bonus applied to user ${member.user.tag}`
-            );
-          }
-
           console.log(`Account created for user ${member.user.tag}`);
           i++;
         } else {
@@ -83,7 +53,7 @@ module.exports = {
       .setTitle("Accounts Created")
       .setColor(color.pink)
       .setDescription(
-        `Les comptes ont été créés et les badges donnés à ${i} membres. 20 000 Fragments ont été crédités à chaque membre.`
+        `Les comptes ont été créés pour ${i} membres. avec 5000 Fragments. `
       )
       .setFooter({
         text: `Demandé par :  ${interaction.user.tag}`,

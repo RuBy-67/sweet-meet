@@ -112,7 +112,7 @@ module.exports = {
               0.6
           );
           await dbManager.removeMaterialFromUser(idUnique);
-          await dbManager.updatePower(i.user.id, -prix);
+          await dbManager.updatePower(i.user.id, prix);
           await interaction.update({
             content: `La vente de **${
               selectedMaterial.nom
