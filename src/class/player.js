@@ -1,17 +1,16 @@
 const param = require("../jsons/param.json");
 const DatabaseManager = require("./dbManager");
 const sqlQueries = require("./sqlQueriesPlayer");
-const { connection, connectionBo, connectionCampagne } = require("../db");
+const { pool, poolBo, poolCampagne } = require("../db");
 const duelMessages = require(`../jsons/gif.json`);
 const emo = require(`../jsons/emoji.json`);
 
 class Player extends DatabaseManager {
   constructor() {
-    super();
+    super(pool, poolBo);
     this.userId = null;
     this.stats = null;
     this.materiaux = null;
-    this.connection = connection;
   }
 
   async userExists(userId) {

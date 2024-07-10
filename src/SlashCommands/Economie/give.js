@@ -205,7 +205,6 @@ module.exports = {
             return;
           } else {
             await dbManager.removeBadgeById(selectedMaterialId);
-            console.log(dbManager.removeBadgeById(selectedMaterialId));
             await i.update({
               content: `Vous avez retiré le badge à un user.`,
             });

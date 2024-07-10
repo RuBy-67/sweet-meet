@@ -1,4 +1,4 @@
-const mysql = require("mysql2");
+const mysql = require("mysql2/promise");
 const {
   db_host,
   db_user,
@@ -10,38 +10,34 @@ const {
   db_user_campagne,
 } = require("./jsons/config.json");
 
-const connection = mysql.createConnection({
+const pool = mysql.createPool({
   host: db_host,
   user: db_user,
   password: db_password,
   database: db,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
 });
 
-const connectionBo = mysql.createConnection({
+const poolBo = mysql.createPool({
   host: db_host,
-  user: db_user_bo,
+  user: db_user,
   password: db_password,
   database: db_bo,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
 });
 
-/*const connectionCampagne = mysql.createConnection({
+/*const poolCampagne = mysql.createPool({
   host: db_host,
   user: db_user_campagne,
   password: db_password,
   database: db_campagne,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
 });*/
-connection.connect((err) => {
-  if (err) throw err;
-  console.log("Connected to the database: " + db);
-});
 
-/*connectionCampagne.connect((err) => {
-  if (err) throw err;
-  console.log("Connected to the database: " + db_bo);
-});*/
-connectionBo.connect((err) => {
-  if (err) throw err;
-  console.log("Connected to the database: " + db_bo);
-});
-
-module.exports = { connection, connectionBo /*connectionCampagne*/ };
+module.exports = { pool, poolBo /*poolCampagne*/ };
