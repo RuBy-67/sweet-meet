@@ -22,6 +22,12 @@ module.exports = {
       type: 3,
       required: true,
     },
+    {
+      name: "description",
+      description: "blablabla",
+      type: 3,
+      required: true,
+    },
   ],
   run: async (client, interaction, args) => {
     const userId = interaction.user.id;
@@ -45,8 +51,9 @@ module.exports = {
     // Check if the user has the required role, is not in a guild, and guild limit is not reached
     const requiredRoleId = "1246944929675087914";
     const maxGuilds = 20;
-    const guildName = interaction.options.getString("guild_name");
-    const guildColorInput = interaction.options.getString("guild_color");
+    const guildName = interaction.options.getString("name");
+    const guildColorInput = interaction.options.getString("color");
+    const guildDescription = interaction.options.getString("description");
 
     try {
       const roles = await dbManager.getRoleByUserId(userId);
@@ -92,7 +99,12 @@ module.exports = {
 
       // Create the guild
       const guildColor = guildColorInput.toUpperCase();
-      await dbManager.createGuild(guildColor, guildName, userId);
+      await dbManager.createGuild(
+        guildColor,
+        guildName,
+        guildDescription,
+        userId
+      );
       await dbManager.updatePower(userId, -params.guildPrice);
 
       const embed = new EmbedBuilder()

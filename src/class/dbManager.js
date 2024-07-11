@@ -53,8 +53,13 @@ class DatabaseManager {
       return "#e08dac";
     }
   }
-  async createGuild(guildColor, guildName, userId) {
-    this.queryMain(SQL_QUERIES.CREATE_GUILD, [guildName, guildColor, userId]);
+  async createGuild(guildColor, guildName, guildDescription, userId) {
+    this.queryMain(SQL_QUERIES.CREATE_GUILD, [
+      guildName,
+      guildDescription,
+      guildColor,
+      userId,
+    ]);
   }
   async getGuild() {
     return this.queryMain(SQL_QUERIES.GET_GUILD);
