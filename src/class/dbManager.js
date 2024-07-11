@@ -140,6 +140,24 @@ class DatabaseManager {
 
   async deleteUserData(discordId) {
     await this.queryMain(SQL_QUERIES.DELETE_USER, [discordId]);
+
+    const guild = await this.getGuildByOwnerId(discordId);
+    if (guild) {
+      // Récupération des membres de la guilde
+      const guildMembers = await this.getGuildMembers(guild.id);
+
+      if (guildMembers.length > 0) {
+        // Sélection aléatoire d'un membre
+        const randomIndex = Math.floor(Math.random() * guildMembers.length);
+        const newEmperor = guildMembers[randomIndex];
+
+        // Attribution du rôle d'Empereur au membre sélectionné
+        await this.addRoleToUser(newEmperor.id, 1246944929675087914);
+      } else {
+        // Suppression de la guilde si elle ne contient plus de membres
+        await this.deleteGuildByOwnerId(discordId);
+      }
+    }
   }
   async removeMaterialFromUser(idUnique) {
     await this.queryMain(SQL_QUERIES.DELETE_MATERIAU_USER, [idUnique]);
@@ -221,6 +239,13 @@ class DatabaseManager {
     return this.queryMain(SQL_QUERIES.GET_ROLE_BY_USER_ID, [userId]);
   }
 
+  async getGuildByOwnerId(userId) {
+    return this.queryMain(SQL_QUERIES.GET_GUILD_BY_OWNER_ID, [userId]);
+  }
+  async getGuildMembers(guildId) {
+    return this.queryMain(SQL_QUERIES.GET_GUILD_MEMBERS, [guildId]);
+  }
+
   async getBadge(userId) {
     return this.queryMain(SQL_QUERIES.GET_BADGE, [userId]);
   }
@@ -255,7 +280,11 @@ class DatabaseManager {
     );
     return result[0];
   }
-
+  async deleteGuildByOwnerId(userId) {
+    guildId = await this.getGuildByOwnerId(userId);
+    await this.queryMain(SQL_QUERIES.DELETE_GUILD_BY_OWNER_ID, [userId]);
+    await this.queryMain(SQL_QUERIES.REMOVE_GUILD_ID_FROM_USER, [guildId]);
+  }
   async getRolesFromDB() {
     return this.queryMain(SQL_QUERIES.GET_ROLES);
   }

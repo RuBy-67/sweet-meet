@@ -4,30 +4,27 @@ const color = require(`../../jsons/color.json`);
 const config = require("../../jsons/config.json");
 const DatabaseManager = require("../../class/dbManager");
 const dbManager = new DatabaseManager();
+const params = require("../../jsons/param.json");
 
 module.exports = {
-  name: "createGuild",
-  description: "Create a guild",
+  name: "createguild",
+  description: "Créer une guilde : prix : " + params.guildPrice + " fragments",
   options: [
     {
       name: "name",
-      description: "Name of the guild",
+      description: "Nom de la Guilde",
       type: 3,
       required: true,
     },
     {
       name: "color",
-      description: "Banner color of the guild (hex code, e.g., #ff5733)",
+      description: "Couleurs de la guilde (hex code, e.g., #ff5733)",
       type: 3,
       required: true,
     },
   ],
   run: async (client, interaction, args) => {
     const userId = interaction.user.id;
-    const guildName = interaction.options.getString("name");
-    const guildColor = interaction.options.getString("color");
-
-    const colors = await dbManager.getColor(userId);
 
     if (config.maintenance) {
       const embed = new EmbedBuilder()
@@ -38,63 +35,101 @@ module.exports = {
         );
       return interaction.reply({ embeds: [embed] });
     }
-
     function emoji(id) {
       return (
         client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
         "Missing Emoji"
       );
     }
-    const roles = await dbManager.getRoleByUserId(userId);
 
+    // Check if the user has the required role, is not in a guild, and guild limit is not reached
     const requiredRoleId = "1246944929675087914";
-    const hasRequiredRole = roles.some(
-      (role) => role.idRole === requiredRoleId
-    );
+    const maxGuilds = 20;
+    const guildName = interaction.options.getString("guild_name");
+    const guildColorInput = interaction.options.getString("guild_color");
 
-    if (!hasRequiredRole) {
+    try {
+      const roles = await dbManager.getRoleByUserId(userId);
+      const hasRequiredRole = roles.some(
+        (role) => role.idRole === requiredRoleId
+      );
+      if (!hasRequiredRole) {
+        throw new Error(
+          "Vous n'avez pas le rôle requis pour créer une guilde."
+        );
+      }
+
+      // Vérifier si la couleur spécifiée est en format hexadécimal
+
+      if (!/^#[0-9A-F]{6}$/i.test(guildColorInput)) {
+        throw new Error(
+          "Le code couleur de la guilde doit être spécifié en format hexadécimal (par exemple, #ff5733)."
+        );
+      }
+
+      const userData = await dbManager.getStats(userId);
+      const userGuildId = userData.guildId;
+      if (userGuildId !== null) {
+        throw new Error(
+          "Vous êtes déjà associé à une guilde. Veuillez quitter votre guilde actuelle pour en créer une nouvelle."
+        );
+      }
+
+      const guilds = await dbManager.getGuild();
+      if (guilds.length >= maxGuilds) {
+        throw new Error(
+          "Le nombre maximum de guildes a été atteint. Veuillez supprimer une guilde pour en créer une nouvelle."
+        );
+      }
+      const guildPrice = params.guildPrice; // Récupérer le prix de création de guilde depuis les paramètres
+      const userFragments = userData.power;
+
+      if (userFragments < guildPrice) {
+        throw new Error(
+          "Vous n'avez pas suffisamment de fragments pour créer une guilde."
+        );
+      }
+
+      // Create the guild
+      const guildColor = guildColorInput.toUpperCase();
+      await dbManager.createGuild(guildColor, guildName, userId);
+      await dbManager.updatePower(userId, -params.guildPrice);
+
+      const embed = new EmbedBuilder()
+        .setTitle("Guilde créée")
+        .setColor(guildColor)
+        .setDescription(
+          `Votre guilde "${guildName}" a été créée avec succès ! et 40000 ${emoji(
+            emo.power
+          )} attribué à la guilde`
+        )
+        .setFooter({
+          text: `Demandé(e) par ${interaction.user.tag}`,
+          iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+        });
+
+      return interaction.reply({ embeds: [embed] });
+    } catch (error) {
+      // Handle errors
       const embed = new EmbedBuilder()
         .setTitle("⚠️ Accès Refusé ⚠️")
         .setColor(color.error)
         .setDescription(
-          `> Vous n'avez pas le rôle requis pour créer une guilde.\n` +
-            `Veuillez acheter le rôle nécessaire dans la boutique pour pouvoir créer une guilde.`
+          `> ${error.message}\n\n` +
+            `Veuillez vérifier les conditions pour pouvoir créer une guilde:\n` +
+            `- Avoir le rôle nécessaire (${requiredRoleId})\n` +
+            `- Moins de ${maxGuilds} guildes au total\n` +
+            `- Ne pas être déjà dans une guilde\n` +
+            `- Avoir suffisamment de fragments (${params.guildPrice} ${emoji(
+              emo.power
+            )}  requis)`
         )
         .setFooter({
           text: `Demandé(e) par ${interaction.user.tag}`,
           iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
         });
+
       return interaction.reply({ embeds: [embed] });
     }
-
-    const maxGuilds = 20;
-    const guilds = await dbManager.getGuild();
-    if (guilds.length >= maxGuilds) {
-      const embed = new EmbedBuilder()
-        .setTitle("⚠️ Création de guilde impossible ⚠️")
-        .setColor(color.error)
-        .setDescription(
-          `> Le nombre maximum de guildes a été atteint. Veuillez supprimer une guilde pour en créer une nouvelle.`
-        )
-        .setFooter({
-          text: `Demandé(e) par ${interaction.user.tag}`,
-          iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
-        });
-      return interaction.reply({ embeds: [embed] });
-    }
-
-    /// create guild (insert into database)
-    await dbManager.createGuild(guildName, guildColor, userId);
-
-    const embed = new EmbedBuilder()
-      .setTitle("Guilde créée")
-      .setColor(guildColor)
-      .setDescription(`La guilde **${guildName}** a été créée avec succès !`)
-      .setFooter({
-        text: `Demandé(e) par ${interaction.user.tag}`,
-        iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
-      });
-
-    return interaction.reply({ embeds: [embed] });
   },
 };
