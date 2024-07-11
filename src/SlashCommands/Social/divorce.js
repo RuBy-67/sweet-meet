@@ -33,7 +33,7 @@ module.exports = {
       );
     }
     const authorId = interaction.user.id;
-
+    const colors = await dbManager.getColor(authorId);
     // Verify if the author has enough power to get
     const authorStats = await dbManager.getStats(authorId);
     if (authorStats.power < param.Pricing.divorce.prix) {
@@ -58,7 +58,7 @@ module.exports = {
     const temps = Math.floor(Date.now() / 1000) + 60;
     const embed = new EmbedBuilder()
       .setTitle(`Demande de divorce de ${interaction.user.username}`)
-      .setColor(color.pink)
+      .setColor(colors)
       .setDescription(
         `Voulez-vous vraiment divorcer ? Vous avez 60 secondes pour répondre.`
       )

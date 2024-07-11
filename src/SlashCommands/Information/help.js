@@ -37,11 +37,11 @@ module.exports = {
         "Missing Emoji"
       );
     }
-
+    const colors = await dbManager.getColor(interaction.user.id);
     const pages = [
       new EmbedBuilder()
         .setTitle("Help - Commande Basique")
-        .setColor(color.pink)
+        .setColor(colors)
         .setDescription("Commande Basique du bot")
         .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
         .addFields(
@@ -70,7 +70,7 @@ module.exports = {
         }),
       new EmbedBuilder()
         .setTitle("Help - Valoria")
-        .setColor(color.pink)
+        .setColor(color)
         .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
         .setDescription("Explication et commande concernant le lore de valoria")
         .addFields({
@@ -93,7 +93,7 @@ module.exports = {
 
       new EmbedBuilder()
         .setTitle("Help - Campagne solo 🚧🚧🚧")
-        .setColor(color.pink)
+        .setColor(colors)
         .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
         .setDescription(
           "Aucune campagne solo n'a encore été créée, revenez plus tard pour plus d'information."
@@ -104,7 +104,7 @@ module.exports = {
         }),
       new EmbedBuilder()
         .setTitle("Help - Royaume 🚧🚧🚧")
-        .setColor(color.pink)
+        .setColor(colors)
         .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
         .setDescription(
           "Aucun Royaume n'a encore été créé, revenez plus tard pour plus d'information."
@@ -124,7 +124,7 @@ module.exports = {
 
     const hiddenPage = new EmbedBuilder()
       .setTitle("Secret Page")
-      .setColor(color.pink)
+      .setColor(colors)
       .setDescription(
         "Ho t'a trouvé la page secrète ! claim ton cadeau 🧧 c'est une chance sur 1000 de tomber sur cette page, et te permet de claim entre 5000 et 15000 fragments !\nAinsi que d'obtenir un matériau legendaire parmis la liste suivante !"
       )

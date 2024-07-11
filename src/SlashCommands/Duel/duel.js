@@ -66,6 +66,7 @@ module.exports = {
     const userId = interaction.user.id;
     const userName = interaction.user.username;
     let paris = interaction.options.getInteger("paris");
+    const colors = await dbManager.getColor(userId);
     const userPower = await dbManager.getStats(userId);
     const adversaryPower = await dbManager.getStats(membre.id);
     if (userPower.power < paris) {
@@ -178,7 +179,7 @@ module.exports = {
         }
       )
       .setImage("https://media1.tenor.com/m/6QwxgzQLGKUAAAAC/battle.gif")
-      .setColor(color.pink);
+      .setColor(colors);
     const message = await interaction.reply({
       content: `Duel initié avec <@${
         membre.id
@@ -351,7 +352,7 @@ module.exports = {
                     }`,
                 }
               )
-              .setColor(color.pink)
+              .setColor(colors)
               .setFooter({
                 text: `Duel ID: ${duelId} | Demandé(e) par ${interaction.user.tag}`,
                 iconURL: interaction.user.displayAvatarURL({ dynamic: true }),

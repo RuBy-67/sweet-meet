@@ -25,10 +25,10 @@ module.exports = {
         "Missing Emoji"
       );
     }
-
+    const colors = await dbManager.getColor(interaction.user.id);
     const embed = new EmbedBuilder()
       .setTitle(`Classement des utilisateurs`)
-      .setColor(color.pink);
+      .setColor(colors);
 
     const top = 5;
 

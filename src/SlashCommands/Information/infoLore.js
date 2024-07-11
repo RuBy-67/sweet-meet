@@ -1,5 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const emo = require(`../../jsons/emoji.json`);
+const DatabaseManager = require("../../class/dbManager");
+const dbManager = new DatabaseManager();
 const color = require(`../../jsons/color.json`);
 const config = require("../../jsons/config.json");
 
@@ -24,9 +26,10 @@ module.exports = {
         "Missing Emoji"
       );
     }
+    const colors = await dbManager.getColor(interaction.user.id);
     const embed = new EmbedBuilder()
       .setTitle("InfoLore - Valoria")
-      .setColor(color.pink)
+      .setColor(colors)
       .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
       .setDescription()
       .addFields(

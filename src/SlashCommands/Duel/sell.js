@@ -26,23 +26,35 @@ module.exports = {
         .setColor(color.error)
         .setDescription(
           `> Le bot est actuellement en maintenance, veuillez réessayer plus tard.`
-        )
-        .setColor(color.error);
+        );
       return interaction.reply({ embeds: [embed] });
     }
+
     function emoji(id) {
       return (
         client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
         "Missing Emoji"
       );
     }
+
     const userMaterials = await dbManager.getMateriauByUserId(
       interaction.user.id
     );
-
+    const colors = await dbManager.getColor(interaction.user.id);
+    if (userMaterials.length === 0) {
+      const noMaterialsEmbed = new EmbedBuilder()
+        .setTitle("Boutique - Vente")
+        .setColor(color.error)
+        .setDescription("Vous ne possédez aucun matériau à vendre.")
+        .setFooter({
+          text: `Demandé(e) par ${interaction.user.tag}`,
+          iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+        });
+      return interaction.reply({ embeds: [noMaterialsEmbed] });
+    }
     const embed = new EmbedBuilder()
       .setTitle("Boutique - Vente")
-      .setColor(color.pink)
+      .setColor(colors)
       .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
       .setDescription("Choisissez un objet à vendre:")
       .setFooter({
@@ -78,12 +90,24 @@ module.exports = {
     });
 
     collector.on("collect", async (i) => {
-      const idUnique = i.values[0].split("_")[0];
-      const idMateriau = i.values[0].split("_")[1];
-      const level = i.values[0].split("_")[2];
+      collector.stop(); // Stop the collector once an item is selected
+
+      const [idUnique, idMateriau, level] = i.values[0].split("_");
       const [selectedMaterial] = await dbManager.getDataMateriauById(
         idMateriau
       );
+
+      const confirmationRow = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId("confirm")
+          .setLabel("Valider")
+          .setStyle(ButtonStyle.Success),
+        new ButtonBuilder()
+          .setCustomId("cancel")
+          .setLabel("Refuser")
+          .setStyle(ButtonStyle.Danger)
+      );
+
       await i.update({
         content: `Êtes-vous sûr de vendre **${
           selectedMaterial.nom
@@ -95,17 +119,21 @@ module.exports = {
         components: [confirmationRow],
         embeds: [],
       });
-      const filter = (interaction) =>
-        (interaction.user.id === i.user.id &&
-          interaction.customId === "confirm") ||
-        interaction.customId === "cancel";
-      const collector = interaction.channel.createMessageComponentCollector({
-        filter,
-        time: 60000,
-      });
 
-      collector.on("collect", async (interaction) => {
-        if (interaction.customId === "confirm") {
+      const confirmFilter = (btnInt) =>
+        btnInt.user.id === interaction.user.id &&
+        (btnInt.customId === "confirm" || btnInt.customId === "cancel");
+
+      const confirmationCollector =
+        interaction.channel.createMessageComponentCollector({
+          confirmFilter,
+          time: 30000, // Set a shorter time for the confirmation collector
+        });
+
+      confirmationCollector.on("collect", async (btnInt) => {
+        confirmationCollector.stop(); // Stop the collector once an action is performed
+
+        if (btnInt.customId === "confirm") {
           const prix = Math.floor(
             param.boutique.vente.prix.materiaux[selectedMaterial.rarete] *
               level *
@@ -121,7 +149,7 @@ module.exports = {
             embeds: [],
           });
         } else {
-          await interaction.update({
+          await btnInt.update({
             content: "Vente annulée.",
             components: [],
             embeds: [],
@@ -129,7 +157,7 @@ module.exports = {
         }
       });
 
-      collector.on("end", async (collected) => {
+      confirmationCollector.on("end", async (collected) => {
         if (collected.size === 0) {
           await i.update({
             content: "Temps écoulé, vente annulée.",
@@ -139,15 +167,15 @@ module.exports = {
         }
       });
     });
+
+    collector.on("end", async (collected) => {
+      if (collected.size === 0) {
+        await interaction.editReply({
+          content: "Temps écoulé, vente annulée.",
+          components: [],
+          embeds: [],
+        });
+      }
+    });
   },
 };
-const confirmationRow = new ActionRowBuilder().addComponents(
-  new ButtonBuilder()
-    .setCustomId("confirm")
-    .setLabel("Valider")
-    .setStyle(ButtonStyle.Success),
-  new ButtonBuilder()
-    .setCustomId("cancel")
-    .setLabel("Refuser")
-    .setStyle(ButtonStyle.Danger)
-);

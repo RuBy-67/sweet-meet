@@ -54,6 +54,7 @@ module.exports = {
     const target = interaction.options.getMember("membre");
     const targetUser = await client.users.fetch(target.user.id);
     const authorId = interaction.user.id;
+    const colors = await dbManager.getColor(authorId);
     const targetId = targetUser.id;
 
     // Verify if the author has enough power to get married
@@ -89,7 +90,7 @@ module.exports = {
       .setTitle(
         `Demande en mariage de ${interaction.user.username} à ${targetUser.username}`
       )
-      .setColor(color.pink)
+      .setColor(colors)
       .setDescription(
         `Un mariage coûte ${param.Pricing.marriage.accepter} ${emoji(
           emo.power

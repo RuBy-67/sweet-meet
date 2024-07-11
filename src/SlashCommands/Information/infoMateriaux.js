@@ -36,6 +36,7 @@ module.exports = {
     },
   ],
   run: async (client, interaction, args) => {
+    const colors = await dbManager.getColor(interaction.user.id);
     if (config.maintenance) {
       const embed = new EmbedBuilder()
         .setTitle("⚒️ Maintenance ⚒️")
@@ -85,7 +86,7 @@ module.exports = {
     const embeds = [];
     let currentEmbed = new EmbedBuilder()
       .setTitle(title)
-      .setColor(color.pink)
+      .setColor(colors)
       .setFooter({
         text: `Demandé(e) par ${interaction.user.tag}`,
         iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
@@ -114,7 +115,7 @@ module.exports = {
         embeds.push(currentEmbed);
         currentEmbed = new EmbedBuilder()
           .setTitle(title)
-          .setColor(color.pink)
+          .setColor(colors)
           .setFooter({
             text: `Demandé(e) par ${interaction.user.tag}`,
             iconURL: interaction.user.displayAvatarURL({ dynamic: true }),

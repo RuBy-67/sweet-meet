@@ -1,6 +1,8 @@
 const { EmbedBuilder } = require("discord.js");
 const emo = require(`../../jsons/emoji.json`);
 const color = require(`../../jsons/color.json`);
+const DatabaseManager = require("../../class/dbManager");
+const dbManager = new DatabaseManager();
 const info = require(`../../jsons/info.json`);
 const config = require("../../jsons/config.json");
 
@@ -19,6 +21,7 @@ module.exports = {
         .setColor(color.error);
       return interaction.reply({ embeds: [embed] });
     }
+    const colors = await dbManager.getColor(interaction.user.id);
     const botPing = Math.round(client.ws.ping);
     function emoji(id) {
       return (
@@ -28,7 +31,7 @@ module.exports = {
     }
     const embed = new EmbedBuilder()
       .setTitle("Info Bot ")
-      .setColor(color.pink) // Code couleur pour rose
+      .setColor(colors)
       .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
       .setDescription(
         `

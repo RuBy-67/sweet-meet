@@ -2,12 +2,16 @@ const { EmbedBuilder } = require("discord.js");
 const emo = require(`../../jsons/emoji.json`);
 const color = require(`../../jsons/color.json`);
 const config = require("../../jsons/config.json");
+const DatabaseManager = require("../../class/dbManager");
+const dbManager = new DatabaseManager();
 
 module.exports = {
   name: "social",
   description: "Social link of my queen (devs)",
   options: null,
   run: async (client, interaction, args) => {
+    const userId = interaction.user.id;
+    const colors = await dbManager.getColor(userId);
     if (config.maintenance) {
       const embed = new EmbedBuilder()
         .setTitle("⚒️ Maintenance ⚒️")
@@ -26,7 +30,7 @@ module.exports = {
     }
     const embed = new EmbedBuilder()
       .setTitle("Social Queen Link")
-      .setColor(color.pink)
+      .setColor(colors)
       .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
       .setDescription(
         `➼ ** | [${emoji(

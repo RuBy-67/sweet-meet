@@ -24,6 +24,8 @@ module.exports = {
     },
   ],
   run: async (client, interaction, args) => {
+    const userIdcolor = interaction.user.id;
+    const colors = await dbManager.getColor(userIdcolor);
     if (config.maintenance) {
       const embed = new EmbedBuilder()
         .setTitle("⚒️ Maintenance ⚒️")
@@ -146,7 +148,7 @@ module.exports = {
       new EmbedBuilder()
 
         .setTitle(`Profil de ${targetUser.username}`)
-        .setColor(color.pink)
+        .setColor(colors)
         .setThumbnail(targetUser.displayAvatarURL({ dynamic: true }))
         .addFields(
           {
@@ -185,7 +187,7 @@ module.exports = {
 
       new EmbedBuilder()
         .setTitle("Mes Matériaux")
-        .setColor(color.pink)
+        .setColor(colors)
         .setDescription(
           "*Dans le royaume ancien de Valoria, la magie et les éléments se mélangent pour créer des matériaux d'une puissance incommensurable. Ces matériaux sont les reliques de l'harmonie entre les forces naturelles et la magie ancestrale, et leur possession confère à leurs détenteurs des capacités extraordinaires. On raconte que ces artefacts sont les vestiges d'une époque où les dieux eux-mêmes foulaient la terre de Valoria, infusant la nature de leur puissance divine.*\n\n***Le level (des materiaux) Influe sur les Boost***"
         )
@@ -204,7 +206,7 @@ module.exports = {
       .join("\n");
     const hiddenPage = new EmbedBuilder()
       .setTitle("Secret Page")
-      .setColor(color.pink)
+      .setColor(colors)
       .setDescription(
         "Ho t'a trouvé la page secrète ! claim ton cadeau 🧧 c'est une chance sur 1000 de tomber sur cette page, et te permet de claim entre 5000 et 15000 Fragments de Protection !\nAinsi que d'obtenir un matériaux legendaire parmis la liste suivante !"
       )
