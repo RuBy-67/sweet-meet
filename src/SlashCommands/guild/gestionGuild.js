@@ -8,7 +8,7 @@ const color = require("../../jsons/color.json");
 const guild = require("./guild");
 
 module.exports = {
-  name: "guildgestion",
+  name: "gestionguild",
   description: "🚨 Empreur, reine et ministre de la guilde",
   options: [
     {
@@ -101,7 +101,7 @@ module.exports = {
           options: [
             {
               type: 6, // 6 corresponds to a USER
-              name: "Membre",
+              name: "membre",
               description: "Membre à inviter",
               required: false,
             },
