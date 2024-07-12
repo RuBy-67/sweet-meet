@@ -8,7 +8,7 @@ const bonus = require("../../jsons/userBonus.json");
 module.exports = {
   name: "create-accounts",
   description:
-    "Créer un compte et donne le rôle first Arrival à tous les membres du serveur.",
+    "🚨 Créer un compte et donne le rôle first Arrival à tous les membres du serveur.",
   options: null,
   run: async (client, interaction, args) => {
     // Check if user have the permission to use this command

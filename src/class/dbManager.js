@@ -53,16 +53,22 @@ class DatabaseManager {
       return "#e08dac";
     }
   }
-  async createGuild(guildColor, guildName, guildDescription, userId) {
+  async createGuild(guildColor, guildName, guildDescription, tag, userId) {
     this.queryMain(SQL_QUERIES.CREATE_GUILD, [
       guildName,
       guildDescription,
+      tag,
       guildColor,
       userId,
     ]);
   }
+
   async getGuild() {
     return this.queryMain(SQL_QUERIES.GET_GUILD);
+  }
+
+  async getGuildByTag(tag) {
+    return this.queryMain(SQL_QUERIES.GET_GUILD_BY_TAG, [tag]);
   }
   async getGuildById(guildId) {
     return this.queryMain(SQL_QUERIES.GET_GUILD_BY_ID, [guildId]);
@@ -80,6 +86,163 @@ class DatabaseManager {
       lvl,
     ]);
   }
+  async getGuildInvitation(guildId) {
+    return this.queryMain(SQL_QUERIES.GET_GUILD_INVITATION, [guildId]);
+  }
+  async getGuildInvitationByUser(guildId, userId) {
+    return this.queryMain(SQL_QUERIES.GET_GUILD_INVITATION_BY_USER, [
+      guildId,
+      userId,
+    ]);
+  }
+  async getUserInvitation(userId) {
+    return this.queryMain(SQL_QUERIES.CHECK_INVITATIONS, [userId]);
+  }
+  async getUserInvitationByGuild(userId, guildId) {
+    return this.queryMain(SQL_QUERIES.CHECK_INVITATIONS_BY_GUILD, [
+      userId,
+      guildId,
+    ]);
+  }
+  async createInvitation(userId, guildId, type) {
+    return this.queryMain(SQL_QUERIES.INSERT_INVITATION, [
+      guildId,
+      userId,
+      type,
+    ]);
+  }
+  async getGuildByName(guildName) {
+    return this.queryMain(SQL_QUERIES.GET_GUILD_BY_NAME, [guildName]);
+  }
+
+  async getGuildInfo(guildId) {
+    const result = await this.queryMain(SQL_QUERIES.GET_GUILD_INFO, [guildId]);
+    return result[0];
+  }
+  async addGuildMemberPower(guildId, amount) {
+    const guildMembers = await this.queryMain(SQL_QUERIES.GET_GUILD_MEMBERS, [
+      guildId,
+    ]);
+    // Parcourir tous les membres et ajouter le pouvoir
+    for (const member of guildMembers) {
+      await this.queryMain(SQL_QUERIES.ADD_MEMBER_POWER, [
+        amount,
+        member.discordId,
+        guildId,
+      ]);
+    }
+  }
+  async updateGuildLevel(guildId, level) {
+    await this.queryMain(SQL_QUERIES.UPDATE_GUILD_LEVEL, [level, guildId]);
+  }
+  async resolveChoices(option) {
+    if (option.choices instanceof Promise) {
+      option.choices = await option.choices;
+    }
+    return option;
+  }
+
+  // Fonction pour rejoindre une guilde
+  async joinGuild(userId, guildId) {
+    await this.queryMain(SQL_QUERIES.UPDATE_USER_GUILD, [guildId, userId]);
+  }
+  async updateUserGuild(userId, guildId) {
+    await this.queryMain(SQL_QUERIES.UPDATE_USER_GUILD, [guildId, userId]);
+  }
+  async addGuildBank(guildId, amount) {
+    await this.queryMain(SQL_QUERIES.ADD_GUILD_BANK, [amount, guildId]);
+  }
+  async updateGuildName(guildId, name, tag) {
+    await this.queryMain(SQL_QUERIES.UPDATE_GUILD_NAME_AND_TAG, [
+      name,
+      guildId,
+      tag,
+    ]);
+  }
+  async updateGuildDescription(guildId, description) {
+    await this.queryMain(SQL_QUERIES.UPDATE_GUILD_DESCRIPTION, [
+      description,
+      guildId,
+    ]);
+  }
+  async updateGuildBanner(guildId, banner) {
+    await this.queryMain(SQL_QUERIES.UPDATE_GUILD_BANNER, [banner, guildId]);
+  }
+  async updateGuildInvitationStatus(guildId, statut) {
+    await this.queryMain(SQL_QUERIES.UPDATE_GUILD_INVITATION_STATUS, [
+      statut,
+      guildId,
+    ]);
+  }
+  // Fonction pour quitter une guilde
+  async leaveGuild(userId) {
+    const userGuildResult = await this.queryMain(SQL_QUERIES.GET_USER_GUILD, [
+      userId,
+    ]);
+    const userIsOwner = await this.getGuildByOwnerId(userId);
+    if (userIsOwner.length > 0) {
+      return "Un empreur ne peut pas quitter sa guilde";
+    }
+
+    if (!userGuildResult.length || userGuildResult[0].guildId === null) {
+      throw new Error("Pas dans une guild");
+    }
+    await this.queryMain(SQL_QUERIES.LEAVE_GUILD, [userId]);
+    await this.queryMain(SQL_QUERIES.DELETE_CLASS_USER, [userId]);
+    return "Vous avez quitté la guilde avec succès";
+  }
+
+  async acceptInvitation(userId, guildId) {
+    // Vérifiez si l'utilisateur est un administrateur de la guilde
+    const isAdmin = await this.isGuildAdmin(userId, guildId);
+    const userGuildResult = await this.queryMain(SQL_QUERIES.GET_USER_GUILD, [
+      userId,
+    ]);
+
+    if (isAdmin) {
+      // Si l'utilisateur est un administrateur, obtenir les invitations des personnes qui ont postulé
+      const applications = await this.queryMain(
+        SQL_QUERIES.GET_GUILD_INVITATION,
+        [guildId]
+      );
+      if (!applications.length) {
+        throw new Error("No applications found for this guild");
+      }
+      return applications;
+    } else if (userGuildResult.length > 0) {
+      // si l'utilisateur fait déjà partie d'une guilde
+      throw new Error("User is already in a guild");
+    } else {
+      // Si l'utilisateur est un joueur, obtenir les invitations qui lui ont été envoyées
+      const invitations = await this.queryMain(SQL_QUERIES.CHECK_INVITATIONS, [
+        userId,
+      ]);
+      if (!invitations.length) {
+        throw new Error("No invitations found for this user");
+      }
+      return invitations;
+    }
+  }
+
+  async isGuildAdmin(userId, guildId) {
+    const guild = await this.getGuildById(guildId);
+    if (guild.empreur === userId) {
+      return true;
+    }
+
+    // Vérifier si l'utilisateur possède l'un des rôles spécifiés
+    const userRoles = await this.getUserClass(userId, guildId);
+    if (userRoles.includes(1) || userRoles.includes(2)) {
+      return true;
+    }
+
+    // Si aucune des conditions n'est remplie, renvoyer false
+    return false;
+  }
+  async getUserClass(userId, guildId) {
+    return this.queryMain(SQL_QUERIES.GET_USER_CLASS, [userId, guildId]);
+  }
+
   async generateSecret() {
     const length = 20; // Longueur du code secret
     const characters =
@@ -250,7 +413,26 @@ class DatabaseManager {
   async getGuildMembers(guildId) {
     return this.queryMain(SQL_QUERIES.GET_GUILD_MEMBERS, [guildId]);
   }
-
+  async getGuildUserByRole(guildId, roleId) {
+    return this.queryMain(SQL_QUERIES.GET_GUILD_USER_BY_ROLE, [
+      guildId,
+      roleId,
+    ]);
+  }
+  async addClassToUser(userId, guildId, classId) {
+    return this.queryMain(SQL_QUERIES.ADD_CLASS_TO_USER, [
+      userId,
+      guildId,
+      classId,
+    ]);
+  }
+  async updateClassToUser(userId, guildId, classId) {
+    return this.queryMain(SQL_QUERIES.UPDATE_CLASS_TO_USER, [
+      userId,
+      guildId,
+      classId,
+    ]);
+  }
   async getBadge(userId) {
     return this.queryMain(SQL_QUERIES.GET_BADGE, [userId]);
   }

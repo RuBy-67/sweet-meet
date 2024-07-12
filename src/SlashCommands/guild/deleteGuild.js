@@ -5,7 +5,7 @@ const DatabaseManager = require("../../class/dbManager");
 const dbManager = new DatabaseManager();
 
 module.exports = {
-  name: "deleteGuild",
+  name: "deleteguild",
   description: "Delete your guild",
   options: null, // No additional options needed for deletion
   run: async (client, interaction, args) => {

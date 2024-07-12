@@ -24,7 +24,7 @@ module.exports = {
     },
     {
       name: "description",
-      description: "blablabla",
+      description: "une description de la guilde",
       type: 3,
       required: true,
     },
@@ -96,16 +96,42 @@ module.exports = {
           "Vous n'avez pas suffisamment de fragments pour créer une guilde."
         );
       }
+      if (guildName.length > 20) {
+        throw new Error(
+          "Le nom de la guilde ne peut pas dépasser 20 caractères."
+        );
+      }
 
       // Create the guild
       const guildColor = guildColorInput.toUpperCase();
+      let tag = guildName.substring(0, 3).toUpperCase();
+      let suffix = 1;
+      let uniqueTag = tag;
+      while (await dbManager.getGuildByTag(uniqueTag)) {
+        uniqueTag = tag + suffix;
+        suffix++;
+      }
+
       await dbManager.createGuild(
         guildColor,
         guildName,
         guildDescription,
+        uniqueTag,
         userId
       );
+      const guildId = await dbManager.getGuildByOwnerId(userId);
+      await dbManager.updateUserGuild(guildId.id, userId);
       await dbManager.updatePower(userId, -params.guildPrice);
+      conjoint = await dbManager.getMarriage(userId);
+      if (conjoint.length > 0) {
+        if (conjoint.idUser1 != userId) {
+          await dbManager.addClassToUser(conjoint[0].idUser1, guildId.id, 1);
+          await dbManager.updateUserGuild(guildId.id, conjoint[0].idUser2);
+        } else if (conjoint.idUser2 != userId) {
+          await dbManager.addClassToUser(conjoint[0].idUser2, guildId.id, 1);
+          await dbManager.updateUserGuild(guildId.id, conjoint[0].idUser2);
+        }
+      }
 
       const embed = new EmbedBuilder()
         .setTitle("Guilde créée")
@@ -113,7 +139,7 @@ module.exports = {
         .setDescription(
           `Votre guilde "${guildName}" a été créée avec succès ! et 40000 ${emoji(
             emo.power
-          )} attribué à la guilde`
+          )} attribué à la guilde\nTag de guilde : \`\`${uniqueTag}\`\``
         )
         .setFooter({
           text: `Demandé(e) par ${interaction.user.tag}`,

@@ -100,24 +100,45 @@ module.exports = {
       await interaction.deferUpdate();
 
       if (interaction.customId === "accepter") {
-        dbManager.deleteMarriage(authorId, targetId);
-        dbManager.updateBadge(targetId, "loveb");
-        dbManager.updateBadge(authorId, "loveb");
-        dbManager.removeBadgeById(4, targetId);
-        dbManager.removeBadgeById(4, authorId);
+        await dbManager.deleteMarriage(authorId, targetId);
+        await dbManager.updateBadge(targetId, "loveb");
+        await dbManager.updateBadge(authorId, "loveb");
+        await dbManager.removeBadgeById(4, targetId);
+        await dbManager.removeBadgeById(4, authorId);
 
-        await interaction.editReply({
+        const inGuild = await dbManager.getStats(targetId);
+        const inGuild2 = await dbManager.getStats(authorId);
+
+        const userClassAuthor = await dbManager.getUserClass(
+          authorId,
+          inGuild.guildId
+        );
+        const userClassTarget = await dbManager.getUserClass(
+          targetId,
+          inGuild2.guildId
+        );
+
+        // Vérification et mise à jour des classes des utilisateurs
+        if (userClassAuthor === 1) {
+          await dbManager.updateClassToUser(authorId, inGuild.guildId, 5);
+        }
+
+        if (userClassTarget === 1) {
+          await dbManager.updateClassToUser(targetId, inGuild2.guildId, 5);
+        }
+
+        return interaction.editReply({
           content: `Félicitations ?, <@${targetId}> et <@${targetId2}> sont maintenant divorcés !`,
           embeds: [],
           components: [],
         });
       } else if (interaction.customId === "refuser") {
-        dbManager.updatePower(authorId, param.Pricing.divorce.refus);
-        dbManager.updatePowerByBadgeId(
+        await dbManager.updatePower(authorId, param.Pricing.divorce.refus);
+        await dbManager.updatePowerByBadgeId(
           5,
           param.Pricing.divorce.refus * param.Pricing.divorce.fees
         );
-        await interaction.editReply({
+        return interaction.editReply({
           content: `La demande de divorce a été refusée. coût : ${
             param.Pricing.divorce.refus
           }  ${emoji(emo.power)}`,
