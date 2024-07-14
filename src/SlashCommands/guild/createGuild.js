@@ -48,7 +48,7 @@ module.exports = {
       );
     }
 
-    // Check if the user has the required role, is not in a guild, and guild limit is not reached
+    // Check si l'user à le role et si le max de guild n'est pas attein
     const requiredRoleId = "1246944929675087914";
     const maxGuilds = 20;
     const guildName = interaction.options.getString("name");
@@ -102,7 +102,7 @@ module.exports = {
         );
       }
 
-      // Create the guild
+      // Créer la guilde
       const guildColor = guildColorInput.toUpperCase();
       let tag = guildName.substring(0, 3).toUpperCase();
       let suffix = 1;

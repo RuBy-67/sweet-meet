@@ -12,12 +12,12 @@ module.exports = {
   description: "🚨 Empreur, reine et ministre de la guilde",
   options: [
     {
-      type: 1, // 1 corresponds to a subcommand
+      type: 1, 
       name: "update",
       description: "Mettre à jour les informations de la guilde",
       options: [
         {
-          type: 3, // 3 corresponds to a STRING
+          type: 3, 
           name: "choix",
           description:
             "Que voulez-vous mettre à jour ? (description, tag, bannière, statutInvit)",
@@ -48,7 +48,7 @@ module.exports = {
           required: false,
         },
         {
-          type: 3, // 3 corresponds to a STRING
+          type: 3, 
           name: "statutinvit",
           description: "mettre à jour le statut d'invitation de la guilde",
           choices: [
@@ -100,7 +100,7 @@ module.exports = {
           description: "Inviter un joueur dans la guilde",
           options: [
             {
-              type: 6, // 6 corresponds to a USER
+              type: 6, // 6 corresponds à USER
               name: "membre",
               description: "Membre à inviter",
               required: false,
@@ -209,7 +209,7 @@ module.exports = {
                 } ${emoji(emo.power)}]`,
               });
             }
-            // Exemple : Mettre à jour la description de la guilde dans la base de données
+            // Mettre à jour la description de la guilde dans la base de données
             await dbManager.updateGuildDescription(guildId, valeur);
             await dbManager.addGuildBank(
               guildId,

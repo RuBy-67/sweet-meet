@@ -11,12 +11,12 @@ module.exports = {
   description: "Gérer les guildes",
   options: [
     {
-      type: 1, // 1 corresponds to a subcommand
+      type: 1, // 1 correspond à une subcommand
       name: "info",
       description: "Obtenir les infos d'une guilde",
       options: [
         {
-          type: 3, // 3 corresponds to a STRING
+          type: 3, // 3 corresponds à STRING
           name: "tag",
           description: "Tag de la guilde (facultatif)",
           required: false,
@@ -29,7 +29,7 @@ module.exports = {
       description: "Rejoindre une guilde",
       options: [
         {
-          type: 3, // 3 corresponds to a STRING
+          type: 3,
           name: "tag",
           description: "tag de la guilde (facultatif)",
           required: false,
@@ -47,7 +47,7 @@ module.exports = {
       description: "Donner à sa guilde",
       options: [
         {
-          type: 4, // 4 corresponds to an INTEGER
+          type: 4, // 4 correspond à INTEGER
           name: "amount",
           description: "Montant à donner",
           required: true,
@@ -108,6 +108,7 @@ module.exports = {
           (acc, member) => acc + member.power,
           0
         );
+        // verification s'il y à une reine
         const reine = await dbManager.getGuildUserByRole(guildInfo.id, 1);
         let reineInfo = "";
         if (reine.length > 0) {
@@ -115,6 +116,7 @@ module.exports = {
         } else {
           reineInfo = "Aucune reine";
         }
+        // verification s'il y a un ou des ministres
         const ministres = await dbManager.getGuildUserByRole(guildInfo.id, 2);
         let ministresInfo = "";
         if (ministres.length > 0) {
@@ -219,7 +221,7 @@ module.exports = {
       case "join":
         try {
           if (!tag) {
-            // User did not provide a tag
+            // User n'a pas fournis de TAG
             const invitations = await dbManager.getUserInvitation(userId);
             if (invitations.length === 0) {
               return interaction.reply({
@@ -227,14 +229,14 @@ module.exports = {
                 ephemeral: true,
               });
             } else if (invitations.length === 1) {
-              // Automatically join the guild with the single invitation
+              // Rejoindre Automatiquement une GUild (s'il y à une invitation en attente)
               const guildId = invitations[0].guildId;
               await dbManager.joinGuild(userId, guildId);
               return interaction.reply(
                 `Vous avez rejoint la guilde avec le tag ${invitations[0].tag}.`
               );
             } else {
-              // Multiple invitations, show an embed with the list of guilds
+              // Si plusieurs invitation, afficher la liste
               const embed = new EmbedBuilder()
                 .setTitle("Invitations en attente")
                 .setDescription(
@@ -255,7 +257,7 @@ module.exports = {
               return interaction.reply({ embeds: [embed] });
             }
           } else {
-            // User provided a tag
+            // User FOurnis un tag
             const guild = await dbManager.getGuildByTag(tag);
             if (!guild) {
               return interaction.reply("Guilde non trouvée avec ce tag.");
@@ -263,15 +265,20 @@ module.exports = {
 
             switch (guild.type) {
               case 3:
+                // si Guild OUverte
                 await dbManager.joinGuild(userId, guild.id);
                 return interaction.reply(
                   `Vous avez rejoint la guilde ${guild.nom}.`
                 );
               case 2:
+                // si Guild fermé
                 return interaction.reply(
                   "La guilde est fermée et ne peut pas être rejointe."
                 );
               case 1:
+                // si guild sur inviatation
+
+                // si invitation existe --> rejoindre guild
                 const existingInvitation =
                   await dbManager.getUserInvitationByGuild(userId, guild.id);
                 if (existingInvitation) {
@@ -280,6 +287,7 @@ module.exports = {
                     `Vous avez rejoint la guilde ${guild.nom}.`
                   );
                 } else {
+                  // sinon envoyé une demande
                   await dbManager.createInvitation(userId, guild.id, 1);
                   return interaction.reply(
                     `Votre demande pour rejoindre la guilde ${guild.nom} a été envoyée.`

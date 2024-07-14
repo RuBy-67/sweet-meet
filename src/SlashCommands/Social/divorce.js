@@ -34,7 +34,7 @@ module.exports = {
     }
     const authorId = interaction.user.id;
     const colors = await dbManager.getColor(authorId);
-    // Verify if the author has enough power to get
+    // Verifier si possède assez de fragment
     const authorStats = await dbManager.getStats(authorId);
     if (authorStats.power < param.Pricing.divorce.prix) {
       return interaction.reply({
@@ -45,7 +45,7 @@ module.exports = {
       });
     }
 
-    // Verify if the author and the target are married
+    // Verifier s'il/si elle est marié(e)
     const authorMarriage = await dbManager.getMarriage(authorId);
     if (authorMarriage.length === 0) {
       return interaction.reply({

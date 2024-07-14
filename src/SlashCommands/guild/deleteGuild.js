@@ -7,7 +7,7 @@ const dbManager = new DatabaseManager();
 module.exports = {
   name: "deleteguild",
   description: "Delete your guild",
-  options: null, // No additional options needed for deletion
+  options: null, 
   run: async (client, interaction, args) => {
     const userId = interaction.user.id;
     const colors = await dbManager.getColor(userId);
@@ -22,7 +22,7 @@ module.exports = {
       return interaction.reply({ embeds: [embed] });
     }
 
-    // Check if the user owns a guild
+    // Check si l'user fait partie d'une guild
     const guild = await dbManager.getGuildByOwnerId(userId);
 
     if (!guild) {
@@ -37,7 +37,7 @@ module.exports = {
       return interaction.reply({ embeds: [embed] });
     }
 
-    // Delete the guild
+    // Sinon suprimmer la guilde (et associé)
     await dbManager.deleteGuildByOwnerId(userId);
 
     const embed = new EmbedBuilder()

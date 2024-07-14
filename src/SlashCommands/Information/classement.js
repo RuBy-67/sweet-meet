@@ -32,7 +32,7 @@ module.exports = {
 
     const top = 5;
 
-    // Ranking by power
+    // Rank par fragment
     const powerResult = await dbManager.getTopUsers("power", top);
     let powerDescription = "";
     for (let i = 0; i < powerResult.length; i++) {
@@ -53,7 +53,7 @@ module.exports = {
       inline: true,
     });
 
-    // Ranking by victories
+    // Rank par victoire
     const winResult = await dbManager.getTopUsers("winCounter", top);
     let winDescription = "";
     for (let i = 0; i < winResult.length; i++) {
@@ -73,7 +73,7 @@ module.exports = {
       inline: true,
     });
 
-    // Ranking by defeats
+    // Rank par défaite
     const loseResult = await dbManager.getTopUsers("loseCounter", top);
     let loseDescription = "";
     for (let i = 0; i < loseResult.length; i++) {
@@ -94,7 +94,7 @@ module.exports = {
       inline: true,
     });
 
-    // Ranking by win rate
+    // Rank par Win Rate
     const rateResult = await dbManager.getTopUsersByRate(top);
     let rateDescription = "";
     for (let i = 0; i < rateResult.length; i++) {

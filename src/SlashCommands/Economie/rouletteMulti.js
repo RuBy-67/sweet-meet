@@ -75,7 +75,7 @@ module.exports = {
     const members = await interaction.guild.members.fetch();
     const memberArray = Array.from(members.values());
 
-    // Shuffle the array
+    // Shuffle le tableau
     const shuffledMembers = memberArray.sort(() => 0.5 - Math.random());
 
     if (!Array.isArray(shuffledMembers)) {

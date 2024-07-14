@@ -90,7 +90,7 @@ module.exports = {
     });
 
     collector.on("collect", async (i) => {
-      collector.stop(); // Stop the collector once an item is selected
+      collector.stop(); 
 
       const [idUnique, idMateriau, level] = i.values[0].split("_");
       const [selectedMaterial] = await dbManager.getDataMateriauById(
@@ -127,11 +127,11 @@ module.exports = {
       const confirmationCollector =
         interaction.channel.createMessageComponentCollector({
           confirmFilter,
-          time: 30000, // Set a shorter time for the confirmation collector
+          time: 30000, 
         });
 
       confirmationCollector.on("collect", async (btnInt) => {
-        confirmationCollector.stop(); // Stop the collector once an action is performed
+        confirmationCollector.stop(); 
 
         if (btnInt.customId === "confirm") {
           const prix = Math.floor(

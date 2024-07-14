@@ -57,7 +57,7 @@ module.exports = {
     const colors = await dbManager.getColor(authorId);
     const targetId = targetUser.id;
 
-    // Verify if the author has enough power to get married
+    // Verififier s'il possède assez de fragment pour se marié(e)
     const authorStats = await dbManager.getStats(authorId);
     if (authorStats.power < param.Pricing.marriage.accepter) {
       return interaction.reply({
@@ -75,7 +75,7 @@ module.exports = {
       });
     }
 
-    // Verify if the author and the target are already married
+    // Verifier s'il est déjà marié(e)
     const authorMarriage = await dbManager.getMarriage(authorId);
     const targetMarriage = await dbManager.getMarriage(targetId);
     if (authorMarriage.length > 0 || targetMarriage.length > 0) {
