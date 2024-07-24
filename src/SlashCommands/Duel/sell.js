@@ -141,7 +141,7 @@ module.exports = {
           );
           await dbManager.removeMaterialFromUser(idUnique);
           await dbManager.updatePower(i.user.id, -prix);
-          await interaction.update({
+          await i.update({
             content: `La vente de **${
               selectedMaterial.nom
             }** a été effectuée avec succès pour ${prix} ${emoji(emo.power)}.`,

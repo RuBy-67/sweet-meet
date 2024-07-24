@@ -1,4 +1,9 @@
-const { EmbedBuilder } = require("discord.js");
+const {
+  EmbedBuilder,
+  StringSelectMenuBuilder,
+  StringSelectMenuOptionBuilder,
+  ActionRowBuilder,
+} = require("discord.js");
 const DatabaseManager = require("../../class/dbManager");
 const dbManager = new DatabaseManager();
 const emo = require("../../jsons/emoji.json");
@@ -12,12 +17,12 @@ module.exports = {
   description: "🚨 Empreur, reine et ministre de la guilde",
   options: [
     {
-      type: 1, 
+      type: 1,
       name: "update",
       description: "Mettre à jour les informations de la guilde",
       options: [
         {
-          type: 3, 
+          type: 3,
           name: "choix",
           description:
             "Que voulez-vous mettre à jour ? (description, tag, bannière, statutInvit)",
@@ -48,7 +53,7 @@ module.exports = {
           required: false,
         },
         {
-          type: 3, 
+          type: 3,
           name: "statutinvit",
           description: "mettre à jour le statut d'invitation de la guilde",
           choices: [
@@ -88,11 +93,27 @@ module.exports = {
           type: 1,
           name: "promote",
           description: "Promouvoir un membre de la guilde",
+          options: [
+            {
+              type: 6, // 6 corresponds à USER
+              name: "membre",
+              description: "Membre à promouvoir",
+              required: true,
+            },
+          ],
         },
         {
           type: 1,
           name: "demote",
           description: "Rétrograder un membre de la guilde",
+          options: [
+            {
+              type: 6, // 6 corresponds à USER
+              name: "membre",
+              description: "Membre à Retrograder",
+              required: true,
+            },
+          ],
         },
         {
           type: 1,
@@ -103,7 +124,7 @@ module.exports = {
               type: 6, // 6 corresponds à USER
               name: "membre",
               description: "Membre à inviter",
-              required: false,
+              required: true,
             },
           ],
         },
@@ -134,15 +155,16 @@ module.exports = {
     }
     const subCommand = interaction.options.getSubcommand();
     let guildId = await dbManager.getStats(interaction.user.id);
-    const guildInfo = await dbManager.getGuildInfo(guildId.guildId);
     guildId = guildId.guildId;
+    const guildInfo = await dbManager.getGuildInfo(guildId);
+
     const verif = await dbManager.isGuildAdmin(interaction.user.id, guildId);
     if (!verif) {
       const embed = new EmbedBuilder()
         .setTitle("🚨 Erreur 🚨")
         .setColor(color.error)
         .setDescription(
-          `> Vous n'êtes pas autorisé à utiliser cette commande.`
+          `> Vous n'êtes pas autorisé à utiliser cette commande, vous devez être Empreur, Reine ou Ministre de guild`
         );
       return interaction.reply({ embeds: [embed] });
     }
@@ -376,24 +398,292 @@ module.exports = {
 
         switch (subSubCommand) {
           case "kick":
-            // Logique pour la sous-commande "kick"
+            const members = dbManager.getGuildMembers(guildId);
+            const nonAdminMembers = [];
+            for (const member of members) {
+              const isAdmin = await dbManager.isGuildAdmin(member.id, guildId);
+              if (!isAdmin) {
+                const userClass = await dbManager.getUserClass(
+                  member.id,
+                  guildId
+                );
+                const user = await client.users.fetch(member.id);
+                const emoji = emoji(emo[`class${userClass.idClass}`]) || "❔";
+                nonAdminMembers.push({
+                  id: member.id,
+                  username: user.username,
+                  emoji: emoji,
+                });
+              }
+            }
+            const memberOptions = nonAdminMembers.map((member) => {
+              return {
+                emoji: member.emoji,
+                label: member.username,
+                value: member.id,
+              };
+            });
+
+            // Si aucun membre n'est éligible pour être exclu
+            if (memberOptions.length === 0) {
+              return interaction.reply({
+                content: "Aucun membre à exclure.",
+                ephemeral: true,
+              });
+            }
+            const row = new ActionRowBuilder().addComponents(
+              new StringSelectMenuBuilder()
+                .setCustomId("select-kick-member")
+                .setPlaceholder("Choisir un membre à exclure")
+                .addOptions(memberOptions)
+            );
+
+            await interaction.reply({
+              content: "Sélectionnez le membre à exclure:",
+              components: [row],
+              ephemeral: true,
+            });
+
+            client.on("interactionCreate", async (interaction) => {
+              if (!interaction.isSelectMenu()) return;
+
+              // Vérifier si c'est le menu déroulant pour exclure un membre
+              if (interaction.customId !== "select-kick-member") return;
+
+              const memberId = interaction.values[0]; // Récupérer l'ID du membre à exclure
+              const isAdmin = await dbManager.isGuildAdmin(memberId, guildId);
+
+              if (isAdmin) {
+                await interaction.update({
+                  content:
+                    "Impossible de kick un membre important de la guilde [EMPREUR, REINE, MINISTRE]",
+                  components: [],
+                  ephemeral: true,
+                });
+              } else {
+                await dbManager.leaveGuild(memberId); // Exécuter l'action pour exclure le membre
+                await interaction.update({
+                  content: `Le membre <@${memberId}> a été exclu de la guilde avec succès.`,
+                  components: [],
+                });
+              }
+            });
+
             break;
 
           case "promote":
-            // Logique pour la sous-commande "promote"
-            break;
+            const userIdToPromote = interaction.options.getUser("membre");
+            if (!userIdToPromote) {
+              return interaction.reply({
+                content: "vous devez spécifier un membre à Promouvoire.",
+                ephemeral: true,
+              });
+            }
+
+            // verifier si l'utilisateurs à promouvoir, fait partie de la guilde, ou s'il n'est pas déjà admin de la guilde
+            const memberToPromote = await dbManager.getStats(
+              userIdToPromote.id
+            );
+
+            const getMemberClassToPromote = await dbManager.getUserClass(
+              memberToPromote,
+              guildId
+            );
+            if (memberToPromote.guildId == guildId) {
+              const guildInfo = await dbManager.getGuildInfo(guildId);
+              const ministre = await dbManager.getGuildUserByRole(guildId, 2);
+              const maxMinistre = params.maxMinistre[guildInfo.level];
+              const getClassFromUser = await dbManager.getUserClass(
+                interaction.user.id,
+                guildId
+              );
+              let newClassId = getMemberClassToPromote - 1;
+              if (
+                guildInfo.empreur == interaction.user.id ||
+                getClassFromUser == 1
+              ) {
+                if (newClassId == 1) {
+                  const ClassName = dbManager.getClassName(newClassId);
+                  return interaction.reply({
+                    content: `Un membre ne peut être (${ClassName} ${emoji(
+                      emo[`class${newClassId}`]
+                    )}), que par le Mariage`,
+                    ephemeral: true,
+                  });
+                } else if (newClassId == 2 && ministre.length == maxMinistre) {
+                  return interaction.reply({
+                    content: `Nombre Max de Ministre atteint : ${maxMinistre}`,
+                  });
+                } else {
+                  await dbManager.promoteDemoteMember(
+                    userId,
+                    guildId,
+                    newClassId
+                  );
+                  const ClassName = dbManager.getClassName(newClassId);
+                  return interaction.reply({
+                    content: `Le membre à été promu au rang de ${ClassName}  ${emoji(
+                      emo[`class${newClassId}`]
+                    )}`,
+                    ephemeral: true,
+                  });
+                }
+              } else {
+                if (getMemberClassToPromote == 3) {
+                  return interaction.reply({
+                    content: `seul un empreur ou une reine peux promouvoir un nouveau ministre`,
+                  });
+                } else {
+                  await dbManager.promoteDemoteMember(
+                    userId,
+                    guildId,
+                    newClassId
+                  );
+                  const ClassName = dbManager.getClassName(newClassId);
+                  return interaction.reply({
+                    content: `Le membre à été promus au rang de ${ClassName}  ${emoji(
+                      emo[`class${newClassId}`]
+                    )}`,
+                    ephemeral: true,
+                  });
+                }
+              }
+            } else {
+              return interaction.reply({
+                content: "L'utilisateur n'est pas membre de votre guilde.",
+                ephemeral: true,
+              });
+            }
 
           case "demote":
-            // Logique pour la sous-commande "demote"
-            break;
+            const userIdToDemote = interaction.options.getUser("membre");
+            if (!userIdToDemote) {
+              return interaction.reply({
+                content: "vous devez spécifier un membre à Retrograder.",
+                ephemeral: true,
+              });
+            }
+
+            // verifier si l'utilisateurs à retrograder, fait partie de la guilde, ou s'il n'est pas déjà admin de la guilde
+            const memberToDemote = await dbManager.getStats(userIdToDemote.id);
+            const getMemberClassToDemote = await dbManager.getUserClass(
+              memberToDemote,
+              guildId
+            );
+            if (memberToDemote.guildId == guildId) {
+              const guildInfo = await dbManager.getGuildInfo(guildId);
+              const getClassFromUser = await dbManager.getUserClass(
+                interaction.user.id,
+                guildId
+              );
+              let newClassId = getMemberClassToDemote + 1;
+              if (
+                guildInfo.empreur == interaction.user.id ||
+                getClassFromUser == 1
+              ) {
+                if (newClassId > 6) {
+                  const ClassName = dbManager.getClassName(newClassId);
+                  return interaction.reply({
+                    content: `Le membre est déjà au banc de la société (${ClassName} ${emoji(
+                      emo[`class${newClassId}`]
+                    )})`,
+                    ephemeral: true,
+                  });
+                } else {
+                  await dbManager.promoteDemoteMember(
+                    userId,
+                    guildId,
+                    newClassId
+                  );
+                  const ClassName = dbManager.getClassName(newClassId);
+                  return interaction.reply({
+                    content: `Le membre à été rétrograder au rang de ${ClassName}  ${emoji(
+                      emo[`class${newClassId}`]
+                    )}`,
+                    ephemeral: true,
+                  });
+                }
+              } else {
+                if (getMemberClassToDemote == 2) {
+                  return interaction.reply({
+                    content: `seul un empreur ou une reine peux retrograder un ministre`,
+                  });
+                }
+                if (newClassId > 6) {
+                  const ClassName = dbManager.getClassName(newClassId);
+                  return interaction.reply({
+                    content: `Le membre est déjà au banc de la société (${ClassName} ${emoji(
+                      emo[`class${newClassId}`]
+                    )})`,
+                    ephemeral: true,
+                  });
+                } else {
+                  await dbManager.promoteDemoteMember(
+                    userId,
+                    guildId,
+                    newClassId
+                  );
+                  const ClassName = dbManager.getClassName(newClassId);
+                  return interaction.reply({
+                    content: `Le membre à été rétrograder au rang de ${ClassName}  ${emoji(
+                      emo[`class${newClassId}`]
+                    )}`,
+                    ephemeral: true,
+                  });
+                }
+              }
+            } else {
+              return interaction.reply({
+                content: "L'utilisateur n'est pas membre de votre guilde.",
+                ephemeral: true,
+              });
+            }
 
           case "invite":
-            const userId = interaction.options.getUser("Membre").id;
-            // Logique pour inviter un membre
+            const userIdToInvite = interaction.options.getUser("membre");
+            if (!userIdToInvite) {
+              return interaction.reply({
+                content: `vous devez spécifier un membre à inviter`,
+                ephemeral: true,
+              });
+            }
+            /// check si l'user est dans une guild
+            const userToInvite = await dbManager.getStats(userIdToInvite);
+            if ((userToInvite.guildId = !null)) {
+              /// check si l'user à déjà proposé une invitation si oui faire rejoindre le joueurs
+              const invitation = await dbManager.getUserInvitationByGuild(
+                userIdToInvite,
+                guildId,
+                1
+              );
+              if (invitation.length > 0) {
+                   await dbManager.joinGuild(userIdToInvite.id, guildId)
+                   interaction.reply({content: `L'user étant déjà en attente pour rejoindre la guilde le joueurs à automatiquement rejoin la guilde`, ephemeral: true})
+                   interaction.reply({content: `le joueursn <@${userIdToInvite.id}> fait maintenant parti de la guilde [${guildInfo.tag}] - ${guildInfo.nom}` })
+              } else {
+                 await dbManager.createInvitation(guildId, userIdToInvite.id, 2);
+              await interaction.reply({
+                content: `L'utilisateur ${userIdToInvite.username} a été invité dans la guilde ${guildInfo.nom}.`,
+                ephemeral: true,
+              });
+              }
+
+            } else {
+              return interaction.reply({
+                content: `L'user est déjà dans une guild, impossible de l'inviter`,
+                ephemeral: true,
+              });
+            }
+
             break;
 
           case "accept":
             // Logique pour accepter une demande dans la guilde
+            //Afficher la liste des membre (max 25) qui ont demander à rejoindre la guilde dans un embed
+            // mettre la même liste dans un selectMenue (pour accepter ou non le membre)
+            // Liste 1 accepter
+            // Liste 2 refuser
+            // LA selection accepte (fait entré le membre dans la guilde) ou refuse (suprimme l'invitation (where 1?))
             break;
 
           default:

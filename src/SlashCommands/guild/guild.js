@@ -156,7 +156,7 @@ module.exports = {
           .addFields(
             {
               name: `tag de guilde`,
-              value: `${guildInfo.tag}`,
+              value: `[${guildInfo.tag}]`,
             },
             {
               name: `${emoji(emo.King)} Empreur`,
@@ -231,10 +231,21 @@ module.exports = {
             } else if (invitations.length === 1) {
               // Rejoindre Automatiquement une GUild (s'il y à une invitation en attente)
               const guildId = invitations[0].guildId;
-              await dbManager.joinGuild(userId, guildId);
-              return interaction.reply(
-                `Vous avez rejoint la guilde avec le tag ${invitations[0].tag}.`
-              );
+              // verifier que le guild n'est pas complète avant de rejoindre :
+              const getMembers = await dbManager.getGuildMembers(guildId);
+              const guildInfo = await dbManager.getGuildInfo(guildId);
+              if (getMembers.length >= params.maxJoueurLvl[guildInfo.level]) {
+                return interaction.reply(
+                  `Impossible de rejoindre la guild car elle est complète`
+                );
+              } else {
+                // rejoindre la guild
+                await dbManager.deleteInvitation(userId);
+                await dbManager.joinGuild(userId, guildId);
+                return interaction.reply(
+                  `Vous avez rejoint la guilde: ${invitations[0].tag}.`
+                );
+              }
             } else {
               // Si plusieurs invitation, afficher la liste
               const embed = new EmbedBuilder()
@@ -257,7 +268,7 @@ module.exports = {
               return interaction.reply({ embeds: [embed] });
             }
           } else {
-            // User FOurnis un tag
+            // User Fournis un tag
             const guild = await dbManager.getGuildByTag(tag);
             if (!guild) {
               return interaction.reply("Guilde non trouvée avec ce tag.");
@@ -266,10 +277,21 @@ module.exports = {
             switch (guild.type) {
               case 3:
                 // si Guild OUverte
-                await dbManager.joinGuild(userId, guild.id);
-                return interaction.reply(
-                  `Vous avez rejoint la guilde ${guild.nom}.`
-                );
+                // verifier que la guild n'est pas complète :
+                const getMembers = await dbManager.getGuildMembers(guild.id);
+                const guildInfo = await dbManager.getGuildInfo(guild.id);
+                if (getMembers.length >= params.maxJoueurLvl[guildInfo.level]) {
+                  return interaction.reply(
+                    `Impossible de rejoindre la guild car elle est complète`
+                  );
+                } else {
+                  await dbManager.joinGuild(userId, guild.id);
+                  await dbManager.deleteInvitation(userId);
+                  return interaction.reply(
+                    `Vous avez rejoint la guilde ${guild.nom}.`
+                  );
+                }
+
               case 2:
                 // si Guild fermé
                 return interaction.reply(
@@ -279,20 +301,30 @@ module.exports = {
                 // si guild sur inviatation
 
                 // si invitation existe --> rejoindre guild
-                const existingInvitation =
-                  await dbManager.getUserInvitationByGuild(userId, guild.id);
-                if (existingInvitation) {
-                  await dbManager.joinGuild(userId, guild.id);
+
+                // check si guild non complète
+                if (getMembers.length >= params.maxJoueurLvl[guildInfo.level]) {
                   return interaction.reply(
-                    `Vous avez rejoint la guilde ${guild.nom}.`
+                    `Impossible de rejoindre, ou demander à rejoindre la guild car elle est complète`
                   );
                 } else {
-                  // sinon envoyé une demande
-                  await dbManager.createInvitation(userId, guild.id, 1);
-                  return interaction.reply(
-                    `Votre demande pour rejoindre la guilde ${guild.nom} a été envoyée.`
-                  );
+                  const existingInvitation =
+                    await dbManager.getUserInvitationByGuild(userId, guild.id,2);
+                  if (existingInvitation) {
+                    await dbManager.deleteInvitation(userId);
+                    await dbManager.joinGuild(userId, guild.id);
+                    return interaction.reply(
+                      `Vous avez rejoint la guilde ${guild.nom}.`
+                    );
+                  } else {
+                    // sinon envoyé une demande
+                    await dbManager.createInvitation(userId, guild.id, 1);
+                    return interaction.reply(
+                      `Votre demande pour rejoindre la guilde ${guild.nom} a été envoyée.`
+                    );
+                  }
                 }
+
               default:
                 return interaction.reply("Type de guilde inconnu.");
             }

@@ -98,12 +98,15 @@ class DatabaseManager {
   async getUserInvitation(userId) {
     return this.queryMain(SQL_QUERIES.CHECK_INVITATIONS, [userId]);
   }
-  async getUserInvitationByGuild(userId, guildId) {
+  async getUserInvitationByGuild(userId, guildId, type) {
     return this.queryMain(SQL_QUERIES.CHECK_INVITATIONS_BY_GUILD, [
       userId,
       guildId,
+      type
     ]);
   }
+
+
   async createInvitation(userId, guildId, type) {
     return this.queryMain(SQL_QUERIES.INSERT_INVITATION, [
       guildId,
@@ -111,8 +114,18 @@ class DatabaseManager {
       type,
     ]);
   }
+  async deleteInvitation(userId) {
+    return this.queryMain(SQL_QUERIES.REMOVE_INVITATION, [userId]);
+  }
+
+  async deleteInvitationByUserAndGuildId(userId, guildId, type) {}
+
+
   async getGuildByName(guildName) {
     return this.queryMain(SQL_QUERIES.GET_GUILD_BY_NAME, [guildName]);
+  }
+  async getClassName(idClass) {
+    return this.query(SQL_QUERIES.GET_CLASS_NAME,[idClass]);
   }
 
   async getGuildInfo(guildId) {
@@ -145,6 +158,7 @@ class DatabaseManager {
   // Fonction pour rejoindre une guilde
   async joinGuild(userId, guildId) {
     await this.queryMain(SQL_QUERIES.UPDATE_USER_GUILD, [guildId, userId]);
+    await this.queryMain(SQL_QUERIES.ADD_CLASS_TO_USER, [userId, guildId, 5]);
   }
   async updateUserGuild(userId, guildId) {
     await this.queryMain(SQL_QUERIES.UPDATE_USER_GUILD, [guildId, userId]);
@@ -192,6 +206,7 @@ class DatabaseManager {
     return "Vous avez quitté la guilde avec succès";
   }
 
+  // A revoire
   async acceptInvitation(userId, guildId) {
     // Vérifiez si l'utilisateur est un administrateur de la guilde
     const isAdmin = await this.isGuildAdmin(userId, guildId);
@@ -222,6 +237,18 @@ class DatabaseManager {
       }
       return invitations;
     }
+  }
+  /// a revoire
+
+
+  async promoteDemoteMember(userId, guildId, newClassId) {
+    ///supirmmer l'ancienne classe de l'user
+    await this.queryMain(SQL_QUERIES.DELETE_CLASS_USER, [userId]);
+    await this.queryMain(SQL_QUERIES.ADD_CLASS_TO_USER, [
+      userId,
+      guildId,
+      newClassId,
+    ]);
   }
 
   async isGuildAdmin(userId, guildId) {
