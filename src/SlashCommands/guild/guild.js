@@ -116,6 +116,12 @@ module.exports = {
         } else {
           reineInfo = "Aucune reine";
         }
+        //verification s'il y a un marchand 
+        const marchand = guildInfo.marchand;
+        let descMarchand = 'Pas de Marchand désigné';
+        if (marchand =! null) {
+          descMarchand = guildInfo.marchand;
+        }
         // verification s'il y a un ou des ministres
         const ministres = await dbManager.getGuildUserByRole(guildInfo.id, 2);
         let ministresInfo = "";
@@ -172,6 +178,11 @@ module.exports = {
               name: "Ministre",
               value: ministresInfo,
               inline: true,
+            },
+            {
+              name : "Marchand",
+              value : descMarchand,
+              inline : true
             },
             {
               name: `${emoji(emo.xp)} XP`,
@@ -235,15 +246,15 @@ module.exports = {
               const getMembers = await dbManager.getGuildMembers(guildId);
               const guildInfo = await dbManager.getGuildInfo(guildId);
               if (getMembers.length >= params.maxJoueurLvl[guildInfo.level]) {
-                return interaction.reply(
-                  `Impossible de rejoindre la guild car elle est complète`
+                return interaction.reply({content:`Impossible de rejoindre la guild car elle est complète`, ephemeral: true }
+                  
                 );
               } else {
                 // rejoindre la guild
                 await dbManager.deleteInvitation(userId);
                 await dbManager.joinGuild(userId, guildId);
-                return interaction.reply(
-                  `Vous avez rejoint la guilde: ${invitations[0].tag}.`
+                return interaction.reply({content :`Vous avez rejoint la guilde: ${invitations[0].tag}.`, ephemeral: true }
+                  
                 );
               }
             } else {
@@ -265,13 +276,13 @@ module.exports = {
                 });
               }
 
-              return interaction.reply({ embeds: [embed] });
+              return interaction.reply({ embeds: [embed], ephemeral: true });
             }
           } else {
             // User Fournis un tag
             const guild = await dbManager.getGuildByTag(tag);
             if (!guild) {
-              return interaction.reply("Guilde non trouvée avec ce tag.");
+              return interaction.reply({content: `Guilde non trouvée avec le tag: [${tag}]`, ephemeral: true }  );
             }
 
             switch (guild.type) {
@@ -281,21 +292,21 @@ module.exports = {
                 const getMembers = await dbManager.getGuildMembers(guild.id);
                 const guildInfo = await dbManager.getGuildInfo(guild.id);
                 if (getMembers.length >= params.maxJoueurLvl[guildInfo.level]) {
-                  return interaction.reply(
-                    `Impossible de rejoindre la guild car elle est complète`
+                  return interaction.reply({content:`Impossible de rejoindre la guild car elle est complète`, ephemeral: true }
+                    
                   );
                 } else {
                   await dbManager.joinGuild(userId, guild.id);
                   await dbManager.deleteInvitation(userId);
-                  return interaction.reply(
-                    `Vous avez rejoint la guilde ${guild.nom}.`
+                  return interaction.reply( {content:`Vous avez rejoint la guilde ${guild.nom}.`, ephemeral: true }
+                    
                   );
                 }
 
               case 2:
                 // si Guild fermé
-                return interaction.reply(
-                  "La guilde est fermée et ne peut pas être rejointe."
+                return interaction.reply({content:"La guilde est fermée et ne peut pas être rejointe." , ephemeral: true}
+                  
                 );
               case 1:
                 // si guild sur inviatation
@@ -304,8 +315,8 @@ module.exports = {
 
                 // check si guild non complète
                 if (getMembers.length >= params.maxJoueurLvl[guildInfo.level]) {
-                  return interaction.reply(
-                    `Impossible de rejoindre, ou demander à rejoindre la guild car elle est complète`
+                  return interaction.reply({content: `Impossible de rejoindre, ou demander à rejoindre la guilde car elle est complète`, ephemeral: true}
+                    
                   );
                 } else {
                   const existingInvitation =
@@ -313,26 +324,26 @@ module.exports = {
                   if (existingInvitation) {
                     await dbManager.deleteInvitation(userId);
                     await dbManager.joinGuild(userId, guild.id);
-                    return interaction.reply(
-                      `Vous avez rejoint la guilde ${guild.nom}.`
+                    return interaction.reply( {content:`Vous avez rejoint la guilde ${guild.nom}.` , ephemeral: true}
+                      
                     );
                   } else {
                     // sinon envoyé une demande
                     await dbManager.createInvitation(userId, guild.id, 1);
-                    return interaction.reply(
-                      `Votre demande pour rejoindre la guilde ${guild.nom} a été envoyée.`
+                    return interaction.reply( {content:`Votre demande pour rejoindre la guilde ${guild.nom} a été envoyée.` , ephemeral: true}
+                      
                     );
                   }
                 }
 
               default:
-                return interaction.reply("Type de guilde inconnu.");
+                return interaction.reply({content: "Type de guilde inconnu.", ephemeral: true});
             }
           }
         } catch (error) {
           console.error(error);
-          return interaction.reply(
-            "Une erreur s'est produite lors de la tentative de rejoindre la guilde."
+          return interaction.reply({content:"Une erreur s'est produite lors de la tentative de rejoindre la guilde." , ephemeral: true}
+            
           );
         }
 
@@ -353,8 +364,8 @@ module.exports = {
           // Vérifier si l'utilisateur est membre d'une guilde
           const userStats = await dbManager.getStats(userId);
           if (!userStats.guildId) {
-            return interaction.reply(
-              "Vous devez être membre d'une guilde pour utiliser cette commande."
+            return interaction.reply({content:"Vous devez être membre d'une guilde pour utiliser cette commande." , ephemeral: true}
+              
             );
           }
 
@@ -367,17 +378,17 @@ module.exports = {
           // Ajouter le montant à la banque de la guilde
           await dbManager.addGuildBank(userStats.guildId, amount);
 
-          return interaction.reply(
-            `Vous avez donné ${amount} ${emoji(
+          return interaction.reply({content: `Vous avez donné ${amount} ${emoji(
               emo.power
             )} à votre guilde et reçu un remboursement de ${roundedRefund}  ${emoji(
               emo.power
-            )}.`
+            )}.\n MERCI <3` , ephemeral: true}
+           
           );
         } catch (error) {
           console.error(error);
-          return interaction.reply(
-            "Une erreur s'est produite lors de la tentative de donner à votre guilde."
+          return interaction.reply({content: "Une erreur s'est produite lors de la tentative de donner à votre guilde.", ephemeral: true}
+            
           );
         }
 

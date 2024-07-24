@@ -65,7 +65,6 @@ module.exports = {
           "Vous n'avez pas le rôle requis pour créer une guilde."
         );
       }
-
       // Vérifier si la couleur spécifiée est en format hexadécimal
 
       if (!/^#[0-9A-F]{6}$/i.test(guildColorInput)) {

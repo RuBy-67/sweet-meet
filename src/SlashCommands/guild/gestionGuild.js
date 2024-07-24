@@ -10,7 +10,8 @@ const emo = require("../../jsons/emoji.json");
 const config = require("../../jsons/config.json");
 const params = require("../../jsons/param.json");
 const color = require("../../jsons/color.json");
-const guild = require("./guild");
+const Player = require("../../class/player");
+const player = new Player();
 
 module.exports = {
   name: "gestionguild",
@@ -117,6 +118,19 @@ module.exports = {
         },
         {
           type: 1,
+          name: "setmarchand",
+          description: "Promouvoir un membre au rôle de marchand",
+          options: [
+            {
+              type: 6, // 6 corresponds à USER
+              name: "membre",
+              description: "Membre à promouvoir",
+              required: true,
+            },
+          ],
+        },
+        {
+          type: 1,
           name: "invite",
           description: "Inviter un joueur dans la guilde",
           options: [
@@ -194,9 +208,9 @@ module.exports = {
             }
             if (guildInfo.banque < params.changeGuildName) {
               return interaction.reply({
-                content: `La guilde n'a pas assez de fragments pour effectuer cette action. [${
-                  params.changeGuildName
-                } ${emoji(emo.power)}]`,
+                content: `La guilde n'a pas assez de fragments pour effectuer cette action. [**${
+                  guildInfo.banque
+                } / ${params.changeGuildName} ${emoji(emo.power)}**]`,
               });
             }
             let tag = guildName.substring(0, 3).toUpperCase();
@@ -226,9 +240,9 @@ module.exports = {
             }
             if (guildInfo.banque < params.changeGuildDescription) {
               return interaction.reply({
-                content: `La guilde n'a pas assez de fragments pour effectuer cette action. [${
-                  params.changeGuildDescription
-                } ${emoji(emo.power)}]`,
+                content: `La guilde n'a pas assez de fragments pour effectuer cette action. [**${
+                  guildInfo.banque
+                } / ${params.changeGuildDescription} ${emoji(emo.power)}**]`,
               });
             }
             // Mettre à jour la description de la guilde dans la base de données
@@ -260,9 +274,9 @@ module.exports = {
             }
             if (guildInfo.banque < params.changeGuildBanner) {
               return interaction.reply({
-                content: `La guilde n'a pas assez de fragments pour effectuer cette action. [${
-                  params.changeGuildBanner
-                } ${emoji(emo.power)}]`,
+                content: `La guilde n'a pas assez de fragments pour effectuer cette action. [**${
+                  guildInfo.banque
+                } / ${params.changeGuildBanner} ${emoji(emo.power)}**]`,
               });
             }
             // Exemple : Mettre à jour la bannière de la guilde dans la base de données
@@ -287,9 +301,9 @@ module.exports = {
             }
             if (guildInfo.banque < params.changeGuildStatut) {
               return interaction.reply({
-                content: `La guilde n'a pas assez de fragments pour effectuer cette action. [${
-                  params.changeGuildStatut
-                } ${emoji(emo.power)}]`,
+                content: `La guilde n'a pas assez de fragments pour effectuer cette action. [**${
+                  guildInfo.banque
+                } / ${params.changeGuildStatut} ${emoji(emo.power)}**]`,
               });
             }
             // Exemple : Mettre à jour le statut d'invitation de la guilde dans la base de données
@@ -334,7 +348,8 @@ module.exports = {
           return interaction.reply({
             content: `La guilde n'a pas assez d'XP pour passer au niveau suivant. Il lui faut au moins ${requiredXP} ${emoji(
               emo.xp
-            )}.`,
+            )}.\n\n
+            **${guildInfo.xp} / ${requiredXP}** ${emoji(emo.xp)}`,
             ephemeral: true,
           });
         }
@@ -345,7 +360,9 @@ module.exports = {
           return interaction.reply({
             content: `La guilde n'a pas assez de fragments dans la banque pour effectuer cette amélioration. Il lui faut au moins ${upgradePrice} ${emoji(
               emo.power
-            )}.`,
+            )}.\n\n**${guildInfo.banque} / ${upgradePrice}** ${emoji(
+              emo.power
+            )}`,
             ephemeral: true,
           });
         }
@@ -479,6 +496,18 @@ module.exports = {
                 ephemeral: true,
               });
             }
+            if (guildInfo.banque < params.promote.Ministre + 10000) {
+              return interaction.reply({
+                content: `La banque de Guilde doit au minimum posseder **${
+                  params.promote.Ministre + 10000
+                }** ${emoji(
+                  emo.power
+                )}, pour pouvoir promouvoir un membre\n- __Banque Actuelle :__${
+                  guildInfo.banque
+                } / ${params.promote.Ministre + 10000} ${emoji(emo.power)} `,
+                ephemeral: true,
+              });
+            }
 
             // verifier si l'utilisateurs à promouvoir, fait partie de la guilde, ou s'il n'est pas déjà admin de la guilde
             const memberToPromote = await dbManager.getStats(
@@ -521,9 +550,17 @@ module.exports = {
                     newClassId
                   );
                   const ClassName = dbManager.getClassName(newClassId);
+                  await dbManager.addGuildBank(
+                    guildId,
+                    -params.promote[ClassName]
+                  );
                   return interaction.reply({
                     content: `Le membre à été promu au rang de ${ClassName}  ${emoji(
-                      emo[`class${newClassId}`]
+                      emo[
+                        `class${newClassId}\n\nCoût : **${
+                          params.promote[ClassName]
+                        }** ${emoji(emo.power)}`
+                      ]
                     )}`,
                     ephemeral: true,
                   });
@@ -540,9 +577,17 @@ module.exports = {
                     newClassId
                   );
                   const ClassName = dbManager.getClassName(newClassId);
+                  await dbManager.addGuildBank(
+                    guildId,
+                    -params.promote[ClassName]
+                  );
                   return interaction.reply({
                     content: `Le membre à été promus au rang de ${ClassName}  ${emoji(
-                      emo[`class${newClassId}`]
+                      emo[
+                        `class${newClassId}\n\nCoût : **${
+                          params.promote[ClassName]
+                        }** ${emoji(emo.power)}`
+                      ]
                     )}`,
                     ephemeral: true,
                   });
@@ -657,17 +702,18 @@ module.exports = {
                 1
               );
               if (invitation.length > 0) {
-                   await dbManager.joinGuild(userIdToInvite.id, guildId)
-                   interaction.reply({content: `L'user étant déjà en attente pour rejoindre la guilde le joueurs à automatiquement rejoin la guilde`, ephemeral: true})
-                   interaction.reply({content: `le joueursn <@${userIdToInvite.id}> fait maintenant parti de la guilde [${guildInfo.tag}] - ${guildInfo.nom}` })
+                await dbManager.joinGuild(userIdToInvite.id, guildId);
+                return interaction.reply({
+                  content: `L'user étant déjà en attente pour rejoindre la guilde le joueurs à automatiquement rejoin la guilde\n\n- Le joueur <@${userIdToInvite.id}> fait maintenant parti de la guilde [${guildInfo.tag}] - ${guildInfo.nom}`,
+                  ephemeral: true,
+                });
               } else {
-                 await dbManager.createInvitation(guildId, userIdToInvite.id, 2);
-              await interaction.reply({
-                content: `L'utilisateur ${userIdToInvite.username} a été invité dans la guilde ${guildInfo.nom}.`,
-                ephemeral: true,
-              });
+                await dbManager.createInvitation(guildId, userIdToInvite.id, 2);
+                await interaction.reply({
+                  content: `L'utilisateur ${userIdToInvite.username} a été invité dans la guilde ${guildInfo.nom}.`,
+                  ephemeral: true,
+                });
               }
-
             } else {
               return interaction.reply({
                 content: `L'user est déjà dans une guild, impossible de l'inviter`,
@@ -678,13 +724,175 @@ module.exports = {
             break;
 
           case "accept":
-            // Logique pour accepter une demande dans la guilde
-            //Afficher la liste des membre (max 25) qui ont demander à rejoindre la guilde dans un embed
-            // mettre la même liste dans un selectMenue (pour accepter ou non le membre)
-            // Liste 1 accepter
-            // Liste 2 refuser
-            // LA selection accepte (fait entré le membre dans la guilde) ou refuse (suprimme l'invitation (where 1?))
-            break;
+            const invitations = await dbManager.getGuildInvitations(guildId);
+            if (invitations.length === 0) {
+              return interaction.reply({
+                content: "Aucune demande de rejoindre la guilde.",
+                ephemeral: true,
+              });
+            } else {
+              const memberOptions = await Promise.all(
+                invitations.map(async (invitation) => {
+                  const user = await client.users.fetch(invitation.userId);
+                  const stats = await player.getStatsById(invitation.userId);
+                  return {
+                    label: user.username,
+                    value: user.id,
+                    power: stats.power,
+                    sante: stats.sante,
+                    defense: stats.defense,
+                    attaque: stats.attaque,
+                  };
+                })
+              );
+              let description =
+                "Sélectionnez les membres à accepter ou refuser:\n";
+              memberOptions.forEach((member) => {
+                description += `**${member.label}**, ***STATS***: **${
+                  member.power
+                } ${emoji(emo.power)}**, **${member.sante}💚**, **${
+                  member.defense
+                }🛡️**, **${member.attaque}⚔️**\n\n`;
+              });
+              const embed = new EmbedBuilder()
+                .setTitle("Demandes de rejoindre la guilde")
+                .setDescription(description);
+
+              const acceptMenu = new StringSelectMenuBuilder()
+                .setCustomId("select-accept-member")
+                .setPlaceholder("Choisir un membre à accepter")
+                .addOptions(memberOptions);
+
+              // Créer le select menu pour refuser
+              const rejectMenu = new StringSelectMenuBuilder()
+                .setCustomId("select-reject-member")
+                .setPlaceholder("Choisir un membre à refuser")
+                .addOptions(memberOptions);
+              const acceptRow = new ActionRowBuilder().addComponents(
+                acceptMenu
+              );
+              const rejectRow = new ActionRowBuilder().addComponents(
+                rejectMenu
+              );
+
+              await interaction.reply({
+                embeds: [embed],
+                components: [acceptRow, rejectRow],
+                ephemeral: true,
+              });
+              client.on("interactionCreate", async (menuInteraction) => {
+                if (!menuInteraction.isStringSelectMenu()) return;
+
+                const selectedMemberId = menuInteraction.values[0];
+                if (menuInteraction.customId === "select-accept-member") {
+                  // Accepter le membre
+                  await dbManager.joinGuild(selectedMemberId, guildId);
+                  await menuInteraction.update({
+                    content: `Le membre <@${selectedMemberId}> a été accepté dans la guilde. [${guildInfo.tag}]`,
+                    components: [],
+                  });
+                } else if (
+                  menuInteraction.customId === "select-reject-member"
+                ) {
+                  // Refuser le membre
+                  await dbManager.deleteInvitation(
+                    selectedMemberId,
+                    guildId,
+                    1
+                  );
+                  await menuInteraction.update({
+                    content: `La demande du membre <@${selectedMemberId}> a été refusée.`,
+                    components: [],
+                  });
+                }
+              });
+            }
+
+          case "setmarchand":
+            const userIdTo = interaction.options.getUser("membre").id;
+            if (interaction.user.id !== guildInfo.empreur) {
+              return interaction.reply({
+                content: "Seul l'empereur peut promouvoir un marchand.",
+                ephemeral: true,
+              });
+            }
+            // Vérifier si le membre à promouvoir possède le rôle requis
+            const member = await interaction.guild.members.fetch(
+              userIdToPromote
+            );
+            const requiredRoleId = "1246944923526234113";
+            const requiredRole =
+              interaction.guild.roles.cache.get(requiredRoleId);
+            if (!member.roles.cache.has(requiredRole)) {
+              return interaction.reply({
+                content: `Le membre à promouvoir doit posséder le rôle requis. **@${requiredRole.name}**.`,
+                ephemeral: true,
+              });
+            }
+            // Vérifier si un marchand est déjà en place
+            const currentMarchand = await dbManager.getCurrentMarchand(guildId);
+            if (currentMarchand) {
+              const confirmationMessage = await interaction.reply({
+                content:
+                  "Un marchand est déjà en place. Souhaitez-vous le remplacer ?",
+                components: [
+                  new ActionRowBuilder().addComponents(
+                    new ButtonBuilder()
+                      .setCustomId("replace-marchand-yes")
+                      .setLabel("✅ Oui")
+                      .setStyle("PRIMARY"),
+                    new ButtonBuilder()
+                      .setCustomId("replace-marchand-no")
+                      .setLabel("❌ Non")
+                      .setStyle("SECONDARY")
+                  ),
+                ],
+                ephemeral: true,
+                fetchReply: true,
+              });
+              // Attendre la réponse de l'utilisateur
+              const filter = (i) =>
+                i.customId === "replace-marchand-yes" ||
+                i.customId === "replace-marchand-no";
+              const response = await confirmationMessage.awaitMessageComponent({
+                filter,
+                time: 60000,
+              });
+
+              if (response.customId === "replace-marchand-no") {
+                return response.update({
+                  content: "Le marchand actuel n'a pas été remplacé.",
+                  components: [],
+                });
+              } else {
+                // Supprimer le marchand actuel
+                await dbManager.updateMarchand(null, guildId);
+              }
+            }
+            // Vérifier que la guilde a assez de fragments
+            const cost = params.promote.Marchand;
+            if (guildInfo.banque < cost) {
+              return interaction.reply({
+                content: `La guilde n'a pas assez de fragments pour promouvoir un marchand.\n **${
+                  guildInfo.banque
+                } / ${cost}** ${emoji(emo.power)}`,
+                ephemeral: true,
+              });
+            }
+            await dbManager.updateMarchand(userIdToPromote, guildId);
+            await dbManager.addGuildBank(guildId, -cost);
+            return interaction.reply({
+              content: `Le membre <@${userIdToPromote}> a été promu au rang de marchand de guild, pour la guilde [${guildInfo.tag}]`,
+            });
+
+          // doit posséder le role = 1246944923526234113 --> sinon erreur
+          // est mis avec la fonction dbManager.updateMarchand(userId, guildId)--> déjà mis en place
+          // seule l'empreur peut effectuer cette action (guildInfo.empreur)
+          // Max 1 marchand si j'ai 1 marchand déjà en place dans la guild je met :
+          // Un Marchand est déjà en place souhaiter vous le remplacer (oui / non)
+          // SI oui Update
+          // SI non pas d'update
+          // le prix est définie par params.promote.Marchand je dois donc si le marchand est affecté update la banque en conséquence (et verifier que la guilde à asser de fragment guildInfo.banque) --> si non message
 
           default:
             await interaction.reply({

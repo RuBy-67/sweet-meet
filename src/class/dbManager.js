@@ -86,14 +86,8 @@ class DatabaseManager {
       lvl,
     ]);
   }
-  async getGuildInvitation(guildId) {
+  async getGuildInvitations(guildId) {
     return this.queryMain(SQL_QUERIES.GET_GUILD_INVITATION, [guildId]);
-  }
-  async getGuildInvitationByUser(guildId, userId) {
-    return this.queryMain(SQL_QUERIES.GET_GUILD_INVITATION_BY_USER, [
-      guildId,
-      userId,
-    ]);
   }
   async getUserInvitation(userId) {
     return this.queryMain(SQL_QUERIES.CHECK_INVITATIONS, [userId]);
@@ -102,13 +96,17 @@ class DatabaseManager {
     return this.queryMain(SQL_QUERIES.CHECK_INVITATIONS_BY_GUILD, [
       userId,
       guildId,
-      type
+      type,
     ]);
   }
 
-
   async createInvitation(userId, guildId, type) {
-    return this.queryMain(SQL_QUERIES.INSERT_INVITATION, [
+    await this.queryMain(SQL_QUERIES.DELETE_INVITATION, [
+      guildId,
+      userId,
+      type,
+    ]);
+    await this.queryMain(SQL_QUERIES.INSERT_INVITATION, [
       guildId,
       userId,
       type,
@@ -120,12 +118,11 @@ class DatabaseManager {
 
   async deleteInvitationByUserAndGuildId(userId, guildId, type) {}
 
-
   async getGuildByName(guildName) {
     return this.queryMain(SQL_QUERIES.GET_GUILD_BY_NAME, [guildName]);
   }
   async getClassName(idClass) {
-    return this.query(SQL_QUERIES.GET_CLASS_NAME,[idClass]);
+    return this.query(SQL_QUERIES.GET_CLASS_NAME, [idClass]);
   }
 
   async getGuildInfo(guildId) {
@@ -182,6 +179,9 @@ class DatabaseManager {
   async updateGuildBanner(guildId, banner) {
     await this.queryMain(SQL_QUERIES.UPDATE_GUILD_BANNER, [banner, guildId]);
   }
+  async updateMarchand(userId, guildId) {
+    await this.queryMain(SQL_QUERIES.UPDATE_GUILD_MARCHAND, [userId, guildId]);
+  }
   async updateGuildInvitationStatus(guildId, statut) {
     await this.queryMain(SQL_QUERIES.UPDATE_GUILD_INVITATION_STATUS, [
       statut,
@@ -193,13 +193,17 @@ class DatabaseManager {
     const userGuildResult = await this.queryMain(SQL_QUERIES.GET_USER_GUILD, [
       userId,
     ]);
+
     const userIsOwner = await this.getGuildByOwnerId(userId);
     if (userIsOwner.length > 0) {
       return "Un empreur ne peut pas quitter sa guilde";
     }
-
-    if (!userGuildResult.length || userGuildResult[0].guildId === null) {
-      throw new Error("Pas dans une guild");
+    const guildInfo = await this.queryMain(SQL_QUERIES.GET_GUILD_INFO, [
+      userGuildResult,
+    ]);
+    if (guildInfo.marchand == userId) {
+      /// A verifier FONCTIONNELLE ?
+      await this.updateMarchand(NULL, guildInfo.id);
     }
     await this.queryMain(SQL_QUERIES.LEAVE_GUILD, [userId]);
     await this.queryMain(SQL_QUERIES.DELETE_CLASS_USER, [userId]);
@@ -239,7 +243,6 @@ class DatabaseManager {
     }
   }
   /// a revoire
-
 
   async promoteDemoteMember(userId, guildId, newClassId) {
     ///supirmmer l'ancienne classe de l'user
