@@ -41,6 +41,10 @@ async function handleVoiceReward(userId, totalTime, channel) {
   if (powerIncrement > 0) {
     try {
       await db.updatePower(userId, powerIncrement);
+      if ((stats.guildId = !null)) {
+        // à verifier si c'est pas trop
+        await db.updateGuildXp(stats.guildId, powerIncrement * 7);
+      }
     } catch (error) {
       console.error(
         `Failed to add Fragments of Protection to user ${userId}:`,

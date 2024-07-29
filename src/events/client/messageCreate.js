@@ -3,6 +3,7 @@ const DatabaseManager = require("../../class/dbManager");
 const db = new DatabaseManager();
 const userLastMessage = new Map();
 const config = require("../../jsons/config.json");
+const guild = require("../../SlashCommands/guild/guild");
 
 module.exports = {
   name: Events.MessageCreate,
@@ -53,6 +54,11 @@ module.exports = {
 
     try {
       await db.updatePower(userId, powerIncrement);
+      const stats = await db.getStats(userId);
+      if ((stats.guildId = !null)) {
+        // à verifier si c'est pas trop
+        await db.updateGuildXp(stats.guildId, powerIncrement * 7);
+      }
     } catch (error) {
       console.error(
         `Failed to add Fragments of Protection to user ${userId}:`,

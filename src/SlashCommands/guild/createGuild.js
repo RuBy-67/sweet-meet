@@ -17,12 +17,6 @@ module.exports = {
       required: true,
     },
     {
-      name: "color",
-      description: "Couleurs de la guilde (hex code, e.g., #ff5733)",
-      type: 3,
-      required: true,
-    },
-    {
       name: "description",
       description: "une description de la guilde",
       type: 3,
@@ -52,7 +46,8 @@ module.exports = {
     const requiredRoleId = "1246944929675087914";
     const maxGuilds = 20;
     const guildName = interaction.options.getString("name");
-    const guildColorInput = interaction.options.getString("color");
+    const guildColorInput =
+      "#" + ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, "0");
     const guildDescription = interaction.options.getString("description");
 
     try {
@@ -138,7 +133,7 @@ module.exports = {
         .setDescription(
           `Votre guilde "${guildName}" a été créée avec succès ! et 40000 ${emoji(
             emo.power
-          )} attribué à la guilde\nTag de guilde : \`\`${uniqueTag}\`\``
+          )} attribué à la guilde\nTag de guilde : \`\`${uniqueTag}\`\`\nLe code couleur de la guilde est (Aléatoire) : ${guildColor}, modifiable à partir du Niveau 2 de guilde`
         )
         .setFooter({
           text: `Demandé(e) par ${interaction.user.tag}`,

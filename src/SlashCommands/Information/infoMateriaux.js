@@ -11,7 +11,7 @@ const dbManager = new DatabaseManager();
 const config = require("../../jsons/config.json");
 
 module.exports = {
-  name: "infos",
+  name: "generale",
   description: "informations sur les Objets Roles et Badges disponible",
   options: [
     {

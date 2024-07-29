@@ -456,6 +456,9 @@ class DatabaseManager {
       classId,
     ]);
   }
+  async updateGuildXp(guildId, amount) {
+    return this.queryMain(SQL_QUERIES.UPDATE_GUILD_XP, [amount, guildId]);
+  }
   async updateClassToUser(userId, guildId, classId) {
     return this.queryMain(SQL_QUERIES.UPDATE_CLASS_TO_USER, [
       userId,

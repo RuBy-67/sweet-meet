@@ -6,7 +6,7 @@ const color = require(`../../jsons/color.json`);
 const config = require("../../jsons/config.json");
 
 module.exports = {
-  name: "infolore",
+  name: "lore",
   description: "Information sur le lore de Valoria",
   options: null,
   run: async (client, interaction, args) => {
