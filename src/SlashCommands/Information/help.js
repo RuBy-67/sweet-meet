@@ -48,11 +48,11 @@ module.exports = {
           {
             name: "🌐 Social",
             value: [
-              "**/social** - Gérez vos interactions sociales",
               "**/mariage** - Mariez-vous avec un autre utilisateur",
               "**/divorce** - Divorcez de votre partenaire",
-              "**/profil** - Affichez votre profil utilisateur",
-              "**/infobot** - informations sur le bot (MAJ, prévision ...)",
+              "**/infos social** - Gérez vos interactions sociales",
+              "**/infos profil** - Affichez votre profil utilisateur",
+              "**/infos bot** - informations sur le bot (MAJ, prévision ...)",
             ].join("\n"),
           },
           {
@@ -77,13 +77,13 @@ module.exports = {
           name: "⚔️ Commande de Duel",
           value: [
             "**/duel @user** - Défiez un guerrier",
-            "**/setmateriaux** - Choisissez les matériaux à utiliser",
+            "**/materiaux setmateriaux** - Choisissez les matériaux à utiliser",
             "**/freedaylibox** - Réclamez votre free daily box",
-            "**/upgrade** - Améliorez vos matériaux",
-            "**/sell** - Vendez vos matériaux",
-            "**/classement** - Consultez le classement des joueurs",
-            "**/infos [ ]** - Consultez les informations sur les matériaux, roles, badges, etc.",
-            "**/infolore** - Consultez les informations sur le lore de Valoria",
+            "**/materiaux upgrade** - Améliorez vos matériaux",
+            "**/materiaux sell** - Vendez vos matériaux",
+            "**/infos classement** - Consultez le classement des joueurs",
+            "**/infos generales [ ]** - Consultez les informations sur les matériaux, roles, badges, etc.",
+            "**/infos lore** - Consultez les informations sur le lore de Valoria",
           ].join("\n"),
         })
         .setFooter({
@@ -103,12 +103,37 @@ module.exports = {
           iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
         }),
       new EmbedBuilder()
-        .setTitle("Help - Royaume 🚧🚧🚧")
+        .setTitle("Help - Guildes ")
         .setColor(colors)
         .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-        .setDescription(
-          "Aucun Royaume n'a encore été créé, revenez plus tard pour plus d'information."
-        )
+        .setDescription("")
+        .addFields({
+          name: "⚔️ Commande de Guildes",
+          value: [
+            "***Joueurs***",
+            "**/createguild** - Créer une guilde",
+            "**/deleteguild** - Créer une guilde",
+            "**/guild info** - Obtenir les infos d'une guilde",
+            "**/guild join** - Rejoindre une guilde",
+            "**/guild leave** - Quitter sa guilde actuelle",
+            "**/guild give** - Donner des fragments à sa guilde",
+            "**/guild update [Nom, Description, Bannière, StatutInvit]** - Mettre à jour les informations de la guilde",
+            "***Admin de guild***",
+            "**/gestionguild upgrade** - Améliorer la guilde (level)",
+            "**/gestionguild membre kick ** - Exclure un membre de la guilde ",
+            "**/gestionguild membre promote** - Promouvoir un membre de la guilde",
+            "**/gestionguild membre demote** - Rétrograder un membre de la guilde",
+            "**/gestionguild membre setmarchand** - Promouvoir un membre au rôle de marchand",
+            "**/gestionguild membre invite** - Inviter un joueur dans la guilde",
+            "**/gestionguild membre accept** - Accepter une invitation dans la guilde",
+            "***Marchand***",
+            "**/marchand** - Ouvrir la boutique de la guilde",
+            "***Chevalier***",
+            "**/chevalier** - Ouvrir la boutique de la guilde",
+            "***Nobles***",
+            "**/nobles** - Ouvrir la boutique de la guilde",
+          ].join("\n"),
+        })
         .setFooter({
           text: `Demandé(e) par ${interaction.user.tag}`,
           iconURL: interaction.user.displayAvatarURL({ dynamic: true }),

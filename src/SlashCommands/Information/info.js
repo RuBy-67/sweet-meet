@@ -14,7 +14,7 @@ const Player = require("../../class/player");
 const player = new Player();
 
 module.exports = {
-  name: "info",
+  name: "infos",
   description: "Informations sur generale",
   options: [
     {
