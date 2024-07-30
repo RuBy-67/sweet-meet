@@ -81,6 +81,11 @@ module.exports = {
       description: "Améliorer la guilde (level)",
     },
     {
+      type: 1,
+      name: "help",
+      description: "Commande d'aide de gestion de guilde",
+    },
+    {
       type: 2,
       name: "membre",
       description: "gérer les membres de la guilde",
@@ -187,6 +192,26 @@ module.exports = {
     }
     console.log("vérification guildId" + guildId);
     switch (subCommand) {
+      case "help":
+        const helpEmbed = new EmbedBuilder()
+          .setTitle("📚 Aide de gestion de guilde")
+          .setColor(Embedcolors)
+          .setDescription("Commandes de gestion de guilde, pour les admins")
+          .addFields({
+            name: `${emoji(emo.ministre)} Commandes pour les Admins de Guildes`,
+            value: [
+              "- **/gestionguild upgrade** - Améliorer la guilde (level)",
+              "- **/gestionguild update [Nom, Description, Bannière, StatutInvit]** - Mettre à jour les informations de la guilde",
+              "- **/gestionguild membre kick** - Exclure un membre de la guilde",
+              "- **/gestionguild membre promote** - Promouvoir un membre de la guilde",
+              "- **/gestionguild membre demote** - Rétrograder un membre de la guilde",
+              "- **/gestionguild membre setmarchand** - Promouvoir un membre au rôle de marchand",
+              "- **/gestionguild membre invite** - Inviter un joueur dans la guilde",
+              "- **/gestionguild membre accept** - Accepter une invitation dans la guilde",
+            ].join("\n"),
+          });
+        return interaction.reply({ embeds: [helpEmbed] });
+        break;
       case "update":
         const choix = interaction.options.getString("choix");
         const valeur = interaction.options.getString("valeur");

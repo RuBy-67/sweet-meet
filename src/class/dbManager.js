@@ -45,7 +45,8 @@ class DatabaseManager {
     if (userStats.guildId !== null) {
       const result = await this.queryMain(SQL_QUERIES.GET_COLOR, [userId]);
       if (result && result[0] && result[0].bannière) {
-        return result[0].bannière;
+        const color = result[0].bannière;
+        return color;
       } else {
         return "#e08dac";
       }
@@ -122,7 +123,7 @@ class DatabaseManager {
     return this.queryMain(SQL_QUERIES.GET_GUILD_BY_NAME, [guildName]);
   }
   async getClassName(idClass) {
-    return this.query(SQL_QUERIES.GET_CLASS_NAME, [idClass]);
+    return this.queryMain(SQL_QUERIES.GET_CLASS_NAME, [idClass]);
   }
 
   async getGuildInfo(guildId) {
@@ -255,7 +256,7 @@ class DatabaseManager {
   }
 
   async isGuildAdmin(userId, guildId) {
-    const guild = await this.getGuildById(guildId);
+    const [guild] = await this.getGuildById(guildId);
     if (guild.empreur === userId) {
       return true;
     }

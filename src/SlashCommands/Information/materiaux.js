@@ -33,7 +33,7 @@ module.exports = {
     {
       type: 1,
       name: "setmateriaux",
-      description: "setActiveMateriaux",
+      description: "Mettre actif un materiau pour le combat",
     },
   ],
   run: async (client, interaction, args) => {

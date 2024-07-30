@@ -44,7 +44,7 @@ module.exports = {
     {
       type: 1,
       name: "give",
-      description: "Donner à sa guilde",
+      description: "Donner des fragments à sa guilde",
       options: [
         {
           type: 4, // 4 correspond à INTEGER

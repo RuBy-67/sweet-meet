@@ -13,6 +13,7 @@ const config = require("../../jsons/config.json");
 const params = require("../../jsons/param.json");
 const color = require("../../jsons/color.json");
 const Player = require("../../class/player");
+const info = require("../../jsons/info.json");
 const player = new Player();
 
 module.exports = {
@@ -206,11 +207,42 @@ module.exports = {
         if (roleInfo.length > 0) {
           role = roleInfo.map((role1) => `<@&${role1.id}>`).join(" ");
         }
+        let EmbedColor = colors;
+        let guildTag = "";
+        console.log("guildId : " + statsResult.guildId);
+        if (statsResult.guildId != null) {
+          const [guildInfo] = await dbManager.getGuildById(statsResult.guildId);
+
+          const guildInfoClassId = await dbManager.getUserClass(
+            targetUser.id,
+            statsResult.guildId
+          );
+          console.log(guildInfo.empreur + " / " + targetUser.id);
+
+          if (guildInfo.empreur === targetUser.id) {
+            guildTag = `${emoji(emo.King)} Empereur de la guilde ${
+              guildInfo.nom
+            } **[${guildInfo.tag}]**`;
+            EmbedColor = guildInfo.bannière;
+          } else {
+            const guildInfoClassName = await dbManager.getClassName(
+              guildInfoClassId
+            );
+            guildTag = `${emoji(
+              emo[`class${guildInfoClassId}`]
+            )} ${guildInfoClassName} de la guilde ${guildInfo.nom} **[${
+              guildInfo.tag
+            }]**`;
+            EmbedColor = guildInfo.bannière;
+          }
+        } else {
+          guildTag = "Aucune guilde associée";
+        }
         const pages = [
           new EmbedBuilder()
 
             .setTitle(`Profil de ${targetUser.username}`)
-            .setColor(colors)
+            .setColor(EmbedColor)
             .setThumbnail(targetUser.displayAvatarURL({ dynamic: true }))
             .addFields(
               {
@@ -219,27 +251,34 @@ module.exports = {
                 inline: true,
               },
               {
-                name: "Fragments :",
-                value: `${power} ${emoji(emo.power)}` || "0",
+                name: "Guilde :",
+                value: guildTag,
+              },
+              {
+                name: "Information :",
+                value: `Fragments : ${power
+                  .toString()
+                  .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}${emoji(
+                  emo.power
+                )}\nBadges : ${badges}\n `,
                 inline: true,
               },
-              { name: "Badges :", value: badges || "Aucun", inline: false },
               {
                 name: "Roles :",
                 value: role || "Aucun",
-                inline: false,
+                inline: true,
               },
               {
                 name: "Matériaux :",
                 value: materiaux || "Aucun",
                 inline: false,
               },
-              { name: "Win :", value: `${win}`, inline: true },
-              { name: "Lose :", value: `${lose}`, inline: true },
               {
-                name: "Rate :",
-                value: `${(rate * 100).toFixed(2)}%`,
-                inline: true,
+                name: "Performance",
+                value: `🏆 Win : **${win}**\n❌ Lose : **${lose}**\n📊 Rate : **${(
+                  rate * 100
+                ).toFixed(2)}%**`,
+                inline: false,
               },
               {
                 name: "Statistique de combat",
@@ -372,7 +411,7 @@ module.exports = {
           .setTitle("InfoLore - Valoria")
           .setColor(colors)
           .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-          .setDescription()
+          .setDescription("description")
           .addFields(
             {
               name: "📖 - Histoire",
@@ -431,12 +470,12 @@ module.exports = {
           )
           .addFields(
             {
-              name: "📚 V 0.1.2 -> V 1.0.0 Sortie de béta",
-              value: `>>> - Ajout des DayBox et Randombox dans la boutique\n- Reset des Fragements\n- Ajout des Dayli free box\n- Ajout Roulette Russe (Admin) et solo \n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
+              name: "📚 V 1.5.0",
+              value: `>>> - Ajout d'une campagne solo\n- Ajout des Guilde (Empereur)\n- Ajout Duel 'Publique'\n- Ajout de l'utilité des role 🟢 \n- Marchand, chevalier guilde au rapport\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
             },
             {
-              name: "📚 V 1.0.0-> ...",
-              value: `>>> - Ajout d'une campagne solo\n- Ajout des royaumes (Empereur)\n- Ajout Duel 'Publique'\n- Ajout de l'utilité des role, badge, mariage \n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
+              name: "📚 V 1.5.0 -->",
+              value: `>>> - Ajout de "combat de guilde" sur un royaume (territoire), permettant le farm de fragment et ressource pour mener à bien votre conquête de valoria, qui sera le nouveau prétendant au titre d'empereur suprême de valoria ?\n`,
             }
           )
           .setFooter({
@@ -516,6 +555,8 @@ module.exports = {
         });
 
         embeds.push(currentEmbed);
+
+        return interaction.reply({ embeds: embeds });
       case "classement":
         const embedClassement = new EmbedBuilder()
           .setTitle(`Classement des utilisateurs`)

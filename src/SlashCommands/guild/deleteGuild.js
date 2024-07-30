@@ -6,8 +6,8 @@ const dbManager = new DatabaseManager();
 
 module.exports = {
   name: "deleteguild",
-  description: "Delete your guild",
-  options: null, 
+  description: "Suprimmer votre guilde",
+  options: null,
   run: async (client, interaction, args) => {
     const userId = interaction.user.id;
     const colors = await dbManager.getColor(userId);
