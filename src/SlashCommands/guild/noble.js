@@ -17,8 +17,8 @@ const { description } = require("./guild");
 const player = new Player();
 
 module.exports = {
-  name: "marchand",
-  description: "🚨 Réservé au marchand d'une guilde",
+  name: "noble",
+  description: "🚨 Réservé aux nobles d'une guilde",
   options: [
     {
       type: 1,

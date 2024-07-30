@@ -83,6 +83,7 @@ module.exports = {
         if (guildName) {
           // Recherche de la guilde par son nom
           guildInfo = await dbManager.getGuildByName(guildName);
+          console.log(guildInfo);
 
           if (!guildInfo) {
             interaction.reply({
@@ -119,7 +120,7 @@ module.exports = {
         //verification s'il y a un marchand
         const marchand = guildInfo.marchand;
         let descMarchand = "Pas de Marchand désigné";
-        if ((marchand = !null)) {
+        if (marchand != null) {
           descMarchand = guildInfo.marchand;
         }
         // verification s'il y a un ou des ministres
@@ -153,8 +154,9 @@ module.exports = {
           emoLevel = emoji(emo.level5);
         }
         const xpString =
-          guildInfo.xp.toString() + "/" + parseInt(params.xp[guildInfo.level]);
+          guildInfo.xp + "/" + parseInt(params.xp[guildInfo.level]);
         const colors = guildInfo.bannière;
+        console.log(colors);
         const embedInfo = new EmbedBuilder()
           .setTitle(`Infos de la guilde ${guildInfo.nom}`)
           .setColor(colors)
@@ -230,8 +232,17 @@ module.exports = {
         return interaction.reply({ embeds: [embedInfo] });
 
       case "join":
+        const tag = interaction.options.getString("tag");
+        const alreadyInGuild = await dbManager.getStats(userId);
+        if (alreadyInGuild.guildId != null) {
+          return interaction.reply({
+            content: "Vous êtes déjà membre d'une guilde.",
+            ephemeral: true,
+          });
+        }
         try {
           if (!tag) {
+            console.log("Pas de tag");
             // User n'a pas fournis de TAG
             const invitations = await dbManager.getUserInvitation(userId);
             if (invitations.length === 0) {
@@ -255,7 +266,7 @@ module.exports = {
                 await dbManager.deleteInvitation(userId);
                 await dbManager.joinGuild(userId, guildId);
                 return interaction.reply({
-                  content: `Vous avez rejoint la guilde: ${invitations[0].tag}.`,
+                  content: `Vous avez rejoint la guilde: ${guildInfo.tag}.`,
                   ephemeral: true,
                 });
               }
@@ -281,6 +292,8 @@ module.exports = {
               return interaction.reply({ embeds: [embed], ephemeral: true });
             }
           } else {
+            console.log("tag fournis");
+            console.log(tag);
             // User Fournis un tag
             const guild = await dbManager.getGuildByTag(tag);
             if (!guild) {
@@ -290,22 +303,23 @@ module.exports = {
               });
             }
 
-            switch (guild.type) {
+            const guildInfo = await dbManager.getGuildInfo(guild[0].id);
+            const getMembers = await dbManager.getGuildMembers(guildInfo.id);
+            switch (guildInfo.statutInvit) {
               case 3:
                 // si Guild OUverte
                 // verifier que la guild n'est pas complète :
-                const getMembers = await dbManager.getGuildMembers(guild.id);
-                const guildInfo = await dbManager.getGuildInfo(guild.id);
+
                 if (getMembers.length >= params.maxJoueurLvl[guildInfo.level]) {
                   return interaction.reply({
                     content: `Impossible de rejoindre la guild car elle est complète`,
                     ephemeral: true,
                   });
                 } else {
-                  await dbManager.joinGuild(userId, guild.id);
+                  await dbManager.joinGuild(userId, guild[0].id);
                   await dbManager.deleteInvitation(userId);
                   return interaction.reply({
-                    content: `Vous avez rejoint la guilde ${guild.nom}.`,
+                    content: `Vous avez rejoint la guilde ${guildInfo.nom}.`,
                     ephemeral: true,
                   });
                 }
@@ -318,9 +332,7 @@ module.exports = {
                 });
               case 1:
                 // si guild sur inviatation
-
                 // si invitation existe --> rejoindre guild
-
                 // check si guild non complète
                 if (getMembers.length >= params.maxJoueurLvl[guildInfo.level]) {
                   return interaction.reply({
@@ -331,21 +343,21 @@ module.exports = {
                   const existingInvitation =
                     await dbManager.getUserInvitationByGuild(
                       userId,
-                      guild.id,
+                      guildInfo.id,
                       2
                     );
-                  if (existingInvitation) {
+                  if (existingInvitation.length > 0) {
                     await dbManager.deleteInvitation(userId);
-                    await dbManager.joinGuild(userId, guild.id);
+                    await dbManager.joinGuild(userId, guildInfo.id);
                     return interaction.reply({
-                      content: `Vous avez rejoint la guilde ${guild.nom}.`,
+                      content: `Vous avez rejoint la guilde ${guildInfo.nom}.`,
                       ephemeral: true,
                     });
                   } else {
                     // sinon envoyé une demande
-                    await dbManager.createInvitation(userId, guild.id, 1);
+                    await dbManager.createInvitation(userId, guildInfo.id, 1);
                     return interaction.reply({
-                      content: `Votre demande pour rejoindre la guilde ${guild.nom} a été envoyée.`,
+                      content: `Votre demande pour rejoindre la guilde ${guildInfo.nom} a été envoyée.`,
                       ephemeral: true,
                     });
                   }
@@ -368,9 +380,16 @@ module.exports = {
         }
 
       case "leave":
+        const InGuild = await dbManager.getStats(userId);
+        if (InGuild.guildId > 0) {
+          return interaction.reply({
+            content: "Vous n'êtes membre d'aucune guilde.",
+            ephemeral: true,
+          });
+        }
         try {
           const resultLeave = await dbManager.leaveGuild(userId);
-          return interaction.reply({ content: resultLeave });
+          return interaction.reply({ content: resultLeave, ephemeral: true });
         } catch (error) {
           console.error(error);
           return interaction.reply({
@@ -380,7 +399,7 @@ module.exports = {
         }
       case "give":
         try {
-          const amount = args.find((arg) => arg.name === "amount")?.value;
+          const amount = interaction.options.getInteger("amount");
           // Vérifier si l'utilisateur est membre d'une guilde
           const userStats = await dbManager.getStats(userId);
           if (!userStats.guildId) {

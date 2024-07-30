@@ -78,7 +78,9 @@ module.exports = {
           .setTitle("Boutique - Vente")
           .setColor(colors)
           .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-          .setDescription("Choisissez un objet à vendre:")
+          .setDescription(
+            "Choisissez un objet à vendre dans la liste ci-dessous"
+          )
           .setFooter({
             text: `Demandé(e) par ${interaction.user.tag}`,
             iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
@@ -88,12 +90,13 @@ module.exports = {
           new StringSelectMenuBuilder()
             .setCustomId("sell_select")
             .setPlaceholder("Choisissez un objet à vendre")
+            .setMaxValues(1)
             .addOptions(
               ...userMaterials.map((material) => ({
                 emoji: emo[material.nom] || `❔`,
                 label: `${material.nom} => lvl: ${material.lvl}`,
                 description: `Prix: ${Math.floor(
-                  param.boutique.vente.prix.materiaux[material.rarete] *
+                  params.boutique.vente.prix.materiaux[material.rarete] *
                     material.lvl *
                     0.6
                 )}`,
@@ -102,7 +105,11 @@ module.exports = {
             )
         );
 
-        await interaction.reply({ embeds: [embed], components: [row] });
+        await interaction.reply({
+          embeds: [embed],
+          components: [row],
+          ephemeral: true,
+        });
 
         const filter = (i) =>
           i.customId === "sell_select" && i.user.id === interaction.user.id;
@@ -134,12 +141,13 @@ module.exports = {
             content: `Êtes-vous sûr de vendre **${
               selectedMaterial.nom
             }** pour ${Math.floor(
-              param.boutique.vente.prix.materiaux[selectedMaterial.rarete] *
+              params.boutique.vente.prix.materiaux[selectedMaterial.rarete] *
                 level *
                 0.6
             )} ${emoji(emo.power)} ?`,
             components: [confirmationRow],
             embeds: [],
+            ephemeral: true,
           });
 
           const confirmFilter = (btnInt) =>
@@ -157,13 +165,13 @@ module.exports = {
 
             if (btnInt.customId === "confirm") {
               const prix = Math.floor(
-                param.boutique.vente.prix.materiaux[selectedMaterial.rarete] *
+                params.boutique.vente.prix.materiaux[selectedMaterial.rarete] *
                   level *
                   0.6
               );
               await dbManager.removeMaterialFromUser(idUnique);
               await dbManager.updatePower(i.user.id, -prix);
-              await i.update({
+              await btnInt.update({
                 content: `La vente de **${
                   selectedMaterial.nom
                 }** a été effectuée avec succès pour ${prix} ${emoji(
@@ -171,12 +179,14 @@ module.exports = {
                 )}.`,
                 components: [],
                 embeds: [],
+                ephemeral: true,
               });
             } else {
               await btnInt.update({
                 content: "Vente annulée.",
                 components: [],
                 embeds: [],
+                ephemeral: true,
               });
             }
           });
@@ -187,6 +197,7 @@ module.exports = {
                 content: "Temps écoulé, vente annulée.",
                 components: [],
                 embeds: [],
+                ephemeral: true,
               });
             }
           });
@@ -194,10 +205,11 @@ module.exports = {
 
         collector.on("end", async (collected) => {
           if (collected.size === 0) {
-            await interaction.editReply({
+            await interaction.followUp({
               content: "Temps écoulé, vente annulée.",
               components: [],
               embeds: [],
+              ephemeral: true,
             });
           }
         });
@@ -222,12 +234,12 @@ module.exports = {
         }
         async function componentMaterial() {
           const ownedMaterials2 = await dbManager.getMateriauByUserId(userId);
-          let components = [];
+          let componentMaterial = [];
           if (ownedMaterials.length > 0) {
             const selectMenu = new StringSelectMenuBuilder()
               .setCustomId("material_select")
               .setPlaceholder("Upgrade")
-              .setMinValues(1)
+              .setMaxValues(1)
               .addOptions(
                 ownedMaterials2.map((material) => {
                   const emoji = emo[material.nom];
@@ -255,28 +267,29 @@ module.exports = {
                 })
               );
             const actionRow = new ActionRowBuilder().addComponents(selectMenu);
-            components.push(actionRow);
+            componentMaterial.push(actionRow);
           }
-          return components;
+          return componentMaterial;
         }
 
         await interaction.reply({
           content: `**Comment le prix est calculé ? :**\n
 🔹 **Facteurs :**\n> Nombre de matériaux possédés\n> Niveaux des matériaux\n> Types des matériaux\n> Raretés des matériaux\n\n*Améliorer un matériau apportera une amélioration des bonus du materiaux.*\n\n**Sélectionnez un matériau à améliorer**`,
           components: await componentMaterial(),
+          ephemeral: true,
         });
         const collectorUp = interaction.channel.createMessageComponentCollector(
           {
-            filter: (i) =>
-              i.user.id === userId && i.customId === "material_select",
+            filter: (it) =>
+              it.user.id === userId && it.customId === "material_select",
             time: 72000,
           }
         );
-        collectorUp.on("collect", async (i) => {
-          const selectedMaterials = i.values;
+        collectorUp.on("collect", async (it) => {
+          const selectedMaterials = it.values;
           const selectedMaterialId = selectedMaterials[0];
 
-          if (i.customId === "material_select") {
+          if (it.customId === "material_select") {
             const stats = await player.getStats(userId);
             const power = stats.power;
             const [material] = await dbManager.getMateriauById(
@@ -284,7 +297,10 @@ module.exports = {
             );
 
             if (!material) {
-              return i.reply("Matériau non trouvé.");
+              return it.reply({
+                content: "Matériau non trouvé.",
+                ephemeral: true,
+              });
             }
             const baseRarity = rarityMap[material.rarete] || 1;
             const typeMultiplier = typeMultiplierMap[material.type] || 1;
@@ -298,7 +314,7 @@ module.exports = {
             );
 
             if (power < upgradePrice) {
-              return i.update({
+              return it.update({
                 content: `Vous n'avez pas assez de Fragments pour améliorer **${material.nom}**.\n(Prix:** ${upgradePrice})**\n**Vous avez :** ${power} Fragments de Protection**\n\n**Sélectionnez un matériau à améliorer**`,
                 components: await componentMaterial(),
               });
@@ -306,7 +322,7 @@ module.exports = {
 
             const newLevel = material.lvl + 1;
             if (newLevel > params.maxLevel) {
-              return i.update({
+              return it.update({
                 content: `Le niveau maximal pour **${material.nom}** est atteint. max : **(${params.maxLevel})**\n\n**Sélectionnez un matériau à améliorer**`,
                 components: await componentMaterial(),
               });
@@ -318,33 +334,32 @@ module.exports = {
             );
             if (upgrade) {
               await dbManager.setPowerById(userId, -upgradePrice);
-              return i.update({
+              return it.update({
                 content: `Le matériau **${material.nom}** a été amélioré au niveau **${newLevel}**.\n**Sélectionnez le matériau à améliorer**`,
                 components: await componentMaterial(),
               });
             } else {
-              return i.reply("Échec de la mise à jour du matériau.");
+              return it.reply({
+                content: "Erreur lors de l'amélioration du matériau.",
+                ephemeral: true,
+              });
             }
           }
           collectorUp.on("end", (collected, reason) => {
             if (reason === "time") {
-              interaction.followUp(
-                "La sélection est terminée car le délai a expiré."
-              );
+              interaction.followUp({
+                content: "La sélection est terminée car le délai a expiré.",
+                ephemeral: true,
+              });
             }
           });
         });
 
       case "setmateriaux":
-        const materialsUsed = await player.getMaterialsById(userId);
         const materials = await player.getMaterialsByIdEtat0(userId);
-        if (materials.length === 0 && materialsUsed.length === 0) {
+        const userIdMaterials = await player.getMaterialsById(userId);
+        if (materials.length === 0 && userIdMaterials.length === 0) {
           return interaction.reply("Aucun matériau disponible.");
-        }
-        if (materialsUsed.length > 4) {
-          return interaction.reply(
-            "Vous Avez déjà 4 matériaux actifs, veuillez en désactiver un pour en activer un autre."
-          );
         }
 
         async function component() {
@@ -356,7 +371,7 @@ module.exports = {
             const selectMenu = new StringSelectMenuBuilder()
               .setCustomId("material_select")
               .setPlaceholder("SetMateriaux")
-              .setMinValues(1)
+              .setMaxValues(1)
               .addOptions(
                 (await player.getMaterialsStringSelect(userId, 0, true))
                   .split("\n")
@@ -368,13 +383,6 @@ module.exports = {
                       .setValue(id);
                   })
               );
-            const maxSelectOptions = Math.min(
-              await (
-                await player.getMaterialsByIdEtat0(userId)
-              ).length,
-              4
-            );
-            selectMenu.setMaxValues(maxSelectOptions);
             const row = new ActionRowBuilder().addComponents(selectMenu);
             components.push(row);
           }
@@ -382,7 +390,7 @@ module.exports = {
             const unselectMenu = new StringSelectMenuBuilder()
               .setCustomId("material_unselect")
               .setPlaceholder("UnsetMateriaux")
-              .setMinValues(1)
+              .setMaxValues(1)
               .addOptions(
                 (await player.getMaterialsStringSelect(userId, 1, true))
                   .split("\n")
@@ -394,14 +402,6 @@ module.exports = {
                       .setValue(id);
                   })
               );
-
-            const maxOptions = Math.min(
-              await (
-                await player.getMaterialsById(userId)
-              ).length,
-              4
-            );
-            unselectMenu.setMaxValues(maxOptions);
             const row2 = new ActionRowBuilder().addComponents(unselectMenu);
 
             components.push(row2);
@@ -432,6 +432,7 @@ module.exports = {
         await interaction.reply({
           content: `Matériaux Actuellement Actifs : \n${await stringMat()}`,
           components: await component(),
+          ephemeral: true,
         });
         const collectorSet =
           interaction.channel.createMessageComponentCollector({
@@ -484,14 +485,18 @@ module.exports = {
               components: await component(),
             });
           } else {
-            await interaction.followUp("La sélection est terminée");
+            await interaction.followUp({
+              content: "La selection est terminée",
+              ephemeral: true,
+            });
           }
         });
         collectorSet.on("end", (collected, reason) => {
           if (reason === "time") {
-            interaction.followUp(
-              "La sélection est terminée car le délai a expiré."
-            );
+            interaction.followUp({
+              content: "La sélection est terminée car le délai a expiré.",
+              ephemeral: true,
+            });
           }
         });
 

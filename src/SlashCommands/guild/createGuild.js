@@ -43,17 +43,17 @@ module.exports = {
     }
 
     // Check si l'user à le role et si le max de guild n'est pas attein
-    const requiredRoleId = "1246944929675087914";
+    const requiredRoleId = "1267908548650602558"; //1267908548650602558 (test) //1246944929675087914 (prod)
     const maxGuilds = 20;
     const guildName = interaction.options.getString("name");
     const guildColorInput =
       "#" + ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, "0");
     const guildDescription = interaction.options.getString("description");
+    const member = await interaction.guild.members.fetch(interaction.user.id);
 
     try {
-      const roles = await dbManager.getRoleByUserId(userId);
-      const hasRequiredRole = roles.some(
-        (role) => role.idRole === requiredRoleId
+      const hasRequiredRole = member.roles.cache.some(
+        (role) => role.id === requiredRoleId
       );
       if (!hasRequiredRole) {
         throw new Error(
@@ -61,7 +61,6 @@ module.exports = {
         );
       }
       // Vérifier si la couleur spécifiée est en format hexadécimal
-
       if (!/^#[0-9A-F]{6}$/i.test(guildColorInput)) {
         throw new Error(
           "Le code couleur de la guilde doit être spécifié en format hexadécimal (par exemple, #ff5733)."
@@ -95,15 +94,27 @@ module.exports = {
           "Le nom de la guilde ne peut pas dépasser 20 caractères."
         );
       }
-
+      if (guildDescription.length > 250) {
+        throw new Error(
+          "La description de la guilde ne peut pas dépasser 100 caractères."
+        );
+      }
       // Créer la guilde
       const guildColor = guildColorInput.toUpperCase();
       let tag = guildName.substring(0, 3).toUpperCase();
       let suffix = 1;
       let uniqueTag = tag;
-      while (await dbManager.getGuildByTag(uniqueTag)) {
+      const maxAttempts = 8; // Limite maximale d'itérations
+      let attempts = 0;
+      while ((await dbManager.getGuildByTag(uniqueTag).length) > 0) {
+        if (attempts >= maxAttempts) {
+          throw new Error(
+            "Impossible de générer un tag de guilde unique après plusieurs tentatives."
+          );
+        }
         uniqueTag = tag + suffix;
         suffix++;
+        attempts++;
       }
 
       await dbManager.createGuild(
@@ -114,16 +125,18 @@ module.exports = {
         userId
       );
       const guildId = await dbManager.getGuildByOwnerId(userId);
-      await dbManager.updateUserGuild(guildId.id, userId);
+      console.log(guildId[0].id);
+      await dbManager.updateUserGuild(guildId[0].id, userId);
+
       await dbManager.updatePower(userId, -params.guildPrice);
       conjoint = await dbManager.getMarriage(userId);
       if (conjoint.length > 0) {
         if (conjoint.idUser1 != userId) {
-          await dbManager.addClassToUser(conjoint[0].idUser1, guildId.id, 1);
-          await dbManager.updateUserGuild(guildId.id, conjoint[0].idUser2);
+          await dbManager.addClassToUser(conjoint[0].idUser1, guildId[0].id, 1);
+          await dbManager.updateUserGuild(guildId[0].id, conjoint[0].idUser2);
         } else if (conjoint.idUser2 != userId) {
-          await dbManager.addClassToUser(conjoint[0].idUser2, guildId.id, 1);
-          await dbManager.updateUserGuild(guildId.id, conjoint[0].idUser2);
+          await dbManager.addClassToUser(conjoint[0].idUser2, guildId[0].id, 1);
+          await dbManager.updateUserGuild(guildId[0].id, conjoint[0].idUser2);
         }
       }
 
@@ -131,9 +144,9 @@ module.exports = {
         .setTitle("Guilde créée")
         .setColor(guildColor)
         .setDescription(
-          `Votre guilde "${guildName}" a été créée avec succès ! et 40000 ${emoji(
+          `Félicitations, noble Empereur! Vous êtes désormais à la tête d'un véritable empire.\nVotre guilde "${guildName} **[${uniqueTag}]** a été créée avec succès ! et 40000${emoji(
             emo.power
-          )} attribué à la guilde\nTag de guilde : \`\`${uniqueTag}\`\`\nLe code couleur de la guilde est (Aléatoire) : ${guildColor}, modifiable à partir du Niveau 2 de guilde`
+          )} attribué à la guilde\nCouleurs de Guilde (Aléatoire) : ${guildColor} (modifiable à partir du __Niveau 2__)\n\nPour gérer votre guilde, vous trouverez les commandes ici : \`/gestionguild help\`, \`/guild info\`.\n\n*Si vous êtes marié, votre impératrice vous a automatiquement rejoint et règne à vos côtés sur votre cher royaume, apportant sagesse et grâce à votre règne.*`
         )
         .setFooter({
           text: `Demandé(e) par ${interaction.user.tag}`,
@@ -147,9 +160,9 @@ module.exports = {
         .setTitle("⚠️ Accès Refusé ⚠️")
         .setColor(color.error)
         .setDescription(
-          `> ${error.message}\n\n` +
+          `> Erreur -> ${error.message}\n\n` +
             `Veuillez vérifier les conditions pour pouvoir créer une guilde:\n` +
-            `- Avoir le rôle nécessaire (${requiredRoleId})\n` +
+            `- Avoir le rôle nécessaire (<@&${requiredRoleId}>)\n` +
             `- Moins de ${maxGuilds} guildes au total\n` +
             `- Ne pas être déjà dans une guilde\n` +
             `- Avoir suffisamment de fragments (${params.guildPrice} ${emoji(
@@ -161,7 +174,7 @@ module.exports = {
           iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
         });
 
-      return interaction.reply({ embeds: [embed] });
+      return interaction.reply({ embeds: [embed], ephemeral: true });
     }
   },
 };

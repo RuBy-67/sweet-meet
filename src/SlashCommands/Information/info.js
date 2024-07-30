@@ -209,15 +209,8 @@ module.exports = {
         }
         let EmbedColor = colors;
         let guildTag = "";
-        console.log("guildId : " + statsResult.guildId);
         if (statsResult.guildId != null) {
           const [guildInfo] = await dbManager.getGuildById(statsResult.guildId);
-
-          const guildInfoClassId = await dbManager.getUserClass(
-            targetUser.id,
-            statsResult.guildId
-          );
-          console.log(guildInfo.empreur + " / " + targetUser.id);
 
           if (guildInfo.empreur === targetUser.id) {
             guildTag = `${emoji(emo.King)} Empereur de la guilde ${
@@ -225,14 +218,18 @@ module.exports = {
             } **[${guildInfo.tag}]**`;
             EmbedColor = guildInfo.bannière;
           } else {
-            const guildInfoClassName = await dbManager.getClassName(
-              guildInfoClassId
+            const guildInfoClassId = await dbManager.getUserClass(
+              targetUser.id,
+              statsResult.guildId
             );
-            guildTag = `${emoji(
-              emo[`class${guildInfoClassId}`]
-            )} ${guildInfoClassName} de la guilde ${guildInfo.nom} **[${
-              guildInfo.tag
-            }]**`;
+
+            const guildInfoClassName = await dbManager.getClassName(
+              guildInfoClassId[0].idClasse
+            );
+
+            guildTag = `${emoji(emo[`class${guildInfoClassId[0].idClasse}`])} ${
+              guildInfoClassName[0].Nom
+            } de la guilde ${guildInfo.nom} **[${guildInfo.tag}]**`;
             EmbedColor = guildInfo.bannière;
           }
         } else {
@@ -555,8 +552,90 @@ module.exports = {
         });
 
         embeds.push(currentEmbed);
+        // Determine if the rare button should appear
+        const NewShowRareButton = Math.random() < 0.01; // 1 in 100 chance
 
-        return interaction.reply({ embeds: embeds });
+        const NewRow = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId("previous")
+            .setLabel("⬅️")
+            .setStyle(ButtonStyle.Primary),
+          new ButtonBuilder()
+            .setCustomId("next")
+            .setLabel("➡️")
+            .setStyle(ButtonStyle.Primary)
+        );
+
+        if (NewShowRareButton) {
+          NewRow.addComponents(
+            new ButtonBuilder()
+              .setCustomId("secret")
+              .setLabel("🎁")
+              .setStyle(ButtonStyle.Success)
+          );
+        }
+        let NewCurrentPage = 0;
+        const NewMessage = await interaction.reply({
+          embeds: [embeds[NewCurrentPage]],
+          components: [NewRow],
+          fetchReply: true,
+        });
+
+        const gfilter = (i) =>
+          ["previous", "next", "secret", "claim"].includes(i.customId) &&
+          i.user.id === interaction.user.id;
+
+        const Gcollector = NewMessage.createMessageComponentCollector({
+          gfilter,
+          time: 80000,
+        });
+        Gcollector.on("collect", async (i) => {
+          if (i.customId === "next") {
+            NewCurrentPage = (NewCurrentPage + 1) % embeds.length;
+            await i.update({
+              embeds: [embeds[NewCurrentPage]],
+              components: [NewRow],
+            });
+          } else if (i.customId === "previous") {
+            NewCurrentPage =
+              (NewCurrentPage - 1 + embeds.length) % embeds.length;
+            await i.update({
+              embeds: [embeds[NewCurrentPage]],
+              components: [NewRow],
+            });
+          } else if (i.customId === "secret") {
+            NewRow.addComponents(
+              new ButtonBuilder()
+                .setCustomId("claim")
+                .setLabel("🧧 Claim !!!!")
+                .setStyle(ButtonStyle.Success)
+            );
+            await i.update({ embeds: [hiddenPage], components: [NewRow] });
+          } else if (i.customId === "claim") {
+            const power = await dbManager.generateRandomPower();
+            await dbManager.setPowerById(interaction.user.id, power);
+            const randomMaterial =
+              legendaryMaterials[
+                Math.floor(Math.random() * legendaryMaterials.length)
+              ];
+            await dbManager.addMaterialToUser(
+              interaction.user.id,
+              randomMaterial.id
+            );
+            await i.update({
+              content: `Claimed! reçu ${power} power et un matériel légendaire ${emoji(
+                emo[randomMaterial.nom]
+              )} ${randomMaterial.nom}.`,
+              embeds: [],
+              components: [],
+            });
+          }
+        });
+
+        Gcollector.on("end", () => {
+          NewRow.components.forEach((component) => component.setDisabled(true));
+          NewMessage.edit({ components: [NewRow] });
+        });
       case "classement":
         const embedClassement = new EmbedBuilder()
           .setTitle(`Classement des utilisateurs`)
@@ -570,17 +649,17 @@ module.exports = {
         for (let i = 0; i < powerResult.length; i++) {
           const user = `${powerResult[i].discordId}`;
           if (user === undefined) {
-            powerDescription += `${i + 1}. Utilisateur inconnu : ${
-              powerResult[i].power
-            }\n`;
+            powerDescription += `${i + 1}. Utilisateur inconnu : ${powerResult[
+              i
+            ].power.toLocaleString()}\n`;
           } else {
-            powerDescription += `${i + 1}. <@${user}> : ${
-              powerResult[i].power
-            } ${emoji(emo.power)}\n`;
+            powerDescription += `${i + 1}. <@${user}> : ${powerResult[
+              i
+            ].power.toLocaleString()} ${emoji(emo.power)}\n`;
           }
         }
         embedClassement.addFields({
-          name: "🏆 Top - Fragments de Protection",
+          name: "🏆 Top ",
           value: powerDescription,
           inline: true,
         });
@@ -607,25 +686,21 @@ module.exports = {
           inline: true,
         });
 
-        // Rank par défaite
-        const loseResult = await dbManager.getTopUsers("loseCounter", top);
-        let loseDescription = "";
-        for (let i = 0; i < loseResult.length; i++) {
-          const user = `${loseResult[i].discordId}`;
-          if (user === undefined) {
-            loseDescription += `${i + 1}. Utilisateur inconnu : ${
-              loseResult[i].loseCounter
-            }\n`;
-          } else {
-            loseDescription += `${i + 1}. <@${user}> : ${
-              loseResult[i].loseCounter
-            }\n`;
-          }
-        }
+        // Rank par puissance de Guild
+        const topGuilds = await dbManager.calculateGuildRiches();
+
+        const topGuildsDescription = topGuilds
+          .map(
+            (guild, index) =>
+              `${index + 1}. **${guild.tag}**: ${guild.richesse}${emoji(
+                emo.power
+              )}`
+          )
+          .join("\n");
         embedClassement.addFields({
-          name: "👎 Top - Looser",
-          value: loseDescription,
-          inline: true,
+          name: "👑 - Top Guild",
+          value: topGuildsDescription || "Aucune guilde disponible",
+          inline: false,
         });
 
         // Rank par Win Rate

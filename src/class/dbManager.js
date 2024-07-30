@@ -117,10 +117,16 @@ class DatabaseManager {
     return this.queryMain(SQL_QUERIES.REMOVE_INVITATION, [userId]);
   }
 
-  async deleteInvitationByUserAndGuildId(userId, guildId, type) {}
+  async deleteInvitationByUserAndGuildId(userId, guildId, type) {
+    return this.queryMain(SQL_QUERIES.DELETE_INVITATION, [userId, guildId]);
+  }
 
   async getGuildByName(guildName) {
-    return this.queryMain(SQL_QUERIES.GET_GUILD_BY_NAME, [guildName]);
+    const result = await this.queryMain(SQL_QUERIES.GET_GUILD_BY_NAME, [
+      guildName,
+      guildName,
+    ]);
+    return result[0];
   }
   async getClassName(idClass) {
     return this.queryMain(SQL_QUERIES.GET_CLASS_NAME, [idClass]);
@@ -157,8 +163,9 @@ class DatabaseManager {
   async joinGuild(userId, guildId) {
     await this.queryMain(SQL_QUERIES.UPDATE_USER_GUILD, [guildId, userId]);
     await this.queryMain(SQL_QUERIES.ADD_CLASS_TO_USER, [userId, guildId, 5]);
+    await this.queryMain(SQL_QUERIES.REMOVE_INVITATION, [userId]);
   }
-  async updateUserGuild(userId, guildId) {
+  async updateUserGuild(guildId, userId) {
     await this.queryMain(SQL_QUERIES.UPDATE_USER_GUILD, [guildId, userId]);
   }
   async addGuildBank(guildId, amount) {
@@ -170,6 +177,33 @@ class DatabaseManager {
       guildId,
       tag,
     ]);
+  }
+  async getAllGuilds() {
+    return this.queryMain(SQL_QUERIES.GET_GUILD);
+  }
+
+  async calculateGuildRiches() {
+    const allGuilds = await this.getAllGuilds();
+    const guildRiches = [];
+    for (const guild of allGuilds) {
+      const guildId = guild.id;
+      const guildMembers = await this.getGuildMembers(guildId);
+      let totalRiches = guild.banque;
+      for (const member of guildMembers) {
+        const memberStats = await this.getStats(member.discordId);
+        totalRiches += memberStats.power;
+      }
+      guildRiches.push({
+        guildTag: guild.tag,
+        totalRiches: totalRiches,
+      });
+    }
+    guildRiches.sort((a, b) => b.totalRiches - a.totalRiches);
+    const topGuilds = guildRiches.slice(0, 5);
+    return topGuilds.map((guild) => ({
+      tag: guild.guildTag,
+      richesse: guild.totalRiches.toLocaleString(),
+    }));
   }
   async updateGuildDescription(guildId, description) {
     await this.queryMain(SQL_QUERIES.UPDATE_GUILD_DESCRIPTION, [
@@ -365,6 +399,9 @@ class DatabaseManager {
   async getMateriauByUserId(userId) {
     return this.queryMain(SQL_QUERIES.GET_MATERIAU_BY_USER_ID, [userId]);
   }
+  async materiauById(id) {
+    return this.queryMain(SQL_QUERIES.GET_MATERIAU_BY_ID, [id]);
+  }
 
   async getUserDataBo(userId) {
     return this.queryBo(SQL_QUERIES.GET_USER_DATA_BO, [userId]);
@@ -502,9 +539,11 @@ class DatabaseManager {
     return result[0];
   }
   async deleteGuildByOwnerId(userId) {
-    guildId = await this.getGuildByOwnerId(userId);
+    const guildId = await this.getGuildByOwnerId(userId);
     await this.queryMain(SQL_QUERIES.DELETE_GUILD_BY_OWNER_ID, [userId]);
-    await this.queryMain(SQL_QUERIES.REMOVE_GUILD_ID_FROM_USER, [guildId]);
+    await this.queryMain(SQL_QUERIES.REMOVE_GUILD_ID_FROM_USER, [
+      guildId[0].id,
+    ]);
   }
   async getRolesFromDB() {
     return this.queryMain(SQL_QUERIES.GET_ROLES);

@@ -262,6 +262,12 @@ class Player extends DatabaseManager {
     ]);
     return result || [];
   }
+  async getMaterialsByIdEtat1(userId) {
+    const [result] = await pool.query(sqlQueries.getMaterialsByIdEtat1, [
+      userId,
+    ]);
+    return result || [];
+  }
 
   async insertMaterialsIntoDuelDetail(duelId, userId, materialIds) {
     const [materialId1, materialId2, materialId3, materialId4] = materialIds;
