@@ -218,7 +218,7 @@ module.exports = {
         if (ownedMaterials.length === 0) {
           return interaction.reply("Aucun matériau disponible.");
         }
-        async function component() {
+        async function componentMaterial() {
           const ownedMaterials2 = await dbManager.getMateriauByUserId(userId);
           let components = [];
           if (ownedMaterials.length > 0) {
@@ -261,7 +261,7 @@ module.exports = {
         await interaction.reply({
           content: `**Comment le prix est calculé ? :**\n
 🔹 **Facteurs :**\n> Nombre de matériaux possédés\n> Niveaux des matériaux\n> Types des matériaux\n> Raretés des matériaux\n\n*Améliorer un matériau apportera une amélioration des bonus du materiaux.*\n\n**Sélectionnez un matériau à améliorer**`,
-          components: await component(),
+          components: await componentMaterial(),
         });
         const collectorUp = interaction.channel.createMessageComponentCollector(
           {
@@ -298,7 +298,7 @@ module.exports = {
             if (power < upgradePrice) {
               return i.update({
                 content: `Vous n'avez pas assez de Fragments pour améliorer **${material.nom}**.\n(Prix:** ${upgradePrice})**\n**Vous avez :** ${power} Fragments de Protection**\n\n**Sélectionnez un matériau à améliorer**`,
-                components: await component(),
+                components: await componentMaterial(),
               });
             }
 
@@ -306,7 +306,7 @@ module.exports = {
             if (newLevel > params.maxLevel) {
               return i.update({
                 content: `Le niveau maximal pour **${material.nom}** est atteint. max : **(${params.maxLevel})**\n\n**Sélectionnez un matériau à améliorer**`,
-                components: await component(),
+                components: await componentMaterial(),
               });
             }
             const upgrade = await dbManager.updateMaterialLevel(
@@ -318,7 +318,7 @@ module.exports = {
               await dbManager.setPowerById(userId, -upgradePrice);
               return i.update({
                 content: `Le matériau **${material.nom}** a été amélioré au niveau **${newLevel}**.\n**Sélectionnez le matériau à améliorer**`,
-                components: await component(),
+                components: await componentMaterial(),
               });
             } else {
               return i.reply("Échec de la mise à jour du matériau.");

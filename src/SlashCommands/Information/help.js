@@ -129,9 +129,9 @@ module.exports = {
             "***Marchand***",
             "**/marchand** - Ouvrir la boutique de la guilde",
             "***Chevalier***",
-            "**/chevalier** - Ouvrir la boutique de la guilde",
+            "**/chevalier** - ",
             "***Nobles***",
-            "**/nobles** - Ouvrir la boutique de la guilde",
+            "**/nobles** - ",
           ].join("\n"),
         })
         .setFooter({

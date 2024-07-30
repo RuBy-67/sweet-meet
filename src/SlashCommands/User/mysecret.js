@@ -21,12 +21,12 @@ module.exports = {
       commandName,
       cooldownDuration
     );
-    if (config.maintenance) {
+    if (!config.maintenance) {
       const embed = new EmbedBuilder()
         .setTitle("⚒️ Maintenance ⚒️")
         .setColor(color.error)
         .setDescription(
-          `> Le bot est actuellement en maintenance, veuillez réessayer plus tard.`
+          `> La commande est actuellement en maintenance, veuillez réessayer plus tard.`
         )
         .setColor(color.error);
       return interaction.reply({ embeds: [embed] });

@@ -3,7 +3,7 @@ const { EmbedBuilder } = require("discord.js");
 const emo = require(`../../jsons/emoji.json`);
 const color = require(`../../jsons/color.json`);
 const { connection } = require("../../db");
-const bonus = require("../../jsons/userBonus.json");
+//const bonus = require("../../jsons/userBonus.json");
 
 module.exports = {
   name: "create-accounts",
@@ -50,7 +50,7 @@ module.exports = {
             .query("INSERT INTO badge_user (idUser, idBadge) VALUES (?, 1)", [
               member.id,
             ]);
-          if (bonus[member.id]) {
+          /*if (bonus[member.id]) {
             // Insert the badge corresponding to the user's ID from userBonus.json
             await connection
               .promise()
@@ -69,7 +69,7 @@ module.exports = {
             console.log(
               `Badge TESTER AND power Bonus applied to user ${member.user.tag}`
             );
-          }
+          }*/
 
           console.log(`Account created for user ${member.user.tag}`);
           i++;
