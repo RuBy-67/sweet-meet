@@ -128,22 +128,32 @@ module.exports = {
         let attaque = bossInfo.attaque;
         let defense = bossInfo.defense;
         let sante = bossInfo.sante;
+        let recompenseV = 8000;
+        let recompenseD = 2000;
         if (difficulty === "1") {
           attaque = attaque * 0.5;
           defense = defense * 0.5;
           sante = sante * 0.5;
+          recompenseV = recompenseV * 2;
+          recompenseD = recompenseD * 0.5;
         } else if (difficulty === "2") {
           attaque = attaque * 0.75;
           defense = defense * 0.75;
           sante = sante * 0.75;
+          recompenseV = recompenseV * 2;
+          recompenseD = recompenseD * 0.75;
         } else if (difficulty === "3") {
           attaque = attaque * 1.25;
           defense = defense * 1.25;
           sante = sante * 1.25;
+          recompenseV = recompenseV * 3;
+          recompenseD = recompenseD * 1.25;
         } else if (difficulty === "4") {
           attaque = attaque * 1.5;
           defense = defense * 1.5;
           sante = sante * 1.5;
+          recompenseV = recompenseV * 5;
+          recompenseD = recompenseD * 2;
         }
         const embed = new EmbedBuilder()
           .setTitle(`Entraînement contre ${bossInfo.nom}`)
@@ -163,6 +173,12 @@ module.exports = {
             {
               name: "Statistiques",
               value: `⚔️__Attaque:__ *${attaque}*\n🛡️__Défense:__ *${defense}*\n💚__Santé:__ *${sante}*`,
+            },
+            {
+              name: "Récompense",
+              value: `Victoire: ${recompenseV} ${emoji(
+                emo.power
+              )} \nDéfaite: ${recompenseD} ${emoji(emo.power)}`,
             }
           )
           .setColor(Embedcolors);
