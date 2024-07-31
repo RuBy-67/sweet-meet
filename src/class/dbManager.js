@@ -5,7 +5,7 @@ class DatabaseManager {
   constructor() {
     this.pool = pool;
     this.poolBo = poolBo;
-    //this.poolCampagne = poolCampagne;
+    this.poolCampagne = poolCampagne;
   }
 
   async query(pool, sql, params) {
@@ -26,9 +26,9 @@ class DatabaseManager {
     return this.query(this.poolBo, sql, params);
   }
 
-  /*async queryCampagne(sql, params) {
+  async queryCampagne(sql, params) {
     return this.query(this.poolCampagne, sql, params);
-  }*/
+  }
 
   async insertBackupUserData(userData) {
     const { discordId, power, winCounter, loseCounter } = userData;

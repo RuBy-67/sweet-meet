@@ -15,6 +15,9 @@ const color = require("../../jsons/color.json");
 const Player = require("../../class/player");
 const { description } = require("./guild");
 const player = new Player();
+const Boss = require("../../class/bossManager");
+const { name } = require("../guild/guild");
+const bosses = new Boss();
 
 module.exports = {
   name: "campagne",
@@ -78,39 +81,17 @@ module.exports = {
           name: "boss",
           description: "Qui voulez-vous affronter ?",
           choices: [
-            {
-              name: `Malakar`,
-              value: "malakar",
-            },
-            {
-              name: `Zarathos`,
-              value: "zarathos",
-            },
-            {
-              name: `Xerath`,
-
-              value: "xerath",
-            },
-            {
-              name: `Lyrathia `,
-              value: "lyrathia",
-            },
-            {
-              name: `Thalgrimm `,
-              value: "thalgrimm",
-            },
-            {
-              name: `Vorgoth`,
-              value: "vorgoth",
-            },
-            {
-              name: `Morvath`,
-              value: "morvath",
-            },
-            {
-              name: `Draugr`,
-              value: "draugr",
-            },
+            { name: `Malakar`, value: "1" },
+            { name: `Zarathos`, value: "2" },
+            { name: `Xerath`, value: "3" },
+            { name: `Lyrathia `, value: "4" },
+            { name: `Thalgrimm `, value: "5" },
+            { name: `Vorgoth`, value: "6" },
+            { name: `Morvath`, value: "7" },
+            { name: `Nexar`, value: "8" },
+            { name: `Korgath`, value: "9" },
+            { name: `Seraphina`, value: "10" },
+            { name: `Draugr`, value: "8" },
           ],
           required: true,
         },
@@ -136,9 +117,114 @@ module.exports = {
         "Missing Emoji"
       );
     }
+    const userId = interaction.user.id;
     const subCommand = interaction.options.getSubcommand();
     switch (subCommand) {
-      case "help":
+      case "entrainement":
+        const difficulty = interaction.options.getString("difficulté");
+
+        const boss = interaction.options.getString("boss");
+        const bossInfo = await bosses.getInfoBossById(boss);
+        let attaque = bossInfo.attaque;
+        let defense = bossInfo.defense;
+        let sante = bossInfo.sante;
+        if (difficulty === "1") {
+          attaque = attaque * 0.5;
+          defense = defense * 0.5;
+          sante = sante * 0.5;
+        } else if (difficulty === "2") {
+          attaque = attaque * 0.75;
+          defense = defense * 0.75;
+          sante = sante * 0.75;
+        } else if (difficulty === "3") {
+          attaque = attaque * 1.25;
+          defense = defense * 1.25;
+          sante = sante * 1.25;
+        } else if (difficulty === "4") {
+          attaque = attaque * 1.5;
+          defense = defense * 1.5;
+          sante = sante * 1.5;
+        }
+        const embed = new EmbedBuilder()
+          .setTitle(`Entraînement contre ${bossInfo.nom}`)
+          .setThumbnail(bossInfo.image)
+          .setDescription(`*${bossInfo.lore}*\n\nCarte du boss`)
+          .addFields(
+            { name: "Nom du Boss", value: bossInfo.nom, inline: true },
+            { name: "Difficulté", value: difficulty, inline: true },
+            {
+              name: "Habilite",
+              value: `__Habilité 1:__ *${bossInfo.habilite1}*\n__Habilité 2:__ *${bossInfo.habilite2}*`,
+            },
+            {
+              name: "Faiblesse",
+              value: `__Faiblesse 1:__ *${bossInfo.faiblesse1}*\n__Faiblesse 2:__ *${bossInfo.faiblesse2}*`,
+            },
+            {
+              name: "Statistiques",
+              value: `⚔️__Attaque:__ *${attaque}*\n🛡️__Défense:__ *${defense}*\n💚__Santé:__ *${sante}*`,
+            }
+          )
+          .setColor(Embedcolors);
+
+        const actionRow = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId("start_duel")
+            .setLabel("Lancer le duel")
+            .setStyle(ButtonStyle.Primary),
+          new ButtonBuilder()
+            .setCustomId("cancel_duel")
+            .setLabel("Annuler le duel")
+            .setStyle(ButtonStyle.Secondary)
+        );
+
+        await interaction.reply({
+          embeds: [embed],
+          components: [actionRow],
+        });
+
+        // Créer un collector pour gérer les interactions de boutons
+        const filter = (i) =>
+          i.customId === "start_duel" || i.customId === "cancel_duel";
+        const collector = interaction.channel.createMessageComponentCollector({
+          filter,
+          time: 60000, // Temps de validité du collector (1 minute)
+        });
+
+        collector.on("collect", async (i) => {
+          if (i.customId === "start_duel") {
+            // Logique pour lancer le duel
+            const startEmbed = new EmbedBuilder()
+              .setTitle("Duel Commencé")
+              .setDescription(
+                `Vous avez commencé un duel contre **${bossInfo.name}**! Bonne chance!`
+              )
+              .setColor(color.success);
+
+            await i.update({ embeds: [startEmbed], components: [] });
+          } else if (i.customId === "cancel_duel") {
+            // Logique pour annuler le duel
+            const cancelEmbed = new EmbedBuilder()
+              .setTitle("Duel Annulé")
+              .setDescription(
+                `Le duel contre **${bossInfo.name}** a été annulé.`
+              )
+              .setColor(color.error);
+
+            await i.update({ embeds: [cancelEmbed], components: [] });
+          }
+        });
+
+        collector.on("end", (collected, reason) => {
+          if (reason === "time") {
+            interaction.editReply({
+              content: "Le temps est écoulé pour lancer ou annuler le duel.",
+              components: [],
+            });
+          }
+        });
+        break;
+
       default:
         return interaction.reply({
           content: "Commande Invalide",

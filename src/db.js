@@ -30,7 +30,7 @@ const poolBo = mysql.createPool({
   queueLimit: 0,
 });
 
-/*const poolCampagne = mysql.createPool({
+const poolCampagne = mysql.createPool({
   host: db_host,
   user: db_user_campagne,
   password: db_password,
@@ -38,6 +38,6 @@ const poolBo = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-});*/
+});
 
-module.exports = { pool, poolBo /*poolCampagne*/ };
+module.exports = { pool, poolBo, poolCampagne };
