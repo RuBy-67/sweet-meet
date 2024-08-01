@@ -48,20 +48,8 @@ class Player extends DatabaseManager {
   }
 
   async calculateFightScoreBattle(userId, opponentId, duelId) {
-    const playerStats = await this.getStatsById(userId);
-    const opponentStats = await this.getStatsById(opponentId);
-
-    let playerScore =
-      param.facteurPower * playerStats.power * param.facteurPower +
-      param.facteurAttaque * playerStats.attaque * param.facteurAttaque +
-      param.facteurDefense * playerStats.defense * param.facteurDefense +
-      param.facteurSante * playerStats.sante * param.facteurSante;
-
-    let opponentScore =
-      param.facteurPower * opponentStats.power * param.facteurPower +
-      param.facteurAttaque * opponentStats.attaque * param.facteurAttaque +
-      param.facteurDefense * opponentStats.defense * param.facteurDefense +
-      param.facteurSante * opponentStats.sante * param.facteurSante;
+    let opponentScore = await this.calculateFightScore(opponentId);
+    let playerScore = await this.calculateFightScore(userId);
 
     const playerMaterials = await this.getMaterialsById(userId, duelId);
     const opponentMaterials = await this.getMaterialsById(opponentId, duelId);
@@ -80,18 +68,6 @@ class Player extends DatabaseManager {
       });
     });
     return { playerScore, opponentScore };
-  }
-
-  async calculateWinChance(userId, opponentId) {
-    const { playerScore, opponentScore } = await this.calculateFightScoreBattle(
-      userId,
-      opponentId
-    );
-
-    const totalScore = playerScore + opponentScore;
-    const playerWinChance = playerScore / totalScore;
-    const opponentWinChance = opponentScore / totalScore;
-    return { playerWinChance, opponentWinChance };
   }
 
   async getWinner(playerWinChance, opponentWinChance, userId, opponentId) {

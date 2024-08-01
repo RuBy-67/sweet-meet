@@ -22,12 +22,12 @@ module.exports = {
   options: [
     {
       type: 1,
-      name: "avenir",
+      name: "income",
       description: "Commande à venir",
     },
     {
       type: 1,
-      name: "avenir",
+      name: "incoming",
       description: "Commande à venir",
     },
   ],

@@ -1,4 +1,4 @@
-const { pool, poolBo /*poolCampagne*/ } = require("../db");
+const { pool, poolBo, poolCampagne } = require("../db");
 const SQL_QUERIES = require("./sqlQueriesDb");
 
 class DatabaseManager {
