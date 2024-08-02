@@ -477,6 +477,8 @@ class Player extends DatabaseManager {
   async getPotionByEtat(userId) {
     console.log("getPotionByEtat" + userId);
     const [result] = await pool.query(sqlQueries.getPotionByEtat, [userId, 1]);
+    console.log("getPotionByEtat" + userId);
+    console.log(result);
     return result;
   }
 }
