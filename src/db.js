@@ -25,7 +25,7 @@ const pool = mysql.createPool({
 
 const poolBo = mysql.createPool({
   host: db_host,
-  user: db_user,
+  user: db_user_bo,
   password: db_password,
   database: db_bo,
   waitForConnections: true,
