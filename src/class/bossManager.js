@@ -70,7 +70,7 @@ class Boss extends DatabaseManager {
       playerStats.power
     );
     let bossScore = await this.getFightScore(attaque, defense, sante, power);
-    bossScore = bossScore * 0.38;
+    bossScore = bossScore * 0.18;
     console.log("player " + playerScore);
     console.log("boss " + bossScore);
 
@@ -84,7 +84,9 @@ class Boss extends DatabaseManager {
       bossInfo,
       client,
       recompenseV,
-      recompenseD
+      recompenseD,
+      bossScore,
+      playerScore
     );
 
     return;
@@ -108,18 +110,6 @@ class Boss extends DatabaseManager {
       playerWinChance + playerRnd * param.randomFactor;
     const bossAdjustedWinChance = bossWinChance + bossRnd * param.randomFactor;
     const diff = Math.abs(playerAdjustedWinChance - bossAdjustedWinChance);
-    console.log("player " + playerAdjustedWinChance);
-    console.log("boss " + bossAdjustedWinChance);
-    console.log("diff " + diff);
-    console.log("playerRnd " + playerRnd);
-    console.log("bossRnd " + bossRnd);
-    console.log("totalScore " + totalScore);
-    console.log("playerWinChance " + playerWinChance);
-    console.log("bossWinChance " + bossWinChance);
-    console.log("playerScore " + playerScore);
-    console.log("bossScore " + bossScore);
-    console.log("playerRnd " + playerRnd);
-    console.log("bossRnd " + bossRnd);
 
     if (diff < 0.04) {
       return equal;
@@ -137,7 +127,9 @@ class Boss extends DatabaseManager {
     bossInfo,
     client,
     recompenseV,
-    recompenseD
+    recompenseD,
+    bossScore,
+    playerScore
   ) {
     function emoji(id) {
       return (
@@ -240,14 +232,24 @@ class Boss extends DatabaseManager {
       let stringDesc = "";
       if (winner) {
         await dbManager.updatePower(userId, recompenseV);
-        stringDesc = `\n\nVous avez gagné contre **${bossName}** et avez reçu **${recompenseV}** ${emoji(
+        const restStat = Math.round(
+          (playerScore / (playerScore + bossScore) -
+            bossScore / (playerScore + bossScore)) *
+            100
+        );
+        stringDesc = `\n\nVous avez gagné contre **${bossName}** et avez reçu **${recompenseV}**  ${emoji(
           emo.power
-        )}`;
+        )}\nstat restante : **${restStat}%**`;
       } else if (!winner) {
         await dbManager.updatePower(userId, -recompenseD);
-        stringDesc = `\n\nVous avez perdu contre **${bossName}** et avez perdu **${recompenseD}** ${emoji(
+        const restStat = Math.round(
+          (bossScore / (playerScore + bossScore) -
+            playerScore / (playerScore + bossScore)) *
+            100
+        );
+        stringDesc = `\n\nVous avez perdu contre **${bossName}** et avez perdu **${recompenseD}**  ${emoji(
           emo.power
-        )}`;
+        )} stat restante boss : **${restStat}%**`;
       } else {
         stringDesc = `\n\nVous avez fait match nul contre **${bossName}** Rien n'a été distribué`;
       }

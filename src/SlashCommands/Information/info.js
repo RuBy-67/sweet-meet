@@ -77,6 +77,26 @@ module.exports = {
     },
     {
       type: 1,
+      name: "guildes",
+      description: "Affiche l'aide de guildes et des infos utiles",
+    },
+    {
+      type: 1,
+      name: "roleguildes",
+      description: "Affiche les détails des rôles de guilde",
+    },
+    {
+      type: 1,
+      name: "entrainement",
+      description: "Affiche les détails de la campagne d'entrainement",
+    },
+    {
+      type: 1,
+      name: "help",
+      description: "Affiche les commandes supplémentaires",
+    },
+    {
+      type: 1,
       name: "social",
       description: "Social link of my queen (devs)",
     },
@@ -747,6 +767,124 @@ module.exports = {
             iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
           });
         return interaction.reply({ embeds: [embedSocial] });
+      case "guildes":
+        const guildsEmbed = new EmbedBuilder()
+          .setTitle("Infos - Guilde")
+          .setColor(colors)
+          .setDescription(
+            "*Les guildes de Valoria sont des organisations puissantes et influentes qui rassemblent des individus partageant les mêmes idéaux et objectifs. Chaque guilde a sa propre histoire, sa propre culture et ses propres traditions, et ses membres sont liés par des liens de camaraderie et de loyauté. Les guildes jouent un rôle crucial dans la politique, l'économie et la culture de Valoria, et leurs actions peuvent changer le cours de l'histoire.*\n\n Créez votre guilde avec `/guild create [nom] [description]`"
+          )
+          .addFields({
+            name: "🏰 - Guilde Commande",
+            value:
+              "__Pour les Admin de guilde:__\n- `/gestionguild help`\n**-----**\n__Pour les membres de guilde:__\n- `/guild join`,\n- `/guild leave`,\n- `/guild info`,\n- `/guild give [amount]`\n**-----**\n__Pour le Marchand:__\n- `/guild sell`\n- `/marchand stock`\n- `/marchand fabrique`",
+          })
+          .setFooter({
+            text: `Demandé(e) par ${interaction.user.tag}`,
+            iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+          });
+        return await interaction.reply({
+          embeds: [guildsEmbed],
+          ephemeral: true,
+        });
+      case "roleguildes":
+        const guildRolesEmbed = new EmbedBuilder()
+          .setTitle("Infos - Rôles de Guilde")
+          .setColor(colors)
+          .setDescription(
+            "*Les rôles de guilde sont des titres honorifiques et des fonctions spécifiques attribués aux membres des guildes de Valoria. Chaque rôle a ses propres responsabilités et privilèges, et contribue à la structure et au fonctionnement de la guilde. Les rôles de guilde sont un reflet de la culture et de l'organisation de chaque guilde, et ils sont souvent associés à des traditions et des rituels spécifiques.*"
+          )
+          .addFields(
+            {
+              name: `${emoji(emo.King)} - Empereur`,
+              value:
+                "L’Empereur est responsable de la guild, il peut recruter des membres, gérer les rangs et les rôles, [A venir] --> et organiser des événements pour la guilde. ",
+            },
+            {
+              name: `${emoji(emo.reine)} - Reine`,
+              value:
+                "*La reine est la compagne de l'Empereur, elle est la seconde personne la plus importante de la guilde, elle est chargée de la gestion de la guilde en l'absence de l'Empereur. Elle peut recruter des membres, gérer les rangs et les rôles, [A venir] --> et organiser des événements pour la guilde.*",
+            },
+            {
+              name: `${emoji(emo.class2)} - Ministre`,
+              value:
+                "Pour être promus Ministre il faut posséder les rôles suivant :\n- <@&1246944929675087914>\n- <@&1246944923526234113>\n- <@&1246944911580991549>\n\n*Le Ministre est le bras droit de l'Empereur, il est chargé de la gestion de la guilde et de l'organisation de la guilde. Il peut recruter des membres, gérer les rangs et les rôles, [A venir] --> et organiser des événements pour la guilde.*",
+            },
+            {
+              name: `${emoji(emo.marchand)} - Marchand`,
+              value:
+                "Pour être promus Marchand il faut posséder le rôle suivant :\n<@&1246944923526234113>\n\n*Il n'y à qu'un seul Marchand par guilde, promus par l’Empereur en personne il est le responsable de la boutique de guilde, fabrique des potions grâce à ses connaissance en Alchimie et peut vendre des potion de guilde à ses membres.*",
+            },
+            {
+              name: `${emoji(emo.class3)} - Noble`,
+              value:
+                "Pour être promus chevalier il faut posséder les rôles suivant :\n- <@&1246944929675087914>\n- <@&1246944923526234113>\n- <@&1246944911580991549>\n- <&@1216037978913378389>\n\n*Le Nobles à des droits et des devoirs envers la guilde. [A venir]*",
+            },
+            {
+              name: `${emoji(emo.class4)} - Chevalier`,
+              value:
+                "Pour être promus chevalier il faut posséder les rôles suivant :\n- <@&1247280292213948446>\n- <@&1246944929675087914>\n- <@&1246944923526234113>\n- <@&1246944911580991549>\n- <&@1216037978913378389>\n- <@&1216037978913378388>\n\n*Le Chevalier à des droits et des devoirs envers la guilde.[A venir]*",
+            },
+            {
+              name: `${emoji(emo.class5)} - Paysan`,
+              value: "*Simple de membre de Guilde*",
+            },
+            {
+              name: `${emoji(emo.Esclave)} - Esclave`,
+              value: "*Simple esclave de Guilde*",
+            }
+          )
+          .setFooter({
+            text: `Demandé(e) par ${interaction.user.tag}`,
+            iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+          });
+        await interaction.reply({
+          embeds: [guildRolesEmbed],
+          ephemeral: true,
+        });
+      case "entrainement":
+        const trainEmbed = new EmbedBuilder()
+          .setTitle("Infos - Campagne Entrainement")
+          .setColor(colors)
+          .setDescription(
+            "*La campagne d'entraînement est une série de défis conçus pour tester les compétences et la détermination des aventuriers de Valoria. Les participants doivent affronter des bosses redoutables,*\n\n- `/campagne entrainement`"
+          )
+          .setFooter({
+            text: `Demandé(e) par ${interaction.user.tag}`,
+            iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+          });
+        await interaction.reply({
+          embeds: [trainEmbed],
+          ephemeral: true,
+        });
+      case "help":
+        const helpEmbed = new EmbedBuilder()
+          .setTitle("Infos - Commandes")
+          .setColor(colors)
+          .setDescription(
+            "*Commande supplémentaire non listé dans le reste des help*"
+          )
+          .addFields({
+            name: "📚 - Général",
+            value:
+              "`/marriage` - Gérer le mariage\n" +
+              "`/divorce` - Gérer le divorce\n" +
+              "`/info profil` - Afficher le profil utilisateur\n" +
+              "`/info lore` - Obtenir des informations sur le lore\n" +
+              "`/info bot` - Informations sur le bot (MAJ ect)\n" +
+              "`/info generale` - Informations générales, Matériaux, Badge, Role\n" +
+              "`/info classement` - Voir les classements\n" +
+              "`/info social`\n" +
+              "`/info guildes` - Informations sur les guildes\n" +
+              "`/info roleguildes` - Informations sur les rôles de guilde\n" +
+              "`/info entrainement` - Informations sur l'entraînement\n" +
+              "`/gestionguild help` - Aide pour la gestion de guilde\n",
+          })
+          .setFooter({
+            text: `Demandé(e) par ${interaction.user.tag}`,
+            iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+          });
+        await interaction.reply({ embeds: [helpEmbed], ephemeral: true });
 
       default:
         await interaction.reply({
