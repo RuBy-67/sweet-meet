@@ -475,11 +475,17 @@ class Player extends DatabaseManager {
     return weightedMaterials[randomIndex];
   }
   async getPotionByEtat(userId) {
-    console.log("getPotionByEtat" + userId);
-    const [result] = await pool.query(sqlQueries.getPotionByEtat, [userId, 1]);
-    console.log("getPotionByEtat" + userId);
-    console.log(result);
-    return result;
+    console.log("Début de getPotionByEtat avec userId:", userId);
+    try {
+      // Exécuter la requête SQL et récupérer les résultats
+      const [rows] = await pool.query(sqlQueries.getPotionByEtat, [userId, 1]);
+      console.log("Résultat de la requête:", rows);
+      return rows; // Retourner le tableau des résultats
+    } catch (error) {
+      // Afficher l'erreur en cas de problème
+      console.error("Erreur lors de l'exécution de la requête SQL:", error);
+      throw error; // Propager l'erreur
+    }
   }
 }
 
