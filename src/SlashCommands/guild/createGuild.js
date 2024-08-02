@@ -43,7 +43,7 @@ module.exports = {
     }
 
     // Check si l'user à le role et si le max de guild n'est pas attein
-    const requiredRoleId = "1267908548650602558"; //1267908548650602558 (test) //1246944929675087914 (prod)
+    const requiredRoleId = "1246944929675087914"; //1267908548650602558 (test) //1246944929675087914 (prod)
     const maxGuilds = 20;
     const guildName = interaction.options.getString("name");
     const guildColorInput =

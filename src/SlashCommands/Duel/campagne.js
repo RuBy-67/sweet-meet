@@ -140,26 +140,26 @@ module.exports = {
         let defense = bossInfo.defense;
         let sante = bossInfo.sante;
         let recompenseV = 8000;
-        let recompenseD = 2000;
+        let recompenseD = 8000;
         if (difficulty === "1") {
           attaque = Math.round(attaque * 0.5);
           defense = Math.round(defense * 0.5);
           sante = Math.round(sante * 0.5);
-          recompenseV = recompenseV * 2;
-          recompenseD = recompenseD * 0.5;
+          recompenseV = recompenseV * 0.5;
+          recompenseD = recompenseD * 0.25;
           difficultyString = "Facile";
         } else if (difficulty === "2") {
           attaque = Math.round(attaque * 0.75);
           defense = Math.round(defense * 0.75);
           sante = Math.round(sante * 0.75);
-          recompenseV = recompenseV * 2;
-          recompenseD = recompenseD * 0.75;
+          recompenseV = recompenseV * 1;
+          recompenseD = recompenseD * 0.5;
           difficultyString = "Moyen";
         } else if (difficulty === "3") {
           attaque = Math.round(attaque * 1.25);
           defense = Math.round(defense * 1.25);
           sante = Math.round(sante * 1.25);
-          recompenseV = recompenseV * 3;
+          recompenseV = recompenseV * 2;
           recompenseD = recompenseD * 1.25;
           difficultyString = "Difficile";
         } else if (difficulty === "4") {
@@ -277,7 +277,11 @@ module.exports = {
           }
         });
         break;
-
+      case "solo":
+        return interaction.reply({
+          content: "Commande à venir",
+          ephemeral: true,
+        });
       default:
         return interaction.reply({
           content: "Commande Invalide",

@@ -22,11 +22,6 @@ module.exports = {
   options: [
     {
       type: 1,
-      name: "income",
-      description: "Commande à venir",
-    },
-    {
-      type: 1,
       name: "incoming",
       description: "Commande à venir",
     },
@@ -52,7 +47,11 @@ module.exports = {
     }
     const subCommand = interaction.options.getSubcommand();
     switch (subCommand) {
-      case "help":
+      case "incoming":
+        return interaction.reply({
+          content: "Commande à venir",
+          ephemeral: true,
+        });
       default:
         return interaction.reply({
           content: "Commande Invalide",

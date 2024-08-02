@@ -205,6 +205,16 @@ module.exports = {
         parisWin = Math.floor(paris * (75 / 100));
         parisLose = Math.floor(paris * (25 / 100));
         parisDraw = Math.floor((paris / 2) * 1.02);
+        let addGuildBank = Math.round(parisWin / 2);
+        const stat = await dbManager.getStats(winner);
+        let stringGuild = " ";
+        if (stat.guildId) {
+          await dbManager.addGuildBank(stat.guildId, addGuildBank);
+          stringGuild = `**${addGuildBank}** ${emoji(
+            emo.power
+          )} ont été ajoutés à la banque de guilde de <@&${winner}>`;
+        }
+
         if (winner === userId) {
           await player.updatePower(userId, parisWin);
           await player.updatePower(membre.id, parisLose);
@@ -262,7 +272,7 @@ module.exports = {
             const duelEmbed = new EmbedBuilder()
               .setTitle("Duel terminé")
               .setDescription(
-                `Le duel entre <@${userId}> et <@${membre.id}> est terminé.`
+                `Le duel entre <@${userId}> et <@${membre.id}> est terminé.\n- ${stringGuild}`
               )
               .addFields(
                 {

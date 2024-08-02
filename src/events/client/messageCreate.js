@@ -55,9 +55,10 @@ module.exports = {
     try {
       await db.updatePower(userId, powerIncrement);
       const stats = await db.getStats(userId);
-      if ((stats.guildId = !null)) {
+      if (stats.guildId != null) {
         // à verifier si c'est pas trop
-        await db.updateGuildXp(stats.guildId, powerIncrement * 7);
+        console.log("powerIncrement", powerIncrement * 8);
+        await db.updateGuildXp(stats.guildId, powerIncrement * 8);
       }
     } catch (error) {
       console.error(

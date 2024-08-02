@@ -219,7 +219,6 @@ module.exports = {
             ].join("\n"),
           });
         return interaction.reply({ embeds: [helpEmbed] });
-        break;
       case "update":
         const choix = interaction.options.getString("choix");
         const valeur = interaction.options.getString("valeur");
@@ -960,7 +959,7 @@ module.exports = {
           });
         }
 
-        const requiredRoleId = "1246781092929994833"; //1246781092929994833 test  //prod 1246944923526234113
+        const requiredRoleId = "1246944923526234113"; //1246781092929994833 test  //prod 1246944923526234113
         const requiredRole = interaction.guild.roles.cache.get(requiredRoleId);
 
         // Vérifier si un marchand est déjà en place

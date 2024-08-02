@@ -468,10 +468,10 @@ module.exports = {
           .addFields(
             {
               name: "📚 V 1.5.0",
-              value: `>>> - Ajout d'une campagne solo\n- Ajout des Guilde (Empereur)\n- Ajout Duel 'Publique'\n- Ajout de l'utilité des role 🟢 \n- Marchand, chevalier guilde au rapport\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
+              value: `>>> - Ajout d'une campagne solo -> Entrainement\n- Ajout des Guilde (Empereur)\nRéduction de la FreeDayliBox\n- Ajout de l'utilité des role 🟢 \n- Marchand, chevalier, Noble au rapport\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
             },
             {
-              name: "📚 V 1.5.0 -->",
+              name: "📚 V 1.5.X -->",
               value: `>>> - Ajout de "combat de guilde" sur un royaume (territoire), permettant le farm de fragment et ressource pour mener à bien votre conquête de valoria, qui sera le nouveau prétendant au titre d'empereur suprême de valoria ?\n`,
             }
           )

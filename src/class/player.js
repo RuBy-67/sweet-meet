@@ -23,6 +23,7 @@ class Player extends DatabaseManager {
     if (!result[0]) {
       throw new Error(`User with discordId ${userId} not found`);
     }
+
     const powerUser = result[0].power;
     const statsADS = await this.calculateStats(powerUser, userId);
 
@@ -165,6 +166,16 @@ class Player extends DatabaseManager {
         defense *= (materiaux.defenseBoost / 100) * (1 + levelBonus / 100) + 1;
         attaque *= (materiaux.attaqueBoost / 100) * (1 + levelBonus / 100) + 1;
       });
+      const potionBonus = await this.getPotionByEtat(userId);
+      console.log("PotionBonus" + potionBonus);
+      if (potionBonus.length > 0) {
+        potionBonus.forEach((potion) => {
+          console.log(potion.santeBoost);
+          sante += potion.santeBoost;
+          defense += potion.defenseBoost;
+          attaque += potion.attaqueBoost;
+        });
+      }
 
       sante = Math.round(sante);
       defense = Math.round(defense);
@@ -438,6 +449,10 @@ class Player extends DatabaseManager {
 
     const randomIndex = Math.floor(Math.random() * weightedMaterials.length);
     return weightedMaterials[randomIndex];
+  }
+  async getPotionByEtat(userId) {
+    const [result] = await pool.query(sqlQueries.getPotionByEtat, [userId, 1]);
+    return result;
   }
 }
 

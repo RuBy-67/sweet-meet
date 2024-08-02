@@ -675,6 +675,75 @@ class DatabaseManager {
       userId,
     ]);
   }
+  //---------- Potion
+  async insertPotionData(
+    userId,
+    potionName,
+    attaqueBoost,
+    defenseBoost,
+    santeBoost,
+    type,
+    powerBoost,
+    duration
+  ) {
+    console.log(userId);
+    console.log(potionName);
+    console.log(attaqueBoost);
+    console.log(defenseBoost);
+    console.log(santeBoost);
+    console.log(type);
+    console.log(powerBoost);
+    console.log(duration);
+
+    return this.queryMain(SQL_QUERIES.INSERT_POTION_DATA, [
+      userId,
+      potionName,
+      attaqueBoost,
+      defenseBoost,
+      santeBoost,
+      type,
+      powerBoost,
+      duration,
+    ]);
+  }
+  async getAllPotionDataForUser(userId) {
+    return this.queryMain(SQL_QUERIES.GET_POTION_DATA, [userId]);
+  }
+  async getAllPotionDataForUserByEtat0(userId) {
+    return this.queryMain(SQL_QUERIES.GET_POTION_DATA_BY_ETAT, [userId]);
+  }
+
+  async getPotionDataById(id) {
+    return this.queryMain(SQL_QUERIES.GET_POTION_DATA_BY_ID, [id]);
+  }
+  async updatePotionEtat(idPotion, userId, etat) {
+    return this.queryMain(SQL_QUERIES.UPDATE_POTION_ETAT, [
+      idPotion,
+      etat,
+      userId,
+    ]);
+  }
+  async deletePotion(userId, idPotion) {
+    return this.queryMain(SQL_QUERIES.DELETE_POTION, [userId, idPotion]);
+  }
+  async updatePotionOwner(newOwner, idPotion) {
+    return this.queryMain(SQL_QUERIES.UPDATE_POTION_OWNER, [
+      newOwner,
+      idPotion,
+    ]);
+  }
+  async updateMateriauxOwner(newOwner, idUnique) {
+    return this.queryMain(SQL_QUERIES.UPDATE_MATERIAUX_OWNER, [
+      newOwner,
+      idUnique,
+    ]);
+  }
+  async updatePotionState(idPotion, etat) {
+    return this.queryMain(SQL_QUERIES.UPDATE_POTION_ETAT, [etat, idPotion]);
+  }
+  async deletePotionById(idPotion) {
+    return this.queryMain(SQL_QUERIES.DELETE_POTION, [idPotion]);
+  }
 }
 
 module.exports = DatabaseManager;
