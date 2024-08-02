@@ -41,11 +41,12 @@ module.exports = {
       );
     }
     const userId = interaction.user.id;
+    const colors = await dbManager.getColor(userId);
     const { material, power } = await player.freeDayliBox(userId);
 
     const embed = new EmbedBuilder()
       .setTitle("Votre Free Daily Box")
-      .setColor(color.pink)
+      .setColor(colors)
       .setDescription(`Voici ce que vous avez reçu dans votre free daily box:`);
     if (material) {
       embed.addFields({
@@ -74,6 +75,6 @@ module.exports = {
         iconURL: client.user.avatarURL(),
       });
     await player.updatePower(userId, power);
-    await interaction.reply({ embeds: [embed] });
+    await interaction.reply({ embeds: [embed], ephemeral: true });
   },
 };

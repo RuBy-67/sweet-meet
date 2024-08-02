@@ -1,0 +1,655 @@
+{
+  "bosses": {
+    "1": {
+      "start": {
+        "1": "Bienvenue dans l'abîme, mortel. Ici, ton âme ne trouvera pas de repos.",
+        "2": "Je sens la peur dans ton cœur. Elle rendra ma victoire encore plus douce.",
+        "3": "Tremble devant Malakar, le Dévoreur d'Âmes, car tu ne quitteras jamais cet endroit vivant.",
+        "4": "Ton âme sera une délicieuse addition à ma collection éternelle."
+      },
+      "battle": {
+        "1": "Tes efforts sont vains, mortel !",
+        "2": "Ton âme m'appartient déjà !",
+        "3": "Tu sens cette terreur ? C'est le goût de ta fin imminente.",
+        "4": "Lutte, crie, implore... rien ne te sauvera.",
+        "5": "Chaque coup que tu portes ne fait que renforcer ma puissance.",
+        "6": "Regarde autour de toi, les ombres se resserrent.",
+        "7": "Tes forces faiblissent, bientôt tu seras à moi.",
+        "8": "La peur nourrit mon pouvoir, continue de lutter.",
+        "9": "Les âmes de tes prédécesseurs crient pour toi.",
+        "10": "Je peux sentir ton désespoir grandir.",
+        "11": "Tu ne peux échapper à l'ombre éternelle.",
+        "12": "Ton destin est scellé.",
+        "13": "Chaque moment que tu passes ici m'enrichit davantage.",
+        "14": "Je me nourris de ta douleur.",
+        "15": "Inutile de résister.",
+        "16": "Les ténèbres sont infinies.",
+        "17": "Ton âme est si... délicieuse.",
+        "18": "L'ombre t'engloutira.",
+        "19": "Regarde tes espoirs se dissiper.",
+        "20": "Bientôt, tu seras l'un des miens."
+      },
+      "end": {
+        "lose": {
+          "1": "Impossible ! Comment as-tu pu résister à mon pouvoir ?!",
+          "2": "Je te retrouverai, mortel. Nul ne peut échapper à Malakar pour toujours.",
+          "3": "Profite de ta victoire, elle sera de courte durée.",
+          "4": "Tu n'as fait que retarder l'inévitable.",
+          "5": "Je reviendrai, et je prendrai ce qui m'est dû."
+        },
+        "win": {
+          "1": "Ton âme est à moi, mortel.",
+          "2": "Rejoins les autres dans mon royaume d'ombres.",
+          "3": "Ta lutte est terminée. Bienvenue dans l'éternité.",
+          "4": "Un autre ajout exquis à ma collection.",
+          "5": "Tes cris se joindront au chœur éternel des damnés."
+        },
+        "tie": {
+          "1": "Nos forces sont égales, mais la nuit n'a pas encore dit son dernier mot.",
+          "2": "Il semble que nos pouvoirs soient équilibrés pour l'instant.",
+          "3": "La balance de l'ombre est encore en jeu.",
+          "4": "Notre duel est suspendu dans les ténèbres.",
+          "5": "La nuit est encore jeune, et l'issue reste incertaine."
+        }
+      }
+    },
+    "2": {
+      "start": {
+        "1": "Les ténèbres sont ma demeure, mortel.",
+        "2": "Prépare-toi à être englouti par l'ombre.",
+        "3": "Zarathos te réduira à néant.",
+        "4": "Tu ne survivras pas à la nuit éternelle."
+      },
+      "battle": {
+        "1": "Les ombres t'engloutiront.",
+        "2": "Tu ne peux échapper à l'obscurité.",
+        "3": "Ton destin est scellé.",
+        "4": "Mes clones sont infinis.",
+        "5": "Chaque coup renforce mon pouvoir.",
+        "6": "Tu es déjà perdu.",
+        "7": "Les ténèbres sont invincibles.",
+        "8": "Tu ne peux vaincre ce que tu ne vois pas.",
+        "9": "Les ombres sont mon domaine.",
+        "10": "Chaque mouvement dans l'obscurité est à mon avantage.",
+        "11": "La lumière ne peut te sauver ici.",
+        "12": "Ton cœur est empli de peur.",
+        "13": "Tes efforts sont vains.",
+        "14": "Je suis partout et nulle part.",
+        "15": "Tu ne peux échapper à ton destin.",
+        "16": "Les ténèbres te consumeront.",
+        "17": "Ton combat est futile.",
+        "18": "La nuit est éternelle.",
+        "19": "Ton âme appartiendra aux ombres.",
+        "20": "Prépare-toi à disparaître."
+      },
+      "end": {
+        "lose": {
+          "1": "Non ! Comment la lumière a-t-elle percé mes ténèbres ?!",
+          "2": "Tu n'as gagné qu'un répit temporaire.",
+          "3": "Les ombres reviendront te chercher.",
+          "4": "Cette défaite ne sera pas oubliée.",
+          "5": "Tu n'as fait que retarder l'inévitable."
+        },
+        "win": {
+          "1": "L'obscurité a triomphé.",
+          "2": "Ton âme est mienne.",
+          "3": "Rejoins-moi dans les ténèbres éternelles.",
+          "4": "La lumière n'a plus de pouvoir ici.",
+          "5": "Tu ne fais plus qu'un avec l'ombre."
+        },
+        "tie": {
+          "1": "Le feu et les cendres se sont affrontés sans vainqueur.",
+          "2": "Nos flammes se consument sans se départager.",
+          "3": "Il semble que le feu n'ait pas encore décidé.",
+          "4": "Le brasier de notre combat est éteint pour le moment.",
+          "5": "La chaleur des flammes n'a pas tranché le sort."
+        }
+      }
+    },
+    "3": {
+      "start": {
+        "1": "Je suis Xerath, le Destructeur !",
+        "2": "Prépare-toi à être écrasé.",
+        "3": "Tu n'es qu'un insecte sous mon pied.",
+        "4": "Ma puissance est inégalée."
+      },
+      "battle": {
+        "1": "Je vais te réduire en poussière !",
+        "2": "Sentez la terre trembler sous ma colère.",
+        "3": "Tu ne peux résister à ma force.",
+        "4": "Ton destin est de périr.",
+        "5": "Je suis invincible.",
+        "6": "Tes attaques ne sont que des caresses.",
+        "7": "Chaque coup renforce ma rage.",
+        "8": "Je suis inarrêtable !",
+        "9": "Ressens la puissance brute !",
+        "10": "La destruction est inévitable.",
+        "11": "Tu ne fais que retarder l'inévitable.",
+        "12": "Mon pouvoir est absolu.",
+        "13": "Tes efforts sont futiles.",
+        "14": "Je vais t'écraser !",
+        "15": "La destruction totale est proche.",
+        "16": "Tes faiblesses sont évidentes.",
+        "17": "Je suis la force incarnée.",
+        "18": "Aucune pitié pour les faibles.",
+        "19": "Je vais tout détruire.",
+        "20": "Ton combat est futile."
+      },
+      "end": {
+        "lose": {
+          "1": "Impossible ! Comment as-tu résisté à ma force ?!",
+          "2": "Ce n'est qu'un sursis pour toi.",
+          "3": "Je reviendrai plus fort.",
+          "4": "Tu n'as fait que retarder ta fin.",
+          "5": "Je te retrouverai, vermine."
+        },
+        "win": {
+          "1": "La destruction est accomplie.",
+          "2": "Tu n'étais rien face à ma puissance.",
+          "3": "Ton destin était scellé dès le début.",
+          "4": "Une autre victoire pour Xerath.",
+          "5": "Tu as été écrasé comme les autres."
+        },
+        "1": "Les ténèbres restent indécises pour l'instant.",
+        "2": "Nos ombres dansent sans décider de vainqueur.",
+        "3": "Il semble que l'obscurité ne soit pas encore tranchée.",
+        "4": "Les profondeurs des ombres n'ont pas encore choisi.",
+        "5": "L'ombre de notre combat reste indéterminée."
+      }
+    },
+    "4": {
+      "start": {
+        "1": "Bienvenue dans le chaos, imprudent.",
+        "2": "Je suis Lyrathia, et le chaos est mon domaine.",
+        "3": "Prépare-toi à affronter la folie incarnée.",
+        "4": "Tu vas regretter d'avoir croisé ma route."
+      },
+      "battle": {
+        "1": "Le chaos te dévorera.",
+        "2": "Rien ne peut échapper au désordre.",
+        "3": "Tes attaques sont inutiles.",
+        "4": "Chaque sort que tu lances me renforce.",
+        "5": "La magie chaotique est invincible.",
+        "6": "Tes efforts sont vains.",
+        "7": "Je suis l'incarnation de la folie.",
+        "8": "Tu vas sombrer dans la folie.",
+        "9": "Le chaos règne ici.",
+        "10": "Tu ne peux comprendre ma puissance.",
+        "11": "Tes actions ne feront qu'aggraver ta situation.",
+        "12": "Les lois de la nature n'ont plus cours ici.",
+        "13": "Je contrôle tout ce qui est imprévisible.",
+        "14": "Ton esprit va se briser.",
+        "15": "La folie est ton seul avenir.",
+        "16": "Les illusions te submergeront.",
+        "17": "Prépare-toi à perdre la raison.",
+        "18": "Chaque instant passé ici te détruit.",
+        "19": "Je suis la maîtresse du désordre.",
+        "20": "Tes cris ne feront qu'amplifier le chaos."
+      },
+      "end": {
+        "lose": {
+          "1": "Comment est-ce possible ?! Mon chaos ne peut être vaincu !",
+          "2": "Tu as eu de la chance, mais le chaos revient toujours.",
+          "3": "Je reviendrai, et la prochaine fois tu ne seras pas si chanceux.",
+          "4": "Ton ordre ne durera pas.",
+          "5": "Je suis éternelle, comme le chaos."
+        },
+        "win": {
+          "1": "Le chaos triomphe toujours.",
+          "2": "Ton esprit est brisé, tout comme ton corps.",
+          "3": "Bienvenue dans la folie éternelle.",
+          "4": "Tu n'étais qu'un pion dans mon jeu.",
+          "5": "Les ténèbres et la folie sont désormais tes compagnons."
+        },
+        "tie": {
+          "1": "Le chaos se contente d'un statu quo pour l'instant.",
+          "2": "Nos forces chaotiques sont en équilibre pour le moment.",
+          "3": "La folie n'a pas encore tranché le sort.",
+          "4": "Le désordre reste suspendu dans l'incertitude.",
+          "5": "L'équilibre du chaos persiste dans notre affrontement."
+        }
+      }
+    },
+    "5": {
+      "start": {
+        "1": "Je suis Thalgrimm, et ta fin est proche.",
+        "2": "Tu oses défier le Briseur de Mondes ?",
+        "3": "Prépare-toi à voir ton monde s'effondrer.",
+        "4": "Je vais réduire ton existence en poussière."
+      },
+      "battle": {
+        "1": "Je vais détruire tout ce que tu connais.",
+        "2": "Ta résistance est inutile.",
+        "3": "Je suis l'apocalypse incarnée.",
+        "4": "Ressens la puissance de la destruction.",
+        "5": "Tes défenses ne peuvent me retenir.",
+        "6": "Je briserai tes espoirs comme je brise les mondes.",
+        "7": "Chaque coup que tu portes me renforce.",
+        "8": "La fin est inévitable.",
+        "9": "Tu ne peux échapper à la destruction.",
+        "10": "Ton monde s'effondrera sous mes coups.",
+        "11": "Je suis inarrêtable.",
+        "12": "Je vais anéantir tout ce que tu aimes.",
+        "13": "Tes cris de douleur me donnent du pouvoir.",
+        "14": "Tu n'es rien face à ma puissance.",
+        "15": "Ton monde ne sera bientôt plus qu'un souvenir.",
+        "16": "Je suis le destructeur ultime.",
+        "17": "Aucun refuge ne te protègera.",
+        "18": "Tu as signé ton arrêt de mort en me défiant.",
+        "19": "Ton désespoir est palpable.",
+        "20": "La destruction totale approche."
+      },
+      "end": {
+        "lose": {
+          "1": "Comment peux-tu résister à ma puissance ?!",
+          "2": "Tu as gagné cette bataille, mais la guerre est loin d'être finie.",
+          "3": "Je reviendrai, plus fort que jamais.",
+          "4": "Tu n'as fait que retarder l'inévitable.",
+          "5": "Profite de ta victoire, elle sera de courte durée."
+        },
+        "win": {
+          "1": "Ton monde est réduit en cendres.",
+          "2": "Tu n'étais qu'un obstacle insignifiant.",
+          "3": "Rien ne peut survivre à ma colère.",
+          "4": "La destruction est totale.",
+          "5": "Je suis le maître de la fin."
+        },
+        "tie": {
+          "1": "La destruction reste en équilibre pour l'instant.",
+          "2": "Nos forces de dévastation sont égales pour le moment.",
+          "3": "Le monde continue de trembler sans vainqueur.",
+          "4": "La puissance destructrice ne s'est pas encore décidée.",
+          "5": "L'effondrement est en suspens, sans décision."
+        }
+      }
+    },
+    "6": {
+      "start": {
+        "1": "Je suis Vorgoth, et ta fin est certaine.",
+        "2": "Aucun mortel ne peut échapper à mon courroux.",
+        "3": "Prépare-toi à affronter l'implacable.",
+        "4": "Je ne montrerai aucune pitié."
+      },
+      "battle": {
+        "1": "Tes efforts sont vains.",
+        "2": "Je suis invincible.",
+        "3": "Aucune force ne peut me stopper.",
+        "4": "Ton destin est de périr sous ma main.",
+        "5": "Ressens la force de l'inexorable.",
+        "6": "Tes attaques sont insignifiantes.",
+        "7": "Je suis l'incarnation de la détermination.",
+        "8": "Aucune pitié pour les faibles.",
+        "9": "Ton combat est déjà perdu.",
+        "10": "Je ne faiblirai pas.",
+        "11": "Tes espoirs sont vains.",
+        "12": "Je suis implacable.",
+        "13": "Ton destin est scellé.",
+        "14": "La fin approche.",
+        "15": "Ton sort est déjà décidé.",
+        "16": "Je suis la force inexorable.",
+        "17": "Rien ne peut m'arrêter.",
+        "18": "Ton agonie est mon plaisir.",
+        "19": "La victoire est inévitable.",
+        "20": "Prépare-toi à disparaître."
+      },
+      "end": {
+        "lose": {
+          "1": "Impossible ! Comment as-tu pu vaincre l'implacable ?!",
+          "2": "Ce n'est qu'un répit temporaire.",
+          "3": "Je reviendrai, plus fort que jamais.",
+          "4": "Tu n'as fait que retarder ta fin.",
+          "5": "Profite de ta victoire, mortel."
+        },
+        "win": {
+          "1": "La victoire est mienne.",
+          "2": "Tu n'étais qu'un obstacle insignifiant.",
+          "3": "Ton sort était scellé dès le début.",
+          "4": "Aucune pitié pour les vaincus.",
+          "5": "Je suis l'incarnation de la victoire."
+        },
+        "tie": {
+          "1": "L'irréductible force de notre combat reste égale.",
+          "2": "Nos puissances implacables n'ont pas encore tranché.",
+          "3": "L'issue de notre affrontement reste en balance.",
+          "4": "La force brute n'a pas encore décidé du vainqueur.",
+          "5": "Notre confrontation est suspendue dans l'immobilité."
+        }
+      }
+    },
+    "7": {
+      "start": {
+        "1": "Je suis Morvath, le Tyran Éternel.",
+        "2": "Prépare-toi à plier sous ma volonté.",
+        "3": "Aucun espoir ne subsiste ici.",
+        "4": "Ta résistance sera écrasée."
+      },
+      "battle": {
+        "1": "Tu ne peux échapper à ma domination.",
+        "2": "Ta volonté est insignifiante.",
+        "3": "Je suis le maître absolu.",
+        "4": "Ta défaite est inévitable.",
+        "5": "Ton destin est de plier devant moi.",
+        "6": "Aucun espoir ne subsiste.",
+        "7": "Ta résistance est futile.",
+        "8": "Je suis l'incarnation de la tyrannie.",
+        "9": "Ressens la puissance de ma domination.",
+        "10": "Ton esprit est brisé.",
+        "11": "Tes actions ne feront qu'aggraver ta situation.",
+        "12": "Je suis invincible.",
+        "13": "Ta lutte est vaine.",
+        "14": "Je suis éternel.",
+        "15": "Ton espoir est un mirage.",
+        "16": "Je suis le tyran de tous les royaumes.",
+        "17": "Aucune rébellion ne triomphera.",
+        "18": "Je suis le maître incontesté.",
+        "19": "Ton agonie est ma joie.",
+        "20": "La victoire est déjà mienne."
+      },
+      "end": {
+        "lose": {
+          "1": "Comment oses-tu défier le Tyran Éternel ?!",
+          "2": "Ce n'est qu'une victoire temporaire.",
+          "3": "Je reviendrai, plus puissant.",
+          "4": "Tu n'as fait que retarder l'inévitable.",
+          "5": "Profite de ta liberté, elle sera de courte durée."
+        },
+        "win": {
+          "1": "La tyrannie triomphe.",
+          "2": "Tu n'étais qu'un pion insignifiant.",
+          "3": "Ton esprit est brisé.",
+          "4": "Aucune rébellion ne subsistera.",
+          "5": "Je suis le maître de tous."
+        },
+        "tie": {
+          "1": "La domination est en balance pour l'instant.",
+          "2": "Nos forces d'oppression restent égales.",
+          "3": "L'issue de notre duel reste incertaine.",
+          "4": "La suprématie n'a pas encore été établie.",
+          "5": "Votre résistance contre ma domination est égale pour l'instant."
+        }
+      }
+    },
+    "8": {
+      "start": {
+        "1": "Graath zinthaar, Nexar vi Kreyth.",
+        "2": "Vrak'tar uthorin, meklorn ith'rah.",
+        "3": "Draath vorkenn, arxithal skar'jorn.",
+        "4": "Theren vaal, draak'var nexoth."
+      },
+      "battle": {
+        "1": "Skraa vekneth, meklorn vek'thorin.",
+        "2": "Vaar'los zinthaar, draath suun'raak.",
+        "3": "Vak'ethar meklorn, arxithal drak'karn.",
+        "4": "Vorthar kreyth, draak'var nexoth.",
+        "5": "Arx vekneth, draath zar'raath.",
+        "6": "Kreyth vek'lorn, draath vek'zar.",
+        "7": "Vek'thorin vek'var, draath vek'nex.",
+        "8": "Vak'ethar vek'raak, draath vek'nor.",
+        "9": "Suun'raak vek'lorn, draath vek'nex.",
+        "10": "Vorthar kreyth, draath vek'zar.",
+        "11": "Vek'lorn vek'raath, draath vek'nex.",
+        "12": "Arx vek'nex, draath vek'zar.",
+        "13": "Vek'raath vek'zar, draath vek'nor.",
+        "14": "Draak'var vek'nex, draath vek'zar.",
+        "15": "Vek'thorin vek'zar, draath vek'nex.",
+        "16": "Vorthar vek'nex, draath vek'zar.",
+        "17": "Vak'ethar vek'raath, draath vek'nex.",
+        "18": "Suun'raak vek'nex, draath vek'zar.",
+        "19": "Vorthar vek'zar, draath vek'nor.",
+        "20": "Draak'var vek'zar, draath vek'nex."
+      },
+      "end": {
+        "lose": {
+          "1": "Zaar vek'nor, vek'raal nexor'kar.",
+          "2": "Draak vek'nex, vek'zar vek'raal.",
+          "3": "Vek'nex vek'raal, vek'zar vek'nor.",
+          "4": "Vak'ethar vek'nor, vek'raal vek'zar.",
+          "5": "Vorthar vek'raal, vek'nor vek'zar."
+        },
+        "win": {
+          "1": "Suun'raak vek'raal, vek'nex vek'zar.",
+          "2": "Draak'var vek'nex, vek'raal vek'zar.",
+          "3": "Vak'ethar vek'raal, vek'nor vek'zar.",
+          "4": "Vek'nex vek'raal, vek'zar vek'raal.",
+          "5": "Vorthar vek'raal, vek'nor vek'raal."
+        },
+        "tie": {
+          "1": "Graath zinthaar, draath vek'nex.",
+          "2": "Vaar'los zinthaar, arx vek'nex.",
+          "3": "Suun'raak vek'lorn, draath vek'zar.",
+          "4": "Vorthar vek'zar, draath vek'nor.",
+          "5": "Kraath nar'los, vek'nex ghor'ta."
+        }
+      }
+    },
+    "9": {
+      "start": {
+        "1": "Je suis Korgath, le Boucher Sanglant.",
+        "2": "Prépare-toi à être dépecé.",
+        "3": "Ton sang coulera pour moi.",
+        "4": "Je vais te réduire en morceaux.",
+        "5": "Tu seras mon prochain festin."
+      },
+      "battle": {
+        "1": "Je vais te découper en morceaux.",
+        "2": "Ressens la douleur de mes coups.",
+        "3": "Tu ne peux échapper à ma hache.",
+        "4": "Ton sang sera versé pour ma gloire.",
+        "5": "Je suis invincible.",
+        "6": "Aucune force ne peut me résister.",
+        "7": "Tu es déjà mort.",
+        "8": "Ton destin est de périr sous ma hache.",
+        "9": "Je vais anéantir tout ce que tu connais.",
+        "10": "Tes efforts sont vains.",
+        "11": "Je suis le maître de la douleur.",
+        "12": "Ton sort est scellé.",
+        "13": "La destruction approche.",
+        "14": "Aucune pitié pour les faibles.",
+        "15": "Ton monde ne sera plus qu'un souvenir.",
+        "16": "Ressens la puissance de ma hache.",
+        "17": "Tu ne fais que retarder l'inévitable.",
+        "18": "Je suis la fin incarnée.",
+        "19": "Prépare-toi à disparaître.",
+        "20": "Ton sang est à moi."
+      },
+      "end": {
+        "lose": {
+          "1": "Impossible ! Comment as-tu résisté à ma hache ?!",
+          "2": "Ce n'est qu'un sursis pour toi.",
+          "3": "Je reviendrai plus fort.",
+          "4": "Tu n'as fait que retarder ta fin.",
+          "5": "Profite de ta victoire, elle sera de courte durée."
+        },
+        "win": {
+          "1": "La destruction est accomplie.",
+          "2": "Tu n'étais qu'un obstacle insignifiant.",
+          "3": "Rien ne peut survivre à ma colère.",
+          "4": "Ton monde est réduit en morceaux.",
+          "5": "Je suis le maître de la douleur."
+        },
+        "tie": {
+          "1": "Le sang n'a pas encore décidé le vainqueur.",
+          "2": "Nos forces sanguinaires restent en équilibre.",
+          "3": "La boucherie n'a pas encore tranché.",
+          "4": "Il semble que le carnage reste égal.",
+          "5": "Le festin de sang reste en suspens pour l'instant."
+        }
+      }
+    },
+    "10": {
+      "start": {
+        "1": "Je suis Seraphina, la Reine Déchue.",
+        "2": "Prépare-toi à subir ma vengeance.",
+        "3": "Ton existence sera un souvenir.",
+        "4": "Je vais te réduire en cendres."
+      },
+      "battle": {
+        "1": "Je vais te réduire en cendres.",
+        "2": "Ressens la chaleur de ma colère.",
+        "3": "Tu ne peux échapper à ma vengeance.",
+        "4": "Je suis le fléau des mortels.",
+        "5": "Ton combat est futile.",
+        "6": "Je suis invincible.",
+        "7": "Aucune force ne peut me résister.",
+        "8": "Tu es déjà mort.",
+        "9": "Ton destin est de périr.",
+        "10": "Je vais anéantir tout ce que tu connais.",
+        "11": "Tes efforts sont vains.",
+        "12": "Je suis le maître de la vengeance.",
+        "13": "Ton sort est scellé.",
+        "14": "La destruction approche.",
+        "15": "Aucune pitié pour les faibles.",
+        "16": "Ton monde ne sera plus qu'un souvenir.",
+        "17": "Ressens la puissance de ma colère.",
+        "18": "Tu ne fais que retarder l'inévitable.",
+        "19": "Je suis la fin incarnée.",
+        "20": "Prépare-toi à disparaître."
+      },
+      "end": {
+        "lose": {
+          "1": "Impossible ! Comment as-tu résisté à ma vengeance ?!",
+          "2": "Ce n'est qu'un sursis pour toi.",
+          "3": "Je reviendrai plus forte.",
+          "4": "Tu n'as fait que retarder ta fin.",
+          "5": "Profite de ta victoire, elle sera de courte durée."
+        },
+        "win": {
+          "1": "La vengeance est accomplie.",
+          "2": "Tu n'étais qu'un obstacle insignifiant.",
+          "3": "Rien ne peut survivre à ma colère.",
+          "4": "Ton monde est réduit en cendres.",
+          "5": "Je suis la maîtresse de la vengeance."
+        },
+        "tie": {
+          "1": "La lumière n'a pas encore éclairci notre confrontation.",
+          "2": "Nos puissances sacrées sont égales pour l'instant.",
+          "3": "Le clair-obscur de notre combat reste indécis.",
+          "4": "La pureté de notre duel reste en balance.",
+          "5": "L'aube de notre affrontement n'a pas encore choisi."
+        }
+      }
+    },
+    "11": {
+      "start": {
+        "1": "Je suis Draugr, le Roi Liche.",
+        "2": "Prépare-toi à affronter la mort incarnée.",
+        "3": "Ton existence sera un souvenir.",
+        "4": "Je vais te réduire en poussière."
+      },
+      "battle": {
+        "1": "Je vais te réduire en poussière.",
+        "2": "Ressens la froideur de la mort.",
+        "3": "Tu ne peux échapper à ma fureur.",
+        "4": "Je suis le fléau des vivants.",
+        "5": "Ton combat est futile.",
+        "6": "Je suis invincible.",
+        "7": "Aucune force ne peut me résister.",
+        "8": "Tu es déjà mort.",
+        "9": "Ton destin est de périr.",
+        "10": "Je vais anéantir tout ce que tu connais.",
+        "11": "Tes efforts sont vains.",
+        "12": "Je suis le maître de la mort.",
+        "13": "Ton sort est scellé.",
+        "14": "La destruction approche.",
+        "15": "Aucune pitié pour les faibles.",
+        "16": "Ton monde ne sera plus qu'un souvenir.",
+        "17": "Ressens la puissance de ma fureur.",
+        "18": "Tu ne fais que retarder l'inévitable.",
+        "19": "Je suis la fin incarnée.",
+        "20": "Prépare-toi à disparaître."
+      },
+      "end": {
+        "lose": {
+          "1": "Impossible ! Comment as-tu résisté à la mort ?!",
+          "2": "Ce n'est qu'un sursis pour toi.",
+          "3": "Je reviendrai plus fort.",
+          "4": "Tu n'as fait que retarder ta fin.",
+          "5": "Profite de ta victoire, elle sera de courte durée."
+        },
+        "win": {
+          "1": "La mort est accomplie.",
+          "2": "Tu n'étais qu'un obstacle insignifiant.",
+          "3": "Rien ne peut survivre à ma fureur.",
+          "4": "Ton monde est réduit en poussière.",
+          "5": "Je suis le maître de la mort."
+        },
+        "tie": {
+          "1": "Les morts-vivants sont en égalité pour l'instant.",
+          "2": "Nos forces de l'ombre restent suspendues.",
+          "3": "La légion des ténèbres n'a pas encore tranché.",
+          "4": "La résurrection reste en balance.",
+          "5": "Nos zombies attendent encore une décision."
+        }
+      }
+    }
+  },
+
+  "habilite": {
+    "1": {
+      "1": "Émergez de l'ombre, mes serviteurs.",
+      "2": "Liez-vous à ma volonté, esprits du néant.",
+      "3": "Réveillez-vous, âmes perdues.",
+      "4": "Venez, mes spectres, venez à moi."
+    },
+    "2": {
+      "1": "Flammes éternelles, embrasez mes ennemis.",
+      "2": "Feu inextinguible, réduis-les en cendres.",
+      "3": "Par le pouvoir du feu éternel, brûlez.",
+      "4": "Mes flammes vous consumeront tous."
+    },
+    "3": {
+      "1": "Les ténèbres vous engloutiront.",
+      "2": "L'obscurité est ma force.",
+      "3": "Je vous plonge dans les abysses.",
+      "4": "Vous serez dévorés par les ombres."
+    },
+    "4": {
+      "1": "Le chaos est ma force.",
+      "2": "Plongez dans la folie éternelle.",
+      "3": "Je suis la maîtresse du désordre.",
+      "4": "Que le chaos vous submerge."
+    },
+    "5": {
+      "1": "Je vais détruire tout ce que vous connaissez.",
+      "2": "Votre monde s'effondrera sous mes coups.",
+      "3": "Ressentez la puissance de la destruction.",
+      "4": "Votre fin est inévitable."
+    },
+    "6": {
+      "1": "Je suis invincible.",
+      "2": "Votre résistance est futile.",
+      "3": "Aucune force ne peut me stopper.",
+      "4": "Je suis implacable."
+    },
+    "7": {
+      "1": "Vous ne pouvez échapper à ma domination.",
+      "2": "Votre volonté est insignifiante.",
+      "3": "Votre résistance sera écrasée.",
+      "4": "Je suis le maître absolu."
+    },
+    "8": {
+      "1": "Graath zinthaar, draath vek'nex.",
+      "2": "Vaar'los zinthaar, arx vek'nex.",
+      "3": "Suun'raak vek'lorn, draath vek'zar.",
+      "4": "Vorthar vek'zar, draath vek'nor."
+    },
+    "9": {
+      "1": "Ton sang nourrira ma soif !",
+      "2": "Je vais te déchirer en morceaux.",
+      "3": "Tes cris me ravissent.",
+      "4": "Je suis le boucher de ce royaume."
+    },
+    "10": {
+      "1": "Par la lumière, je vous purifie.",
+      "2": "Que la pureté de l'aube vous aveugle.",
+      "3": "Je suis la lumière qui dissipe les ténèbres.",
+      "4": "Recevez la bénédiction de la lumière."
+    },
+    "11": {
+      "1": "Élevez-vous, mes serviteurs morts-vivants.",
+      "2": "Rejoignez-moi, légion de l'ombre.",
+      "3": "Ressuscitez, âmes tourmentées.",
+      "4": "Venez à moi, mes zombies."
+    }
+  }
+}

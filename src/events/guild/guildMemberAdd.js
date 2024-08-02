@@ -27,14 +27,9 @@ module.exports = {
       const [userExists] = await player.getUserData(member.id);
 
       if (!userExists) {
-        // User doesn't exist in the main database, check backup database
         const [backupUserData] = await dbManager.getUserDataBo(member.id);
-
         if (backupUserData) {
-          // Insert user data into the main database
           await dbManager.insertUserData(backupUserData);
-
-          // Import materiau data
           const materiauData = await dbManager.getMateriauData(
             backupUserData.discordId
           );

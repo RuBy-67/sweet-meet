@@ -1,10 +1,10 @@
 {
-   "nom": "SweetMeet",
-    "version": "1.0.0",
-    "creatrice": "Ruby_67",
-    "hebergement": "IONOS",
-    "langage": "JS, SQL",
-    "framework": "Discord.js",
-    "base_de_donnees": "PostgreSQL",
-    "url_git": "https://github.com/RuBy-67/sweet-meet"
+  "nom": "SweetMeet",
+  "version": "1.5.0",
+  "creatrice": "Ruby_67",
+  "hebergement": "IONOS",
+  "langage": "JS, SQL",
+  "framework": "Discord.js",
+  "base_de_donnees": "PostgreSQL",
+  "url_git": "https://github.com/RuBy-67/sweet-meet"
 }

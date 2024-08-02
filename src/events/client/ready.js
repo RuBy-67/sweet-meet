@@ -139,7 +139,7 @@ module.exports = (client) => {
    */
   async function updateActivity(client) {
     const activities = [
-      `/help | Watching Valoria`,
+      `/duel | Watching Valoria`,
       `Created by RuBy_67`,
       `Surveille ${allMembers.size} Valorien`,
     ];
