@@ -54,10 +54,9 @@ module.exports = {
     const target = interaction.options.getMember("membre");
     const targetUser = await client.users.fetch(target.user.id);
     const authorId = interaction.user.id;
-    const colors = await dbManager.getColor(authorId);
     const targetId = targetUser.id;
 
-    // Verififier s'il possède assez de fragment pour se marié(e)
+    // Verify if the author has enough power to get married
     const authorStats = await dbManager.getStats(authorId);
     if (authorStats.power < param.Pricing.marriage.accepter) {
       return interaction.reply({
@@ -75,7 +74,7 @@ module.exports = {
       });
     }
 
-    // Verifier s'il est déjà marié(e)
+    // Verify if the author and the target are already married
     const authorMarriage = await dbManager.getMarriage(authorId);
     const targetMarriage = await dbManager.getMarriage(targetId);
     if (authorMarriage.length > 0 || targetMarriage.length > 0) {
@@ -90,7 +89,7 @@ module.exports = {
       .setTitle(
         `Demande en mariage de ${interaction.user.username} à ${targetUser.username}`
       )
-      .setColor(colors)
+      .setColor(color.pink)
       .setDescription(
         `Un mariage coûte ${param.Pricing.marriage.accepter} ${emoji(
           emo.power
@@ -132,68 +131,27 @@ module.exports = {
       await interaction.deferUpdate();
 
       if (interaction.customId === "accepter") {
-        const guild = await dbManager.getGuildByOwnerId(targetId);
-        const guild2 = await dbManager.getGuildByOwnerId(authorId);
-
-        const inGuild = await dbManager.getStats(targetId);
-        const inGuild2 = await dbManager.getStats(authorId);
-
-        // Vérification si les utilisateurs sont déjà dans une guilde
-        if (inGuild2.guildId !== null && guild.id !== inGuild2.guildId) {
-          return interaction.editReply({
-            content: `Mariage Impossible, l'un est empereur d'une guilde différente de la vôtre.`,
-            embeds: [],
-            components: [],
-          });
-        } else if (inGuild.guildId !== null && guild2.id !== inGuild.guildId) {
-          return interaction.editReply({
-            content: `Mariage Impossible, l'un est empereur d'une guilde différente de la vôtre.`,
-            embeds: [],
-            components: [],
-          });
-        }
-
-        // Vérification si les deux utilisateurs sont empereurs de guilde
-        if (guild.length > 0 && guild2.length > 0) {
-          return interaction.editReply({
-            content: `Mariage Impossible, les deux utilisateurs sont tous deux empereurs de guilde.`,
-            embeds: [],
-            components: [],
-          });
-        }
-
-        // Mise à jour des guildes et des classes d'utilisateurs
-        if (guild.length > 0) {
-          await dbManager.addClassToUser(authorId, guild[0].id, 1);
-          await dbManager.updateUserGuild(guild[0].id, targetId);
-        } else if (guild2.length > 0) {
-          await dbManager.addClassToUser(targetId, guild2[0].id, 1);
-          await dbManager.updateUserGuild(guild2[0].id, authorId);
-        }
-
-        // Mise à jour des informations de mariage et des badges
-        await dbManager.setMarriage(authorId, targetId);
-        await dbManager.updateBadge(targetId, "love");
-        await dbManager.updateBadge(authorId, "love");
-        await dbManager.updatePowerByBadgeId(
+        dbManager.setMarriage(authorId, targetId);
+        dbManager.updateBadge(targetId, "love");
+        dbManager.updateBadge(authorId, "love");
+        dbManager.updatePowerByBadgeId(
           5,
           param.Pricing.marriage.accepter * param.Pricing.marriage.fees
         );
 
-        // Réponse finale après mariage
-        return interaction.editReply({
+        await interaction.editReply({
           content: `Félicitations, <@${targetId}> et <@${authorId}> sont maintenant mariés !`,
           embeds: [],
           components: [],
         });
       } else if (interaction.customId === "refuser") {
-        await dbManager.updatePower(authorId, param.Pricing.marriage.refuse);
-        await dbManager.updatePowerByBadgeId(
+        dbManager.updatePower(authorId, param.Pricing.marriage.refuse);
+        dbManager.updatePowerByBadgeId(
           5,
           (param.Pricing.marriage.accepter - param.Pricing.marriage.refuse) *
             param.Pricing.marriage.fees
         );
-        return interaction.editReply({
+        await interaction.editReply({
           content: `La demande en mariage de <@${authorId}> à <@${targetId}> a été refusée, ${
             param.Pricing.marriage.refuse
           } ${emoji(emo.power)} ont été rendus à <@${authorId}>`,
@@ -211,7 +169,7 @@ module.exports = {
           (param.Pricing.marriage.accepter - param.Pricing.marriage.expire) *
             param.Pricing.marriage.fees
         );
-        return interaction.editReply({
+        interaction.editReply({
           content: `La demande en mariage a expiré car <@${targetId}> n'a pas répondu dans le temps imparti, ${
             param.Pricing.marriage.expire
           } ${emoji(emo.power)} on été rendu à <@${authorId}>.`,

@@ -50,7 +50,6 @@ module.exports = {
       );
     }
     const gameMasterIds = Object.values(param.gameMaster);
-    const colors = await db.getColor(interaction.user.id);
     if (!gameMasterIds.includes(interaction.user.id)) {
       const role = interaction.guild.roles.cache.find(
         (role) => role.name === "GameMaster"
@@ -75,7 +74,7 @@ module.exports = {
     const members = await interaction.guild.members.fetch();
     const memberArray = Array.from(members.values());
 
-    // Shuffle le tableau
+    // Shuffle the array
     const shuffledMembers = memberArray.sort(() => 0.5 - Math.random());
 
     if (!Array.isArray(shuffledMembers)) {
@@ -106,7 +105,7 @@ module.exports = {
 
     const embed = new EmbedBuilder()
       .setTitle("Roulette Russe")
-      .setColor(colors)
+      .setColor(color.pink)
       .addFields(...powerLosses) // Ajoute les pertes de puissance comme champs dans l'embed
       .setDescription(
         `Les membres suivants ont été choisis par la roulette russe :\n\nIls seront mutés pendant 30 minutes et perdront 5% de leur puissance.`
