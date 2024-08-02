@@ -818,7 +818,7 @@ module.exports = {
             {
               name: `${emoji(emo.class3)} - Noble`,
               value:
-                "Pour être promus chevalier il faut posséder les rôles suivant :\n- <@&1246944929675087914>\n- <@&1246944923526234113>\n- <@&1246944911580991549>\n- <&@1216037978913378389>\n\n*Le Nobles à des droits et des devoirs envers la guilde. [A venir]*",
+                "Pour être promus chevalier il faut posséder les rôles suivant :\n- <@&1246944929675087914>\n- <@&1246944923526234113>\n- <@&1246944911580991549>\n- <@&1216037978913378389>\n\n*Le Nobles à des droits et des devoirs envers la guilde. [A venir]*",
             },
             {
               name: `${emoji(emo.class4)} - Chevalier`,
