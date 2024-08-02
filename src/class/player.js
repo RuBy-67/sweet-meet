@@ -17,12 +17,11 @@ class Player extends DatabaseManager {
 
   async userExists(userId) {
     const [result] = await pool.query(sqlQueries.userExists, [userId]);
-    const [result] = await pool.query(sqlQueries.userExists, [userId]);
+
     return result;
   }
 
   async getStatsById(userId) {
-    const [result] = await pool.query(sqlQueries.getUserPower, [userId]);
     const [result] = await pool.query(sqlQueries.getUserPower, [userId]);
     if (!result[0]) {
       throw new Error(`User with discordId ${userId} not found`);
@@ -96,8 +95,6 @@ class Player extends DatabaseManager {
   async fightBattle(userId, opponentId) {
     await pool.query(sqlQueries.insertDuel);
     const [rows] = await pool.query(sqlQueries.getLastInsertId);
-    await pool.query(sqlQueries.insertDuel);
-    const [rows] = await pool.query(sqlQueries.getLastInsertId);
     const duelId = rows[0].duel_id;
 
     await pool.query(sqlQueries.insertDuelDetails, [duelId, userId]);
@@ -152,7 +149,6 @@ class Player extends DatabaseManager {
 
   async getMateriaux(userId) {
     const [result] = await pool.query(sqlQueries.getMateriaux, [userId]);
-    const [result] = await pool.query(sqlQueries.getMateriaux, [userId]);
     if (result.length === 0) {
       this.materiaux = [];
     } else {
@@ -205,7 +201,6 @@ class Player extends DatabaseManager {
   }
 
   async getMaterialsById(userId, duelId) {
-    const [result] = await pool.query(sqlQueries.getMaterialsById, [userId]);
     const [result] = await pool.query(sqlQueries.getMaterialsById, [userId]);
 
     if (duelId !== null) {
@@ -265,9 +260,6 @@ class Player extends DatabaseManager {
   }
 
   async getMaterialsByIdEtat0(userId) {
-    const [result] = await pool.query(sqlQueries.getMaterialsByIdEtat0, [
-      userId,
-    ]);
     const [result] = await pool.query(sqlQueries.getMaterialsByIdEtat0, [
       userId,
     ]);
