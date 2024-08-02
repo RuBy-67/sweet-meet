@@ -1,4 +1,3 @@
-/// Take all users from the server and create an account for them in the database + bonus power-up + "first-arrival" profile badge
 const { EmbedBuilder } = require("discord.js");
 const emo = require(`../../jsons/emoji.json`);
 const color = require(`../../jsons/color.json`);
@@ -31,18 +30,17 @@ module.exports = {
     // Loop through all members and create an account for them if they are not bots
     for (const member of members.values()) {
       if (!member.user.bot) {
-        const result = await connection
-          .promise()
-          .query("SELECT * FROM user WHERE discordId = ?", [member.id]);
+        const [result] = await pool.execute(
+          "SELECT * FROM user WHERE discordId = ?",
+          [member.id]
+        );
 
-        if (result[0].length === 0) {
+        if (result.length === 0) {
           // User does not exist in the database, create an account for them
-          await connection
-            .promise()
-            .query(
-              "INSERT INTO user (discordId, power, winCounter, loseCounter) VALUES (?, 5000, 0, 0)",
-              [member.id]
-            );
+          await pool.execute(
+            "INSERT INTO user (discordId, power, winCounter, loseCounter) VALUES (?, 5000, 0, 0)",
+            [member.id]
+          );
 
           // Insert the 'first-arrival' badge into the user's badge collection
           await connection
@@ -83,7 +81,7 @@ module.exports = {
       .setTitle("Accounts Created")
       .setColor(color)
       .setDescription(
-        `Les comptes ont été créés et les badges donnés à ${i} membres. 20 000 Fragments ont été crédités à chaque membre.`
+        `Les comptes ont été créés pour ${i} membres. avec 5000 Fragments. `
       )
       .setFooter({
         text: `Demandé par :  ${interaction.user.tag}`,

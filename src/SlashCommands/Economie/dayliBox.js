@@ -75,6 +75,6 @@ module.exports = {
         iconURL: client.user.avatarURL(),
       });
     await player.updatePower(userId, power);
-    await interaction.reply({ embeds: [embed], ephemeral: true});
+    await interaction.reply({ embeds: [embed], ephemeral: true });
   },
 };

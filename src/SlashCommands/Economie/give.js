@@ -52,16 +52,6 @@ module.exports = {
     },
   ],
   run: async (client, interaction, args) => {
-    if (config.maintenance) {
-      const embed = new EmbedBuilder()
-        .setTitle("⚒️ Maintenance ⚒️")
-        .setColor(color.error)
-        .setDescription(
-          `> Le bot est actuellement en maintenance, veuillez réessayer plus tard.`
-        )
-        .setColor(color.error);
-      return interaction.reply({ embeds: [embed] });
-    }
     function emoji(id) {
       return (
         client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
@@ -215,8 +205,9 @@ module.exports = {
         } else if (i.customId === "badge_UnSelect") {
           const selectedMaterials = i.values;
           const selectedMaterialId = selectedMaterials[0];
-          //appartient à qq ? si oui, retirer si non erreur
           const badge = await dbManager.getBadgeById(selectedMaterialId);
+          console.log(badge);
+          console.log(badge.length);
           if (badge.length === 0) {
             await i.update({
               content: `Le badge n'appartient pas à quelqu'un.`,
@@ -224,7 +215,8 @@ module.exports = {
             });
             return;
           } else {
-            await dbManager.removeBadgeById(utilisateur.id, selectedMaterialId);
+            await dbManager.removeBadgeById(selectedMaterialId);
+            console.log("selected", selectedMaterialId);
             await i.update({
               content: `Vous avez retiré le badge à un user.`,
               ephemeral: true,

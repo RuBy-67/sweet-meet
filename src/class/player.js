@@ -244,15 +244,9 @@ class Player extends DatabaseManager {
   }
 
   async getMaterialsByIdEtat0(userId) {
-    const [result] = await pool.query(sqlQueries.getMaterialsByIdEtat0, [
-      userId,
-    ]);
-    return result || [];
-  }
-  async getMaterialsByIdEtat1(userId) {
-    const [result] = await pool.query(sqlQueries.getMaterialsByIdEtat1, [
-      userId,
-    ]);
+    const [result] = await this.connection
+      .promise()
+      .query(sqlQueries.getMaterialsByIdEtat0, [userId]);
     return result || [];
   }
 
