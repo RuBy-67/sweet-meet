@@ -79,7 +79,7 @@ module.exports = {
 
     const embed = new EmbedBuilder()
       .setTitle("Accounts Created")
-      .setColor(color)
+      .setColor(color.pink)
       .setDescription(
         `Les comptes ont été créés pour ${i} membres. avec 5000 Fragments. `
       )
