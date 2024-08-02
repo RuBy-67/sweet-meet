@@ -182,6 +182,7 @@ class Player extends DatabaseManager {
       });
       console.log("PotionBonus(avant)" + userId);
       const potionBonus = await this.getPotionByEtat(userId);
+
       if (potionBonus) {
         potionBonus.forEach((potion) => {
           console.log(potion.santeBoost);
@@ -475,16 +476,9 @@ class Player extends DatabaseManager {
     return weightedMaterials[randomIndex];
   }
   async getPotionByEtat(userId) {
-    console.log("Début de getPotionByEtat avec userId:", userId);
-    console.log("Requête SQL utilisée:", sqlQueries.getPotionByEtat); // Vérifier la requête SQL
-    try {
-      const [rows] = await pool.query(sqlQueries.getPotionByEtat, [userId, 1]);
-      console.log("Résultat de la requête:", rows);
-      return rows;
-    } catch (error) {
-      console.error("Erreur lors de l'exécution de la requête SQL:", error);
-      throw error;
-    }
+    console.log("getPotionByEtat" + userId);
+    const [result] = await pool.query(sqlQueries.getPotionByEtat, [userId, 1]);
+    return result;
   }
 }
 
