@@ -182,8 +182,7 @@ class Player extends DatabaseManager {
       });
       console.log("PotionBonus(avant)" + userId);
       const potionBonus = await this.getPotionByEtat(userId);
-      console.log("PotionBonus" + potionBonus);
-      if (potionBonus.length > 0) {
+      if (potionBonus) {
         potionBonus.forEach((potion) => {
           console.log(potion.santeBoost);
           sante += potion.santeBoost;
