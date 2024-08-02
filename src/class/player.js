@@ -2,11 +2,13 @@ const param = require("../jsons/param.json");
 const DatabaseManager = require("./dbManager");
 const sqlQueries = require("./sqlQueriesPlayer");
 const { pool, poolBo, poolCampagne } = require("../db");
+const { pool, poolBo, poolCampagne } = require("../db");
 const duelMessages = require(`../jsons/gif.json`);
 const emo = require(`../jsons/emoji.json`);
 
 class Player extends DatabaseManager {
   constructor() {
+    super(pool, poolBo);
     super(pool, poolBo);
     this.userId = null;
     this.stats = null;
@@ -15,10 +17,12 @@ class Player extends DatabaseManager {
 
   async userExists(userId) {
     const [result] = await pool.query(sqlQueries.userExists, [userId]);
+    const [result] = await pool.query(sqlQueries.userExists, [userId]);
     return result;
   }
 
   async getStatsById(userId) {
+    const [result] = await pool.query(sqlQueries.getUserPower, [userId]);
     const [result] = await pool.query(sqlQueries.getUserPower, [userId]);
     if (!result[0]) {
       throw new Error(`User with discordId ${userId} not found`);
@@ -92,8 +96,12 @@ class Player extends DatabaseManager {
   async fightBattle(userId, opponentId) {
     await pool.query(sqlQueries.insertDuel);
     const [rows] = await pool.query(sqlQueries.getLastInsertId);
+    await pool.query(sqlQueries.insertDuel);
+    const [rows] = await pool.query(sqlQueries.getLastInsertId);
     const duelId = rows[0].duel_id;
 
+    await pool.query(sqlQueries.insertDuelDetails, [duelId, userId]);
+    await pool.query(sqlQueries.insertDuelDetails, [duelId, opponentId]);
     await pool.query(sqlQueries.insertDuelDetails, [duelId, userId]);
     await pool.query(sqlQueries.insertDuelDetails, [duelId, opponentId]);
 
@@ -115,11 +123,22 @@ class Player extends DatabaseManager {
     );
     if (winner === null) {
       await pool.query(sqlQueries.updateDuelDetailsDraw, [duelId]);
+      await pool.query(sqlQueries.updateDuelDetailsDraw, [duelId]);
     } else if (winner === userId) {
       await pool.query(sqlQueries.updateDuelDetailsWin, [1, userId, duelId]);
       await pool.query(sqlQueries.updateUserWinCounter, [userId]);
       await pool.query(sqlQueries.updateUserLoseCounter, [opponentId]);
+      await pool.query(sqlQueries.updateDuelDetailsWin, [1, userId, duelId]);
+      await pool.query(sqlQueries.updateUserWinCounter, [userId]);
+      await pool.query(sqlQueries.updateUserLoseCounter, [opponentId]);
     } else if (winner === opponentId) {
+      await pool.query(sqlQueries.updateDuelDetailsWin, [
+        1,
+        opponentId,
+        duelId,
+      ]);
+      await pool.query(sqlQueries.updateUserWinCounter, [opponentId]);
+      await pool.query(sqlQueries.updateUserLoseCounter, [userId]);
       await pool.query(sqlQueries.updateDuelDetailsWin, [
         1,
         opponentId,
@@ -132,6 +151,7 @@ class Player extends DatabaseManager {
   }
 
   async getMateriaux(userId) {
+    const [result] = await pool.query(sqlQueries.getMateriaux, [userId]);
     const [result] = await pool.query(sqlQueries.getMateriaux, [userId]);
     if (result.length === 0) {
       this.materiaux = [];
@@ -185,6 +205,7 @@ class Player extends DatabaseManager {
   }
 
   async getMaterialsById(userId, duelId) {
+    const [result] = await pool.query(sqlQueries.getMaterialsById, [userId]);
     const [result] = await pool.query(sqlQueries.getMaterialsById, [userId]);
 
     if (duelId !== null) {
@@ -244,14 +265,31 @@ class Player extends DatabaseManager {
   }
 
   async getMaterialsByIdEtat0(userId) {
-    const [result] = await this.connection
-      .promise()
-      .query(sqlQueries.getMaterialsByIdEtat0, [userId]);
+    const [result] = await pool.query(sqlQueries.getMaterialsByIdEtat0, [
+      userId,
+    ]);
+    const [result] = await pool.query(sqlQueries.getMaterialsByIdEtat0, [
+      userId,
+    ]);
+    return result || [];
+  }
+  async getMaterialsByIdEtat1(userId) {
+    const [result] = await pool.query(sqlQueries.getMaterialsByIdEtat1, [
+      userId,
+    ]);
     return result || [];
   }
 
   async insertMaterialsIntoDuelDetail(duelId, userId, materialIds) {
     const [materialId1, materialId2, materialId3, materialId4] = materialIds;
+    await pool.query(sqlQueries.insertMaterialsIntoDuelDetail, [
+      materialId1,
+      materialId2,
+      materialId3,
+      materialId4,
+      duelId,
+      userId,
+    ]);
     await pool.query(sqlQueries.insertMaterialsIntoDuelDetail, [
       materialId1,
       materialId2,
@@ -390,7 +428,9 @@ class Player extends DatabaseManager {
 
     const probabilities = {
       freeDayli: 0.85, // 85% de chances de ne pas obtenir de matériau
+      freeDayli: 0.85, // 85% de chances de ne pas obtenir de matériau
       random: 0, // 0% de chances de ne pas obtenir de matériau
+      dayli: 0.4, // 40% de chances de ne pas obtenir de matériau
       dayli: 0.4, // 40% de chances de ne pas obtenir de matériau
     };
 
