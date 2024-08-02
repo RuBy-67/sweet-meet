@@ -66,7 +66,6 @@ module.exports = {
     const userId = interaction.user.id;
     const userName = interaction.user.username;
     let paris = interaction.options.getInteger("paris");
-    const colors = await dbManager.getColor(userId);
     const userPower = await dbManager.getStats(userId);
     const adversaryPower = await dbManager.getStats(membre.id);
     if (userPower.power < paris) {
@@ -179,7 +178,7 @@ module.exports = {
         }
       )
       .setImage("https://media1.tenor.com/m/6QwxgzQLGKUAAAAC/battle.gif")
-      .setColor(colors);
+      .setColor(color.pink);
     const message = await interaction.reply({
       content: `Duel initié avec <@${
         membre.id
@@ -205,16 +204,6 @@ module.exports = {
         parisWin = Math.floor(paris * (75 / 100));
         parisLose = Math.floor(paris * (25 / 100));
         parisDraw = Math.floor((paris / 2) * 1.02);
-        let addGuildBank = Math.round(parisWin / 2);
-        const stat = await dbManager.getStats(winner);
-        let stringGuild = " ";
-        if (stat.guildId) {
-          await dbManager.addGuildBank(stat.guildId, addGuildBank);
-          stringGuild = `**${addGuildBank}** ${emoji(
-            emo.power
-          )} ont été ajoutés à la banque de guilde de <@&${winner}>`;
-        }
-
         if (winner === userId) {
           await player.updatePower(userId, parisWin);
           await player.updatePower(membre.id, parisLose);
@@ -272,7 +261,7 @@ module.exports = {
             const duelEmbed = new EmbedBuilder()
               .setTitle("Duel terminé")
               .setDescription(
-                `Le duel entre <@${userId}> et <@${membre.id}> est terminé.\n- ${stringGuild}`
+                `Le duel entre <@${userId}> et <@${membre.id}> est terminé.`
               )
               .addFields(
                 {
@@ -362,7 +351,7 @@ module.exports = {
                     }`,
                 }
               )
-              .setColor(colors)
+              .setColor(color.pink)
               .setFooter({
                 text: `Duel ID: ${duelId} | Demandé(e) par ${interaction.user.tag}`,
                 iconURL: interaction.user.displayAvatarURL({ dynamic: true }),

@@ -26,7 +26,6 @@ class Player extends DatabaseManager {
     if (!result[0]) {
       throw new Error(`User with discordId ${userId} not found`);
     }
-
     const powerUser = result[0].power;
     const statsADS = await this.calculateStats(powerUser, userId);
 
@@ -52,8 +51,20 @@ class Player extends DatabaseManager {
   }
 
   async calculateFightScoreBattle(userId, opponentId, duelId) {
-    let opponentScore = await this.calculateFightScore(opponentId);
-    let playerScore = await this.calculateFightScore(userId);
+    const playerStats = await this.getStatsById(userId);
+    const opponentStats = await this.getStatsById(opponentId);
+
+    let playerScore =
+      param.facteurPower * playerStats.power * param.facteurPower +
+      param.facteurAttaque * playerStats.attaque * param.facteurAttaque +
+      param.facteurDefense * playerStats.defense * param.facteurDefense +
+      param.facteurSante * playerStats.sante * param.facteurSante;
+
+    let opponentScore =
+      param.facteurPower * opponentStats.power * param.facteurPower +
+      param.facteurAttaque * opponentStats.attaque * param.facteurAttaque +
+      param.facteurDefense * opponentStats.defense * param.facteurDefense +
+      param.facteurSante * opponentStats.sante * param.facteurSante;
 
     const playerMaterials = await this.getMaterialsById(userId, duelId);
     const opponentMaterials = await this.getMaterialsById(opponentId, duelId);
@@ -72,6 +83,18 @@ class Player extends DatabaseManager {
       });
     });
     return { playerScore, opponentScore };
+  }
+
+  async calculateWinChance(userId, opponentId) {
+    const { playerScore, opponentScore } = await this.calculateFightScoreBattle(
+      userId,
+      opponentId
+    );
+
+    const totalScore = playerScore + opponentScore;
+    const playerWinChance = playerScore / totalScore;
+    const opponentWinChance = opponentScore / totalScore;
+    return { playerWinChance, opponentWinChance };
   }
 
   async getWinner(playerWinChance, opponentWinChance, userId, opponentId) {
@@ -182,16 +205,6 @@ class Player extends DatabaseManager {
         defense *= (materiaux.defenseBoost / 100) * (1 + levelBonus / 100) + 1;
         attaque *= (materiaux.attaqueBoost / 100) * (1 + levelBonus / 100) + 1;
       });
-      const potionBonus = await this.getPotionByEtat(userId);
-      console.log("PotionBonus" + potionBonus);
-      if (potionBonus.length > 0) {
-        potionBonus.forEach((potion) => {
-          console.log(potion.santeBoost);
-          sante += potion.santeBoost;
-          defense += potion.defenseBoost;
-          attaque += potion.attaqueBoost;
-        });
-      }
 
       sante = Math.round(sante);
       defense = Math.round(defense);
@@ -411,7 +424,7 @@ class Player extends DatabaseManager {
       "freeDayli"
     );
     let power = await this.generateRandomPower();
-    power = Math.floor(power / 7);
+    power = Math.floor(power / 5);
     return { userId, material: selectedMaterial, power };
   }
 
@@ -475,10 +488,6 @@ class Player extends DatabaseManager {
 
     const randomIndex = Math.floor(Math.random() * weightedMaterials.length);
     return weightedMaterials[randomIndex];
-  }
-  async getPotionByEtat(userId) {
-    const [result] = await pool.query(sqlQueries.getPotionByEtat, [userId, 1]);
-    return result;
   }
 }
 

@@ -33,8 +33,8 @@ module.exports = {
       );
     }
     const authorId = interaction.user.id;
-    const colors = await dbManager.getColor(authorId);
-    // Verifier si possède assez de fragment
+
+    // Verify if the author has enough power to get
     const authorStats = await dbManager.getStats(authorId);
     if (authorStats.power < param.Pricing.divorce.prix) {
       return interaction.reply({
@@ -45,7 +45,7 @@ module.exports = {
       });
     }
 
-    // Verifier s'il/si elle est marié(e)
+    // Verify if the author and the target are married
     const authorMarriage = await dbManager.getMarriage(authorId);
     if (authorMarriage.length === 0) {
       return interaction.reply({
@@ -58,7 +58,7 @@ module.exports = {
     const temps = Math.floor(Date.now() / 1000) + 60;
     const embed = new EmbedBuilder()
       .setTitle(`Demande de divorce de ${interaction.user.username}`)
-      .setColor(colors)
+      .setColor(color.pink)
       .setDescription(
         `Voulez-vous vraiment divorcer ? Vous avez 60 secondes pour répondre.`
       )
@@ -100,45 +100,24 @@ module.exports = {
       await interaction.deferUpdate();
 
       if (interaction.customId === "accepter") {
-        await dbManager.deleteMarriage(authorId, targetId);
-        await dbManager.updateBadge(targetId, "loveb");
-        await dbManager.updateBadge(authorId, "loveb");
-        await dbManager.removeBadgeById(4, targetId);
-        await dbManager.removeBadgeById(4, authorId);
+        dbManager.deleteMarriage(authorId, targetId);
+        dbManager.updateBadge(targetId, "loveb");
+        dbManager.updateBadge(authorId, "loveb");
+        dbManager.removeBadgeById(4, targetId);
+        dbManager.removeBadgeById(4, authorId);
 
-        const inGuild = await dbManager.getStats(targetId);
-        const inGuild2 = await dbManager.getStats(authorId);
-
-        const userClassAuthor = await dbManager.getUserClass(
-          authorId,
-          inGuild.guildId
-        );
-        const userClassTarget = await dbManager.getUserClass(
-          targetId,
-          inGuild2.guildId
-        );
-
-        // Vérification et mise à jour des classes des utilisateurs
-        if (userClassAuthor === 1) {
-          await dbManager.updateClassToUser(authorId, inGuild.guildId, 5);
-        }
-
-        if (userClassTarget === 1) {
-          await dbManager.updateClassToUser(targetId, inGuild2.guildId, 5);
-        }
-
-        return interaction.editReply({
+        await interaction.editReply({
           content: `Félicitations ?, <@${targetId}> et <@${targetId2}> sont maintenant divorcés !`,
           embeds: [],
           components: [],
         });
       } else if (interaction.customId === "refuser") {
-        await dbManager.updatePower(authorId, param.Pricing.divorce.refus);
-        await dbManager.updatePowerByBadgeId(
+        dbManager.updatePower(authorId, param.Pricing.divorce.refus);
+        dbManager.updatePowerByBadgeId(
           5,
           param.Pricing.divorce.refus * param.Pricing.divorce.fees
         );
-        return interaction.editReply({
+        await interaction.editReply({
           content: `La demande de divorce a été refusée. coût : ${
             param.Pricing.divorce.refus
           }  ${emoji(emo.power)}`,

@@ -97,7 +97,6 @@ module.exports = {
               return new StringSelectMenuOptionBuilder()
                 .setEmoji(emo[material.nom])
                 .setLabel(material.nom)
-                .setDescription(material.rarete)
                 .setValue(material.id.toString());
             })
           );
@@ -153,15 +152,13 @@ module.exports = {
     if (type === "power") {
       await dbManager.updatePower(utilisateur.id, valeur);
       interaction.reply({
-        content: `Vous avez donné à ${utilisateur}, ${valeur} ${emoji(
+        content: `Vous avez donné à ${utilisateur},  ${valeur} Fragments de Protection. ${emoji(
           emo.power
         )}`,
-        ephemeral: true,
       });
     } else if (type === "materiel") {
       interaction.reply({
         content: "Veuillez choisir le matériel à donner.",
-        ephemeral: true,
         components: await componentMaterial(),
       });
       collector.on("collect", async (i) => {
@@ -170,11 +167,8 @@ module.exports = {
 
         if (i.customId === "material_select") {
           await dbManager.addMaterialToUser(utilisateur.id, selectedMaterialId);
-          const material = await dbManager.materiauById(selectedMaterialId);
-          console.log(material);
           await i.update({
-            content: `Vous avez donné **${material[0].nom} - (lvl1)** à ${utilisateur}.`,
-            ephemeral: true,
+            content: `Vous avez donné un materiel à ${utilisateur}.`,
           });
         }
       });
@@ -182,7 +176,6 @@ module.exports = {
       interaction.reply({
         content: "Veuillez choisir le badge à donner (ou à reprendre).",
         components: await componentBadge(),
-        ephemeral: true,
       });
       collector.on("collect", async (i) => {
         const selectedMaterials = i.values;
@@ -192,14 +185,12 @@ module.exports = {
           if (badge.length > 0) {
             await i.update({
               content: `Le badge appartient déjà à quelqu'un.`,
-              ephemeral: true,
             });
             return;
           } else {
             await dbManager.updateBadgeById(utilisateur.id, selectedMaterialId);
             await i.update({
               content: `Vous avez donné le badge à ${utilisateur}.`,
-              ephemeral: true,
             });
           }
         } else if (i.customId === "badge_UnSelect") {
@@ -211,7 +202,6 @@ module.exports = {
           if (badge.length === 0) {
             await i.update({
               content: `Le badge n'appartient pas à quelqu'un.`,
-              ephemeral: true,
             });
             return;
           } else {
@@ -219,24 +209,19 @@ module.exports = {
             console.log("selected", selectedMaterialId);
             await i.update({
               content: `Vous avez retiré le badge à un user.`,
-              ephemeral: true,
             });
           }
         }
       });
     } else {
-      interaction.reply({
-        content: "Type de donnée non reconnu.",
-        ephemeral: true,
-      });
+      interaction.reply({ content: "Type de donnée non reconnu." });
     }
 
     collector.on("end", (collected, reason) => {
       if (reason === "time") {
-        interaction.followUp({
-          content: "La sélection est terminée car le délai a expiré.",
-          ephemeral: true,
-        });
+        interaction.followUp(
+          "La sélection est terminée car le délai a expiré."
+        );
       }
     });
   },

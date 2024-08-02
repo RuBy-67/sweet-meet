@@ -48,7 +48,6 @@ module.exports = {
       );
     }
     const userId = interaction.user.id;
-    const colors = await db.getColor(userId);
     const bet = interaction.options.getInteger("paris");
 
     // Initial user stats
@@ -66,7 +65,7 @@ module.exports = {
     // Embed de départ
     const embed = new EmbedBuilder()
       .setTitle("Roulette Russe")
-      .setColor(colors)
+      .setColor(color.pink)
       .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
       .setDescription(
         `Choisissez le nombre de coups à tirer. Chaque coup augmente vos gains potentiels, mais augmente également vos chances de perdre.\n> Paris : ${bet} ${emoji(
@@ -143,7 +142,7 @@ module.exports = {
         await db.updatePower(userId, powerGain);
         const successEmbed = new EmbedBuilder()
           .setTitle("Roulette Russe - Victoire")
-          .setColor(color)
+          .setColor(color.pink)
           .setDescription(
             `Vous avez survécu à ${shots} coups et gagné ${powerGain} ${emoji(
               emo.power
