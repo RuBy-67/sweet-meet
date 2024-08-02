@@ -2,13 +2,11 @@ const param = require("../jsons/param.json");
 const DatabaseManager = require("./dbManager");
 const sqlQueries = require("./sqlQueriesPlayer");
 const { pool, poolBo, poolCampagne } = require("../db");
-const { pool, poolBo, poolCampagne } = require("../db");
 const duelMessages = require(`../jsons/gif.json`);
 const emo = require(`../jsons/emoji.json`);
 
 class Player extends DatabaseManager {
   constructor() {
-    super(pool, poolBo);
     super(pool, poolBo);
     this.userId = null;
     this.stats = null;
@@ -260,9 +258,9 @@ class Player extends DatabaseManager {
   }
 
   async getMaterialsByIdEtat0(userId) {
-    const [result] = await this.connection
-      .promise()
-      .query(sqlQueries.getMaterialsByIdEtat0, [userId]);
+    const [result] = await pool.query(sqlQueries.getMaterialsByIdEtat0, [
+      userId,
+    ]);
     return result || [];
   }
   async getMaterialsByIdEtat1(userId) {

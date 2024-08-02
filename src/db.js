@@ -8,11 +8,8 @@ const {
   db_campagne,
   db_user_bo,
   db_user_campagne,
-  db_user_bo,
-  db_user_campagne,
 } = require("./jsons/config.json");
 
-const pool = mysql.createPool({
 const pool = mysql.createPool({
   host: db_host,
   user: db_user,
@@ -26,7 +23,6 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-const poolBo = mysql.createPool({
 const poolBo = mysql.createPool({
   host: db_host,
   user: db_user,
