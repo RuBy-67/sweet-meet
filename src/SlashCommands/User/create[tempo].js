@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const emo = require(`../../jsons/emoji.json`);
 const color = require(`../../jsons/color.json`);
-const { connection } = require("../../db");
+const { pool } = require("../../db");
 //const bonus = require("../../jsons/userBonus.json");
 
 module.exports = {
