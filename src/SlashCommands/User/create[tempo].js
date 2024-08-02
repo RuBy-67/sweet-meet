@@ -43,12 +43,12 @@ module.exports = {
           );
 
           // Insert the 'first-arrival' badge into the user's badge collection
-          await connection
+          /*await connection
             .promise()
             .query("INSERT INTO badge_user (idUser, idBadge) VALUES (?, 1)", [
               member.id,
             ]);
-          /*if (bonus[member.id]) {
+          if (bonus[member.id]) {
             // Insert the badge corresponding to the user's ID from userBonus.json
             await connection
               .promise()
