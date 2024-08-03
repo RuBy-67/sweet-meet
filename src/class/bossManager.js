@@ -44,22 +44,18 @@ class Boss extends DatabaseManager {
       attaque = attaque * 0.3;
       defense = defense * 0.3;
       sante = sante * 0.3;
-      power = power * 0.5;
     } else if (difficulty === "2") {
       attaque = attaque * 0.75;
       defense = defense * 0.75;
       sante = sante * 0.75;
-      power = power * 0.75;
     } else if (difficulty === "3") {
       attaque = attaque * 1.55;
       defense = defense * 1.55;
       sante = sante * 1.55;
-      power = power * 1.25;
     } else if (difficulty === "4") {
       attaque = attaque * 2.5;
       defense = defense * 2.5;
       sante = sante * 2.22;
-      power = power * 1.5;
     }
     let power = Math.round((attaque + defense + sante) * multiplicateur); // inconue du joueurs
     const playerScore = await this.getFightScore(
