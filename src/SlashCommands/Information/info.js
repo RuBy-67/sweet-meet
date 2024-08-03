@@ -527,7 +527,7 @@ module.exports = {
             "***Dans le royaume de Valoria, les badges sont bien plus que de simples insignes. Ils représentent des statuts, Portés fièrement par leurs détenteurs, chaque badge raconte une histoire et confère des privilèges uniques ou des responsabilités spécifiques.***\n ⚠️ Compétence des badges NON implèmentés\n\n**Liste de tous les badges de Valoria :**";
           category = "Badges";
         } else {
-          interaction.reply("Choix invalide");
+          interaction.reply({ content: "Choix invalide", ephemeral: true });
           return;
         }
 
@@ -599,6 +599,7 @@ module.exports = {
           embeds: [embeds[NewCurrentPage]],
           components: [NewRow],
           fetchReply: true,
+          ephemeral: true,
         });
 
         const gfilter = (i) =>
