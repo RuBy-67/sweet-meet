@@ -230,12 +230,12 @@ module.exports = {
             const commandName = "entrainement";
             const cooldownDuration = params.cooldownEntrainement;
             const cooldownInfo = await cooldown.handleCooldown(
-              interaction,
+              i,
               commandName,
               cooldownDuration
             );
 
-            if (cooldownInfo) return; // uniquement si duel lancé
+            if (cooldownInfo) return;
 
             // Logique pour lancer le duel
             const startEmbed = new EmbedBuilder()
