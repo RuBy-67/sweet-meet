@@ -123,15 +123,6 @@ module.exports = {
     const subCommand = interaction.options.getSubcommand();
     switch (subCommand) {
       case "entrainement":
-        const commandName = "entrainement";
-        const cooldownDuration = params.cooldownEntrainement;
-        const cooldownInfo = await cooldown.handleCooldown(
-          interaction,
-          commandName,
-          cooldownDuration
-        );
-
-        if (cooldownInfo) return;
         const difficulty = interaction.options.getString("difficulté");
         const boss = interaction.options.getString("boss");
         const bossInfo = await bosses.getInfoBossById(boss);
@@ -236,6 +227,16 @@ module.exports = {
 
         collector.on("collect", async (i) => {
           if (i.customId === "start_duel") {
+            const commandName = "entrainement";
+            const cooldownDuration = params.cooldownEntrainement;
+            const cooldownInfo = await cooldown.handleCooldown(
+              interaction,
+              commandName,
+              cooldownDuration
+            );
+
+            if (cooldownInfo) return; // uniquement si duel lancé
+
             // Logique pour lancer le duel
             const startEmbed = new EmbedBuilder()
               .setTitle("Duel Commencé")
