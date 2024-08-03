@@ -777,7 +777,7 @@ module.exports = {
           .addFields({
             name: "🏰 - Guilde Commande",
             value:
-              "__Pour les Admin de guilde:__\n- `/gestionguild help`\n**-----**\n__Pour les membres de guilde:__\n- `/guild join`,\n- `/guild leave`,\n- `/guild info`,\n- `/guild give [amount]`\n**-----**\n__Pour le Marchand:__\n- `/guild sell`\n- `/marchand stock`\n- `/marchand fabrique`",
+              "__Pour les Admin de guilde:__\n- `/gestionguild help`\n**-----**\n__Pour les membres de guilde:__\n- `/guild join`,\n- `/guild leave`,\n- `/guild info`,\n- `/guild give [amount]`\n**-----**\n__Pour le Marchand:__\n- `/marchand sell`\n- `/marchand stock`\n- `/marchand fabrique`",
           })
           .setFooter({
             text: `Demandé(e) par ${interaction.user.tag}`,
