@@ -23,8 +23,8 @@ module.exports = {
     }
     userLastMessage.set(userId, currentTime);
     const ranges = [
-      { min: 15, max: 30, probability: 0.4 }, // 40%
-      { min: 31, max: 60, probability: 0.3 }, // 30%
+      { min: 15, max: 30, probability: 0.3 }, // 30%
+      { min: 31, max: 60, probability: 0.4 }, // 40%
       { min: 61, max: 120, probability: 0.2 }, // 20%
       { min: 121, max: 240, probability: 0.1 }, // 10%
     ];
@@ -45,8 +45,8 @@ module.exports = {
       Math.floor(Math.random() * (selectedRange.max - selectedRange.min + 1)) +
       selectedRange.min;
 
-    const longMessageThreshold = 100;
-    const extraPointsForLongMessage = Math.floor(message.content.length * 0.1);
+    const longMessageThreshold = 50;
+    const extraPointsForLongMessage = Math.floor(message.content.length * 0.5);
 
     if (message.content.length > longMessageThreshold) {
       powerIncrement += extraPointsForLongMessage;
@@ -57,8 +57,9 @@ module.exports = {
       const stats = await db.getStats(userId);
       if (stats.guildId != null) {
         // à verifier si c'est pas trop
-        console.log("powerIncrement", powerIncrement * 8);
-        await db.updateGuildXp(stats.guildId, powerIncrement * 8);
+        console.log("powerIncrement", powerIncrement * 2);
+        await db.updateGuildXp(stats.guildId, powerIncrement * 2);
+        await db.addGuildBank(stats.guildId, powerIncrement);
       }
     } catch (error) {
       console.error(
