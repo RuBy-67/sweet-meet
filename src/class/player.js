@@ -410,7 +410,7 @@ class Player extends DatabaseManager {
       "freeDayli"
     );
     let power = await this.generateRandomPower();
-    power = Math.floor(power / 7);
+    power = Math.floor(power / 6);
     return { userId, material: selectedMaterial, power };
   }
 
