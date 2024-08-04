@@ -480,7 +480,7 @@ module.exports = {
         console.log("Choice Counts:", choiceCounts);
         for (const choice of filteredChoices) {
           const idMateriau = parseInt(choice, 10);
-          const midMaterials = await getMIDMateriauxByIdLVL5(
+          const midMaterials = await dbManager.getMIDMateriauxByIdLVL5(
             idMateriau,
             interaction.user.id
           );
