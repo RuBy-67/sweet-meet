@@ -121,7 +121,7 @@ module.exports = {
         const marchand = guildInfo.marchand;
         let descMarchand = "Pas de Marchand désigné";
         if (marchand != null) {
-          descMarchand = guildInfo.marchand;
+          descMarchand = `<@${guildInfo.marchand}>`;
         }
         // verification s'il y a un ou des ministres
         const ministres = await dbManager.getGuildUserByRole(guildInfo.id, 2);
