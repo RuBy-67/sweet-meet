@@ -518,6 +518,9 @@ module.exports = {
           attaqueBoost += material.attaqueBoost * 2.1;
           defenseBoost += material.defenseBoost * 2.8;
           santeBoost += material.santeBoost * 6;
+          console.log("attaque" + material.attaqueBoost);
+          console.log("defense" + material.defenseBoost);
+          console.log("sante" + material.santeBoost);
         });
         powerBoost = (attaqueBoost + defenseBoost + santeBoost) * 61.38;
 
