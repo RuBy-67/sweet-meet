@@ -1,0 +1,177 @@
+{
+  "shopDuration": 7200,
+  "closeInterval": 14400,
+  "cooldownDuel": "240",
+  "cooldownMariage": "1000",
+  "cooldownEntrainement": "1800",
+  "cooldownBox": "86400",
+  "cooldownSecret": "1200",
+  "guildPrice": "50000",
+  "guildlvlMax": "5",
+  "changeGuildName": "20000",
+  "changeGuildStatut": "5000",
+  "changeGuildBanner": "10000",
+  "changeGuildDescription": "30000",
+
+  "promote": {
+    "Ministre": 15000,
+    "Noble": 11000,
+    "Chevalier": 1000,
+    "Marchand": 20000,
+    "Paysan": 1,
+    "Esclave": 1
+  },
+
+  "xp": {
+    "1": "150000",
+    "2": "305000",
+    "3": "503000",
+    "4": "1000001",
+    "5": "2000003"
+  },
+  "upgradePrice": {
+    "1": "100000",
+    "2": "200000",
+    "3": "400000",
+    "4": "800000",
+    "5": "1000000"
+  },
+
+  "maxJoueurLvl": {
+    "1": "6",
+    "2": "13",
+    "3": "17",
+    "4": "22",
+    "5": "26"
+  },
+
+  "maxMinistre": {
+    "1": "1",
+    "2": "2",
+    "3": "3",
+    "4": "4",
+    "5": "5"
+  },
+  "maxMarchand": {
+    "1": "0",
+    "2": "0",
+    "3": "1",
+    "4": "1",
+    "5": "1"
+  },
+  "maxFlag": {
+    "1": 20,
+    "2": 30,
+    "3": 40,
+    "4": 60,
+    "5": 60
+  },
+
+  "gameMaster": {
+    "id": "375590278880428034",
+    "id2": "462695102876352523",
+    "id3": "389426909634625551"
+  },
+
+  "maxLevel": "5",
+  "updatePrice": {
+    "commun": "10",
+    "rare": "20",
+    "tresRare": "30",
+    "epic": "40",
+    "legendaire": "50",
+    "levels": "0.5",
+    "multiplicateur": "71",
+    "feu": "1.15",
+    "terre": "1.07",
+    "eau": "1.097",
+    "vent": "1.095"
+  },
+  "level": {
+    "1": "0",
+    "2": "100",
+    "3": "150",
+    "4": "225",
+    "5": "300"
+  },
+
+  "Pricing": {
+    "marriage": {
+      "accepter": "2000",
+      "refuse": "500",
+      "expire": "1900",
+      "fees": "0.5"
+    },
+    "divorce": {
+      "prix": "1000",
+      "refus": "500",
+      "fees": "0.8"
+    }
+  },
+  "powerMax": "10000",
+
+  "santeBase": "100",
+  "defenseBase": "5",
+  "attaqueBase": "10",
+  "powerBase": "1000",
+
+  "facteurSante": "0.55",
+  "facteurDefense": "1.57",
+  "facteurAttaque": "1.25",
+  "facteurPower": "0.02",
+
+  "randomFactor": "0.15",
+
+  "types": {
+    "terre": {
+      "malus": { "feu": 0.9 },
+      "bonus": { "eau": 1.1 }
+    },
+    "vent": {
+      "malus": { "terre": 0.9 },
+      "bonus": { "feu": 1.1 }
+    },
+    "eau": {
+      "malus": { "vent": 0.9 },
+      "bonus": { "terre": 1.1 }
+    },
+    "feu": {
+      "malus": { "eau": 0.9 },
+      "bonus": { "vent": 1.1 }
+    }
+  },
+  "boutique": {
+    "achat": {
+      "prix": {
+        "RndLootBox": 30000,
+        "LootBox": 15000,
+        "materiaux": {
+          "Commun": 5000,
+          "Rare": 15000,
+          "Très Rare": 20000,
+          "Épique": 30000,
+          "Legendaire": 40000
+        },
+        "role": {
+          "1247280292213948446": 10000,
+          "1216037978913378389": 20000,
+          "1216037978913378388": 50000,
+          "1246944911580991549": 80000,
+          "1246944923526234113": 100000,
+          "1246944929675087914": 300000
+        }
+      }
+    },
+    "vente": {
+      "prix": {
+        "materiaux": {
+          "Commun": "1500",
+          "Rare": "7500",
+          "Très Rare": "10000",
+          "Épique": "15000",
+          "Legendaire": "30000"
+        }
+      }
+    }
+  }
+}
