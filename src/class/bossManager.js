@@ -103,7 +103,7 @@ class Boss extends DatabaseManager {
     const diff = Math.abs(playerAdjustedWinChance - bossAdjustedWinChance);
 
     if (diff < 0.04) {
-      return equal;
+      return "equal";
     } else if (playerAdjustedWinChance > bossAdjustedWinChance) {
       return true;
     } else {
