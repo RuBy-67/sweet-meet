@@ -128,50 +128,60 @@ module.exports = {
     switch (subCommand) {
       case "entrainement":
         const difficulty = interaction.options.getString("difficulté");
-        const boss = interaction.options.getString("boss");
-        const bossInfo = await bosses.getInfoBossById(boss);
-        let difficultyString = "";
-        let attaque = bossInfo.attaque;
-        let defense = bossInfo.defense;
-        let sante = bossInfo.sante;
-        let recompenseV = 8000;
-        let recompenseD = 8000;
-        if (difficulty === "1") {
-          attaque = Math.round(attaque * 0.3);
-          defense = Math.round(defense * 0.3);
-          sante = Math.round(sante * 0.3);
-          recompenseV = recompenseV * 0.25;
-          recompenseD = recompenseD * 0.1;
-          difficultyString = "Facile";
-        } else if (difficulty === "2") {
-          attaque = Math.round(attaque * 0.75);
-          defense = Math.round(defense * 0.75);
-          sante = Math.round(sante * 0.75);
-          recompenseV = Math.round(recompenseV * 0.75);
-          recompenseD = recompenseD * 0.5;
-          difficultyString = "Moyen";
-        } else if (difficulty === "3") {
-          attaque = Math.round(attaque * 1.88);
-          defense = Math.round(defense * 1.88);
-          sante = Math.round(sante * 1.88);
-          recompenseV = Math.round(recompenseV * 1.25);
-          recompenseD = recompenseD * 1;
-          difficultyString = "Difficile";
-        } else if (difficulty === "4") {
-          attaque = Math.round(attaque * 2.88);
-          defense = Math.round(defense * 2.88);
-          sante = Math.round(sante * 2.97);
-          recompenseV = Math.round(recompenseV * 2);
-          recompenseD = recompenseD * 1.25;
-          difficultyString = "Légendaire";
-        } else if (difficulty === "0") {
-          attaque = Math.round(attaque * 0.1);
-          defense = Math.round(defense * 0.12);
-          sante = Math.round(sante * 0.16);
-          recompenseV = Math.round(recompenseV * 0.04);
-          recompenseD = Math.round(recompenseD * 0.03);
-          difficultyString = "Noob";
-        }
+        const bossId = interaction.options.getString("boss");
+
+        // Récupérer les informations du boss
+        const bossInfo = await bosses.getInfoBossById(bossId);
+
+        // Définir les ajustements en fonction de la difficulté
+        const difficultyAdjustments = {
+          0: {
+            factor: 0.1,
+            rewardMultiplierVictory: 0.04,
+            rewardMultiplierDefeat: 0.03,
+            label: "Noob",
+          },
+          1: {
+            factor: 0.3,
+            rewardMultiplierVictory: 0.25,
+            rewardMultiplierDefeat: 0.1,
+            label: "Facile",
+          },
+          2: {
+            factor: 0.75,
+            rewardMultiplierVictory: 0.75,
+            rewardMultiplierDefeat: 0.5,
+            label: "Moyen",
+          },
+          3: {
+            factor: 1.88,
+            rewardMultiplierVictory: 1.25,
+            rewardMultiplierDefeat: 1,
+            label: "Difficile",
+          },
+          4: {
+            factor: 2.88,
+            rewardMultiplierVictory: 2,
+            rewardMultiplierDefeat: 1.25,
+            label: "Légendaire",
+          },
+        };
+
+        const {
+          factor,
+          rewardMultiplierVictory,
+          rewardMultiplierDefeat,
+          label: difficultyString,
+        } = difficultyAdjustments[difficulty] || {};
+
+        // Calculer les statistiques ajustées
+        const attaque = Math.round(bossInfo.attaque * factor);
+        const defense = Math.round(bossInfo.defense * factor);
+        const sante = Math.round(bossInfo.sante * factor);
+        const recompenseV = Math.round(8000 * rewardMultiplierVictory);
+        const recompenseD = Math.round(8000 * rewardMultiplierDefeat);
+
+        // Créer l'embed pour le duel
         const embed = new EmbedBuilder()
           .setTitle(`Entraînement contre ${bossInfo.nom}`)
           .setThumbnail(bossInfo.image)
@@ -211,86 +221,117 @@ module.exports = {
             iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
           });
 
+        // Créer les boutons d'action
         const actionRow = new ActionRowBuilder().addComponents(
           new ButtonBuilder()
-            .setCustomId("start_duel")
+            .setCustomId(`start_duel_${interaction.id}`) // Utiliser un identifiant unique
             .setLabel("Lancer le duel")
             .setStyle(ButtonStyle.Primary),
           new ButtonBuilder()
-            .setCustomId("cancel_duel")
+            .setCustomId(`cancel_duel_${interaction.id}`) // Utiliser un identifiant unique
             .setLabel("Annuler le duel")
             .setStyle(ButtonStyle.Secondary)
         );
 
+        // Répondre avec l'embed et les boutons
         await interaction.reply({
           embeds: [embed],
           components: [actionRow],
           ephemeral: true,
         });
 
-        // Créer un collector pour gérer les interactions de boutons
-        const filter = (i) =>
-          i.customId === "start_duel" || i.customId === "cancel_duel";
-        const collector = interaction.channel.createMessageComponentCollector({
-          filter,
-          time: 60000,
-        });
-
-        collector.on("collect", async (i) => {
-          if (i.customId === "start_duel") {
-            const commandName = "entrainement";
-            const cooldownDuration =
-              params.cooldownEntrainement * difficulty + 350;
-            const cooldownInfo = await cooldown.handleCooldown(
-              i,
-              commandName,
-              cooldownDuration
-            );
-
-            if (cooldownInfo) return;
-
-            // Logique pour lancer le duel
-            const startEmbed = new EmbedBuilder()
-              .setTitle("Duel Commencé")
-              .setDescription(
-                `Vous avez commencé un duel contre **${bossInfo.nom}**!`
-              )
-              .setImage(bossInfo.image)
-              .setColor(Embedcolors);
-            await i.update({ embeds: [startEmbed], components: [] });
-            await bosses.startDuel(
-              userId,
-              bossInfo,
-              difficulty,
-              i,
-              recompenseD,
-              recompenseV,
-              Embedcolors,
-              client
-            );
-            return;
-          } else if (i.customId === "cancel_duel") {
-            // Logique pour annuler le duel
-            const cancelEmbed = new EmbedBuilder()
-              .setTitle("Duel Annulé")
-              .setDescription(
-                `Le duel contre **${bossInfo.nom}** a été annulé.`
-              )
-              .setColor(color.error);
-
-            await i.update({ embeds: [cancelEmbed], components: [] });
+        // Fonction pour gérer le collector
+        const handleCollector = async () => {
+          // Détacher les anciens écouteurs s'ils existent
+          if (client.collectors[interaction.id]) {
+            client.collectors[interaction.id].stop();
           }
-        });
 
-        collector.on("end", (collected, reason) => {
-          if (reason === "time") {
-            interaction.editReply({
-              content: " ",
-              components: [],
-            });
-          }
-        });
-        break;
+          // Créer un nouveau collector pour gérer les interactions des boutons
+          const filter = (i) => {
+            return (
+              i.customId.startsWith("start_duel_") ||
+              i.customId.startsWith("cancel_duel_")
+            );
+          };
+
+          const collector = interaction.channel.createMessageComponentCollector(
+            {
+              filter,
+              time: 60000,
+            }
+          );
+
+          // Stocker le collector avec l'ID d'interaction pour éviter les conflits
+          client.collectors[interaction.id] = collector;
+
+          collector.on("collect", async (i) => {
+            if (i.customId === `start_duel_${interaction.id}`) {
+              const commandName = "entrainement";
+              const cooldownDuration =
+                params.cooldownEntrainement * difficulty + 350;
+              const cooldownInfo = await cooldown.handleCooldown(
+                i,
+                commandName,
+                cooldownDuration
+              );
+
+              if (cooldownInfo) return;
+
+              // Logique pour lancer le duel
+              const startEmbed = new EmbedBuilder()
+                .setTitle("Duel Commencé")
+                .setDescription(
+                  `Vous avez commencé un duel contre **${bossInfo.nom}**!`
+                )
+                .setImage(bossInfo.image)
+                .setColor(Embedcolors);
+
+              await i.update({ embeds: [startEmbed], components: [] });
+              await bosses.startDuel(
+                interaction.user.id,
+                bossInfo,
+                difficulty,
+                i,
+                recompenseD,
+                recompenseV,
+                Embedcolors,
+                client
+              );
+            } else if (i.customId === `cancel_duel_${interaction.id}`) {
+              // Logique pour annuler le duel
+              const cancelEmbed = new EmbedBuilder()
+                .setTitle("Duel Annulé")
+                .setDescription(
+                  `Le duel contre **${bossInfo.nom}** a été annulé.`
+                )
+                .setColor(color.error);
+
+              await i.update({ embeds: [cancelEmbed], components: [] });
+            }
+          });
+
+          collector.on("end", (collected, reason) => {
+            if (reason === "time") {
+              interaction.editReply({
+                content: "Le temps est écoulé.",
+                components: [],
+              });
+            }
+
+            // Nettoyer le collector stocké
+            delete client.collectors[interaction.id];
+          });
+        };
+
+        // Initialiser un conteneur pour les collectors si ce n'est pas déjà fait
+        if (!client.collectors) {
+          client.collectors = {};
+        }
+
+        // Appeler la fonction pour gérer le collector
+        handleCollector();
+
       case "solo":
         return interaction.reply({
           content: "Commande à venir",
