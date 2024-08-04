@@ -235,7 +235,7 @@ module.exports = {
     },
   ],
   run: async (client, interaction, args) => {
-    /*if (config.maintenance) {
+    if (config.maintenance) {
       const embed = new EmbedBuilder()
         .setTitle("⚒️ Maintenance ⚒️")
         .setColor(color.error)
@@ -244,7 +244,7 @@ module.exports = {
         )
         .setColor(color.error);
       return interaction.reply({ embeds: [embed] });
-    }*/
+    }
     const Embedcolors = await dbManager.getColor(interaction.user.id);
 
     function emoji(id) {
@@ -515,15 +515,13 @@ module.exports = {
         let powerBoost = 10;
 
         selectedMaterials.forEach((material) => {
-          attaqueBoost += Math.round(material.attaqueBoost * 1.9);
-          defenseBoost += Math.round(material.defenseBoost * 2.3);
-          santeBoost += Math.round(material.santeBoost * 6);
+          attaqueBoost += material.attaqueBoost * 2.1;
+          defenseBoost += material.defenseBoost * 2.8;
+          santeBoost += material.santeBoost * 6;
         });
-        powerBoost = Math.round(
-          (attaqueBoost + defenseBoost + santeBoost) * 60.18
-        );
+        powerBoost = (attaqueBoost + defenseBoost + santeBoost) * 61.38;
 
-        const coefficient = 1.3; // Coefficient de puissance
+        const coefficient = 1.23; // Coefficient de puissance
         attaqueBoost = Math.round(attaqueBoost * coefficient);
         defenseBoost = Math.round(defenseBoost * coefficient);
         santeBoost = Math.round(santeBoost * coefficient);

@@ -692,15 +692,6 @@ class DatabaseManager {
     powerBoost,
     duration
   ) {
-    console.log(userId);
-    console.log(potionName);
-    console.log(attaqueBoost);
-    console.log(defenseBoost);
-    console.log(santeBoost);
-    console.log(type);
-    console.log(powerBoost);
-    console.log(duration);
-
     return this.queryMain(SQL_QUERIES.INSERT_POTION_DATA, [
       userId,
       potionName,
