@@ -521,7 +521,6 @@ module.exports = {
         );
 
         powerBoost = (attaqueBoost + defenseBoost + santeBoost) * 61;
-        console.log(attaqueBoost, defenseBoost, santeBoost, powerBoost);
 
         const coefficient = 1.5; // Coefficient de puissance
         attaqueBoost = Math.round(attaqueBoost * coefficient);
@@ -570,12 +569,12 @@ module.exports = {
           .setTitle(`🧪 Potion : ${potionName}`)
           .setColor(Embedcolors)
           .setDescription(
-            `- **Type de Potion:** ${potionType}\n` +
-              `- **Boost d'attaque:** +${attaqueBoost}\n` +
-              `- **Boost de défense:** +${defenseBoost}\n` +
-              `- **Boost de santé:** +${santeBoost}\n` +
-              `- **Boost de puissance:** +${powerBoost}\n` +
-              `- **Durée d'efficacité:** ${duration} secondes\n> ***Vous pouvez vendre vos potions à vos membres de guilde, si vous êtes marchand***`
+            `- Type de Potion: **${potionType}**\n` +
+              `- Boost d'attaque: **+${attaqueBoost}⚔️**\n` +
+              `- Boost de défense: **+${defenseBoost}🛡️**\n` +
+              `- Boost de santé: **+${santeBoost}💚**\n` +
+              `- Boost de puissance: **+${powerBoost}** ${emoji(emo.power)}\n` +
+              `- Durée d'efficacité: **${duration} secondes**\n> ***Vous pouvez vendre vos potions à vos membres de guilde, si vous êtes marchand***`
           );
 
         await dbManager.insertPotionData(
