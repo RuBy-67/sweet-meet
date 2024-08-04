@@ -503,39 +503,47 @@ module.exports = {
           await dbManager.removeMaterialFromUser(mid);
           console.log(`Removed Material with mid ${mid}`);
         }
-        // Sélectionner uniquement les matériaux spécifiés par l'utilisateur
-        const selectedMaterials = possède.filter((material) =>
-          filteredChoices.includes(material.IdMateriau.toString())
-        );
-
-        // Calculer les boosts de la potion
         let attaqueBoost = 0;
         let defenseBoost = 0;
         let santeBoost = 0;
         let powerBoost = 0;
-        selectedMaterials.forEach((material) => {
-          let materialAttaqueBoost = parseInt(material.attaqueBoost);
-          let materialDefenseBoost = parseInt(material.defenseBoost);
-          let materialSanteBoost = parseInt(material.santeBoost);
 
-          attaqueBoost += materialAttaqueBoost * 2;
-          defenseBoost += materialDefenseBoost * 3;
-          santeBoost += materialSanteBoost * 6;
-          console.log(
-            materialSanteBoost,
-            materialDefenseBoost,
-            materialAttaqueBoost
+        // Pour chaque matériau compté dans choiceCounts
+        for (const [choice, count] of Object.entries(choiceCounts)) {
+          const idMateriau = parseInt(choice, 10);
+
+          // Récupérer les matériaux avec le idMateriau spécifié et niveau 5 ou plus
+          const midMaterials = await dbManager.getMIDMateriauxByIdLVL5(
+            idMateriau,
+            interaction.user.id
           );
-        });
+
+          // Utiliser autant de matériaux que nécessaire en fonction de count
+          for (let i = 0; i < count && i < midMaterials.length; i++) {
+            const material = midMaterials[i];
+            const materialAttaqueBoost = parseInt(material.attaqueBoost, 10);
+            const materialDefenseBoost = parseInt(material.defenseBoost, 10);
+            const materialSanteBoost = parseInt(material.santeBoost, 10);
+
+            attaqueBoost += materialAttaqueBoost * 2;
+            defenseBoost += materialDefenseBoost * 3;
+            santeBoost += materialSanteBoost * 6;
+
+            console.log(
+              `Material ID: ${material.id} - Attaque: ${materialAttaqueBoost}, Defense: ${materialDefenseBoost}, Santé: ${materialSanteBoost}`
+            );
+          }
+        }
+
         powerBoost = (attaqueBoost + defenseBoost + santeBoost) * 61;
         console.log(attaqueBoost, defenseBoost, santeBoost, powerBoost);
 
         console.log("------------------------");
         const coefficient = 1.5; // Coefficient de puissance
-        attaqueBoost = attaqueBoost * coefficient;
-        defenseBoost = defenseBoost * coefficient;
-        santeBoost = santeBoost * coefficient;
-        powerBoost = powerBoost * coefficient;
+        attaqueBoost = Math.round(attaqueBoost * coefficient);
+        defenseBoost = Math.round(defenseBoost * coefficient);
+        santeBoost = Math.round(santeBoost * coefficient);
+        powerBoost = Math.round(powerBoost * coefficient);
 
         console.log(
           `Boosts: Attaque: ${attaqueBoost}, Defense: ${defenseBoost}, Santé: ${santeBoost}, Puissance: ${powerBoost}`
