@@ -509,10 +509,10 @@ module.exports = {
         );
 
         // Calculer les boosts de la potion
-        let attaqueBoost = 10;
-        let defenseBoost = 12;
-        let santeBoost = 15;
-        let powerBoost = 10;
+        let attaqueBoost = "";
+        let defenseBoost = "";
+        let santeBoost = "";
+        let powerBoost = "";
         console.log(attaqueBoost, defenseBoost, santeBoost, powerBoost);
         console.log("------------------------");
 
