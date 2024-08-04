@@ -419,17 +419,19 @@ module.exports = {
             ephemeral: true,
           });
         }
+
+        // Filtrer les choix non nuls
         const filteredChoices = choices.filter((choice) => choice !== null);
         console.log("Filtered Choices:", filteredChoices);
 
         const possède = await dbManager.getMateriauByUserId(
           interaction.user.id
         );
-
         const possèdeIds = possède.map((material) =>
           parseInt(material.IdMateriau, 10)
         );
 
+        // Vérifier que l'utilisateur possède tous les matériaux nécessaires
         const allMaterialsPresent = filteredChoices.every((choice) =>
           possèdeIds.includes(parseInt(choice, 10))
         );
@@ -447,6 +449,8 @@ module.exports = {
             ephemeral: true,
           });
         }
+
+        // Vérifier que tous les matériaux sont de niveau 5 ou plus
         const allMaterialsLevelFiveOrAbove = filteredChoices.every((choice) => {
           const material = possède.find(
             (material) => material.IdMateriau === parseInt(choice, 10)
@@ -467,13 +471,22 @@ module.exports = {
           });
         }
 
-        for (const choice of filteredChoices) {
+        // Compter les occurrences de chaque matériau dans les choix
+        const choiceCounts = filteredChoices.reduce((acc, choice) => {
+          acc[choice] = (acc[choice] || 0) + 1;
+          return acc;
+        }, {});
+
+        // Supprimer les matériaux en fonction du nombre d'occurrences dans filteredChoices
+        for (const [choice, count] of Object.entries(choiceCounts)) {
           const materialToRemove = possède.find(
             (material) =>
               parseInt(material.IdMateriau, 10) === parseInt(choice, 10)
           );
           if (materialToRemove) {
-            await dbManager.removeMaterialFromUser(materialToRemove.mid);
+            for (let i = 0; i < count; i++) {
+              await dbManager.removeMaterialFromUser(materialToRemove.mid);
+            }
           }
         }
 
@@ -550,7 +563,7 @@ module.exports = {
               `- **Boost de défense:** +${defenseBoost}\n` +
               `- **Boost de santé:** +${santeBoost}\n` +
               `- **Boost de puissance:** +${powerBoost}\n` +
-              `- **Durée d'efficacité:** ${duration} secondes\n> ***Vous pouvez vendre vos potions à vos membres de guilde.***`
+              `- **Durée d'efficacité:** ${duration} secondes\n> ***Vous pouvez vendre vos potions à vos membres de guilde, si vous êtes marchand***`
           );
         await dbManager.insertPotionData(
           interaction.user.id,
@@ -565,7 +578,6 @@ module.exports = {
 
         return interaction.reply({
           embeds: [embedPotion],
-          ephemeral: true,
           ephemeral: true,
         });
 

@@ -157,11 +157,13 @@ module.exports = {
           emo.power
         )}`,
         ephemeral: true,
+        fetchReply: true,
       });
     } else if (type === "materiel") {
       interaction.reply({
         content: "Veuillez choisir le matériel à donner.",
         ephemeral: true,
+        fetchReply: true,
         components: await componentMaterial(),
       });
       collector.on("collect", async (i) => {
@@ -175,6 +177,7 @@ module.exports = {
           await i.update({
             content: `Vous avez donné **${material[0].nom} - (lvl1)** à ${utilisateur}.`,
             ephemeral: true,
+            fetchReply: true,
           });
         }
       });
@@ -183,6 +186,7 @@ module.exports = {
         content: "Veuillez choisir le badge à donner (ou à reprendre).",
         components: await componentBadge(),
         ephemeral: true,
+        fetchReply: true,
       });
       collector.on("collect", async (i) => {
         const selectedMaterials = i.values;
@@ -228,6 +232,7 @@ module.exports = {
       interaction.reply({
         content: "Type de donnée non reconnu.",
         ephemeral: true,
+        fetchReply: true,
       });
     }
 

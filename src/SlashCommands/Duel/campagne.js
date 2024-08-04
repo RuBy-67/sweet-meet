@@ -224,11 +224,11 @@ module.exports = {
         // Créer les boutons d'action
         const actionRow = new ActionRowBuilder().addComponents(
           new ButtonBuilder()
-            .setCustomId(`start_duel_${interaction.id}`) // Utiliser un identifiant unique
+            .setCustomId(`start_duel_${interaction.id}`)
             .setLabel("Lancer le duel")
             .setStyle(ButtonStyle.Primary),
           new ButtonBuilder()
-            .setCustomId(`cancel_duel_${interaction.id}`) // Utiliser un identifiant unique
+            .setCustomId(`cancel_duel_${interaction.id}`)
             .setLabel("Annuler le duel")
             .setStyle(ButtonStyle.Secondary)
         );
@@ -243,17 +243,14 @@ module.exports = {
         // Fonction pour gérer le collector
         const handleCollector = async () => {
           // Détacher les anciens écouteurs s'ils existent
-          if (client.collectors[interaction.id]) {
+          if (client.collectors && client.collectors[interaction.id]) {
             client.collectors[interaction.id].stop();
           }
 
           // Créer un nouveau collector pour gérer les interactions des boutons
-          const filter = (i) => {
-            return (
-              i.customId.startsWith("start_duel_") ||
-              i.customId.startsWith("cancel_duel_")
-            );
-          };
+          const filter = (i) =>
+            i.customId.startsWith(`start_duel_${interaction.id}`) ||
+            i.customId.startsWith(`cancel_duel_${interaction.id}`);
 
           const collector = interaction.channel.createMessageComponentCollector(
             {
@@ -263,9 +260,20 @@ module.exports = {
           );
 
           // Stocker le collector avec l'ID d'interaction pour éviter les conflits
+          if (!client.collectors) {
+            client.collectors = {};
+          }
           client.collectors[interaction.id] = collector;
 
           collector.on("collect", async (i) => {
+            // Vérifier que l'utilisateur qui interagit est bien celui qui a lancé l'interaction
+            if (i.user.id !== interaction.user.id) {
+              return i.reply({
+                content: "Vous ne pouvez pas interagir avec ce message.",
+                ephemeral: true,
+              });
+            }
+
             if (i.customId === `start_duel_${interaction.id}`) {
               const commandName = "entrainement";
               const cooldownDuration =
@@ -323,11 +331,6 @@ module.exports = {
             delete client.collectors[interaction.id];
           });
         };
-
-        // Initialiser un conteneur pour les collectors si ce n'est pas déjà fait
-        if (!client.collectors) {
-          client.collectors = {};
-        }
 
         // Appeler la fonction pour gérer le collector
         handleCollector();

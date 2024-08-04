@@ -519,6 +519,7 @@ module.exports = {
 🔹 **Facteurs :**\n> Nombre de matériaux possédés\n> Niveaux des matériaux\n> Types des matériaux\n> Raretés des matériaux\n\n*Améliorer un matériau apportera une amélioration des bonus du materiaux.*\n\n**Sélectionnez un matériau à améliorer**`,
           components: await componentMaterial(),
           ephemeral: true,
+          fetchReply: true,
         });
         const collectorUp = interaction.channel.createMessageComponentCollector(
           {
@@ -687,6 +688,7 @@ module.exports = {
           content: `Matériaux Actuellement Actifs : \n${await stringMat()}`,
           components: await component(),
           ephemeral: true,
+          fetchReply: true,
         });
         const collectorSet =
           interaction.channel.createMessageComponentCollector({
