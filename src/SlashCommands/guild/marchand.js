@@ -476,9 +476,14 @@ module.exports = {
           acc[choice] = (acc[choice] || 0) + 1;
           return acc;
         }, {});
-        const materialsToRemove = [];
+
         console.log("Choice Counts:", choiceCounts);
-        for (const choice of filteredChoices) {
+
+        // Liste pour stocker les matériaux à supprimer
+        const materialsToRemove = [];
+
+        // Trouver et stocker les matériaux à supprimer
+        for (const [choice, count] of Object.entries(choiceCounts)) {
           const idMateriau = parseInt(choice, 10);
           const midMaterials = await dbManager.getMIDMateriauxByIdLVL5(
             idMateriau,
@@ -486,32 +491,18 @@ module.exports = {
           );
 
           if (midMaterials.length > 0) {
-            // On utilise un tableau pour gérer les mid et les occurrences
-            midMaterials.forEach((material) => {
-              materialsToRemove.push({
-                mid: material.id,
-                idMateriau: idMateriau,
-              });
-            });
+            // On prend uniquement autant de mid que nécessaire
+            for (let i = 0; i < count && i < midMaterials.length; i++) {
+              materialsToRemove.push(midMaterials[i].id);
+            }
           }
         }
 
-        // Supprimer les matériaux dans l'ordre des choix
-        for (const material of materialsToRemove) {
-          const { mid } = material;
-          console.log(`Removing Material with mid ${mid}`);
-
-          // Supprimer le matériau avec le `mid` spécifique
+        // Supprimer les matériaux
+        for (const mid of materialsToRemove) {
           await dbManager.removeMaterialFromUser(mid);
           console.log(`Removed Material with mid ${mid}`);
-
-          // Mise à jour du tableau filteredChoices pour éviter les suppressions incorrectes
-          const index = filteredChoices.indexOf(material.idMateriau.toString());
-          if (index > -1) {
-            filteredChoices.splice(index, 1); // Retirer le choix traité
-          }
         }
-
         // Sélectionner uniquement les matériaux spécifiés par l'utilisateur
         const selectedMaterials = possède.filter((material) =>
           filteredChoices.includes(material.IdMateriau.toString())
