@@ -476,19 +476,27 @@ module.exports = {
           acc[choice] = (acc[choice] || 0) + 1;
           return acc;
         }, {});
+        const materialsToRemove = [];
 
-        // Supprimer les matériaux en fonction du nombre d'occurrences dans filteredChoices
-        for (const [choice, count] of Object.entries(choiceCounts)) {
+        // Trouver les matériaux correspondants avec leurs occurrences
+        filteredChoices.forEach((choice) => {
           const materialToRemove = possède.find(
             (material) =>
               parseInt(material.IdMateriau, 10) === parseInt(choice, 10)
           );
-          console.log("Material to Remove:", materialToRemove.mid);
           if (materialToRemove) {
-            for (let i = 0; i < count; i++) {
-              await dbManager.removeMaterialFromUser(materialToRemove.mid);
-              console.log("Removed Material:", materialToRemove.mid);
-            }
+            materialsToRemove.push({
+              mid: materialToRemove.mid,
+              count: choiceCounts[choice],
+            });
+          }
+        });
+
+        // Supprimer les matériaux en fonction du nombre d'occurrences
+        for (const { mid, count } of materialsToRemove) {
+          for (let i = 0; i < count; i++) {
+            await dbManager.removeMaterialFromUser(mid);
+            console.log("Removed Material:", mid);
           }
         }
 
