@@ -524,15 +524,10 @@ module.exports = {
         console.log(attaqueBoost, defenseBoost, santeBoost, powerBoost);
 
         const coefficient = 1.5; // Coefficient de puissance
-        attaqueBoost = attaqueBoost * coefficient;
-        defenseBoost = defenseBoost * coefficient;
-        santeBoost = santeBoost * coefficient;
-        powerBoost = powerBoost * coefficient;
-
-        console.log(
-          `Boosts: Attaque: ${attaqueBoost}, Defense: ${defenseBoost}, Santé: ${santeBoost}, Puissance: ${powerBoost}`
-        );
-
+        attaqueBoost = Math.round(attaqueBoost * coefficient);
+        defenseBoost = Math.round(defenseBoost * coefficient);
+        santeBoost = Math.round(santeBoost * coefficient);
+        powerBoost = Math.round(powerBoost * coefficient);
         // Déterminer le type de la potion
         const typeCounts = {};
         selectedMaterials.forEach((material) => {
