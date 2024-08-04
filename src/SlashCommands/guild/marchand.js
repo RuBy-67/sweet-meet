@@ -513,6 +513,8 @@ module.exports = {
         let defenseBoost = 12;
         let santeBoost = 15;
         let powerBoost = 10;
+        console.log(attaqueBoost, defenseBoost, santeBoost, powerBoost);
+        console.log("------------------------");
 
         selectedMaterials.forEach((material) => {
           attaqueBoost += material.attaqueBoost * 2.4;
@@ -520,7 +522,8 @@ module.exports = {
           santeBoost += material.santeBoost * 6.2;
         });
         powerBoost = (attaqueBoost + defenseBoost + santeBoost) * 61.38;
-
+        console.log(attaqueBoost, defenseBoost, santeBoost, powerBoost);
+        console.log("------------------------");
         const coefficient = 1.23; // Coefficient de puissance
         attaqueBoost = Math.round(attaqueBoost * coefficient);
         defenseBoost = Math.round(defenseBoost * coefficient);
