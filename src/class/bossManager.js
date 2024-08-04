@@ -145,13 +145,12 @@ class Boss extends DatabaseManager {
 
       if (phase === "end") {
         console.log(winner);
-        if (winner) {
+        if (winner === "equal") {
+          phrases = dialog.bosses[bossId][phase]["tie"];
+        } else if (winner) {
           phrases = dialog.bosses[bossId][phase]["lose"];
         } else if (!winner) {
           phrases = dialog.bosses[bossId][phase]["win"];
-        } else {
-          console.log("egalité");
-          phrases = dialog.bosses[bossId][phase]["tie"];
         }
       } else {
         phrases = dialog.bosses[bossId][phase];
