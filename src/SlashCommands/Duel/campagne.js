@@ -237,7 +237,7 @@ module.exports = {
         await interaction.reply({
           embeds: [embed],
           components: [actionRow],
-          ephemeral: true,
+          fetchReply: true,
         });
 
         // Fonction pour gérer le collector
