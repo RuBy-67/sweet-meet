@@ -239,7 +239,8 @@ module.exports = {
         collector.on("collect", async (i) => {
           if (i.customId === "start_duel") {
             const commandName = "entrainement";
-            const cooldownDuration = params.cooldownEntrainement;
+            const cooldownDuration =
+              params.cooldownEntrainement * difficulty + 350;
             const cooldownInfo = await cooldown.handleCooldown(
               i,
               commandName,

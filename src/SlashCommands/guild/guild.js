@@ -169,7 +169,7 @@ module.exports = {
         const embedInfo = new EmbedBuilder()
           .setTitle(`Infos de la guilde ${guildInfo.nom}`)
           .setColor(colors)
-          .setDescription("***" + guildInfo.description + "***")
+          .setDescription(guildInfo.description)
           .addFields(
             {
               name: `tag de guilde`,

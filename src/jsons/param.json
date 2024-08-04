@@ -3,7 +3,7 @@
   "closeInterval": 14400,
   "cooldownDuel": "240",
   "cooldownMariage": "1000",
-  "cooldownEntrainement": "1800",
+  "cooldownEntrainement": "450",
   "cooldownBox": "86400",
   "cooldownSecret": "1200",
   "guildPrice": "50000",
