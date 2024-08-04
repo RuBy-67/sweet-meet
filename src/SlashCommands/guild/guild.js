@@ -146,6 +146,15 @@ module.exports = {
         } else if (guildInfo.statutInvit === 3) {
           statutInvit = "🟢 Ouvert";
         }
+        let invitationInWait = "";
+        const invitation = await dbManager.getGuildInvitations(guildInfo.id);
+        if (invitation.length === 1) {
+          invitationInWait = invitation.length + "demande";
+        } else if (invitation.length > 1) {
+          invitationInWait = invitation.length + "demandes";
+        } else {
+          invitationInWait = "Aucune demande en attente";
+        }
 
         let emoLevel = emoji(emo.level12);
         if (guildInfo.level === 3 || guildInfo.level === 4) {
@@ -225,6 +234,12 @@ module.exports = {
                   .replace(/\B(?=(\d{3})+(?!\d))/g, ".") +
                 " " +
                 emoji(emo.power),
+              inline: true,
+            },
+            {
+              name: "📜 Demande en Attente",
+              value: invitationInWait,
+
               inline: true,
             }
           );
@@ -381,7 +396,8 @@ module.exports = {
 
       case "leave":
         const InGuild = await dbManager.getStats(userId);
-        if (InGuild.guildId > 0) {
+        console.log(InGuild.guildId);
+        if (InGuild.guildId == null) {
           return interaction.reply({
             content: "Vous n'êtes membre d'aucune guilde.",
             ephemeral: true,

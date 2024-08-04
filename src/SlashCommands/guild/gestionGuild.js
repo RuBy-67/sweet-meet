@@ -490,28 +490,38 @@ module.exports = {
         return interaction.reply({ embeds: [embed] });
 
       case "kick":
-        const members = dbManager.getGuildMembers(guildId);
+        const members = await dbManager.getGuildMembers(guildId);
+        console.log(members);
+
         const nonAdminMembers = [];
         for (const member of members) {
-          const isAdmin = await dbManager.isGuildAdmin(member.id, guildId);
+          const isAdmin = await dbManager.isGuildAdmin(
+            member.discordId,
+            guildId
+          );
           if (!isAdmin) {
-            const userClass = await dbManager.getUserClass(member.id, guildId);
-            const user = await client.users.fetch(member.id);
-            const emoji = emoji(emo[`class${userClass.idClass}`]) || "❔";
+            const [userClass] = await dbManager.getUserClass(
+              member.discordId,
+              guildId
+            );
+            console.log(userClass.idClasse);
+            const emojiName = emo[`class${userClass.idClasse}`] || "❔";
+            const user = await client.users.fetch(member.discordId);
+            console.log(emojiName);
             nonAdminMembers.push({
-              id: member.id,
+              id: member.discordId,
               username: user.username,
-              emoji: emoji,
+              emoji: emojiName,
             });
           }
         }
-        const memberOptions = nonAdminMembers.map((member) => {
-          return {
-            emoji: member.emoji,
-            label: member.username,
-            value: member.id,
-          };
-        });
+
+        // Mapper les membres pour les options de menu déroulant
+        const memberOptions = nonAdminMembers.map((member) => ({
+          label: member.username,
+          value: member.id,
+          emoji: member.emoji,
+        }));
 
         // Si aucun membre n'est éligible pour être exclu
         if (memberOptions.length === 0) {
@@ -520,6 +530,7 @@ module.exports = {
             ephemeral: true,
           });
         }
+
         const row = new ActionRowBuilder().addComponents(
           new StringSelectMenuBuilder()
             .setCustomId("select-kick-member")
@@ -533,8 +544,9 @@ module.exports = {
           ephemeral: true,
         });
 
-        client.on("interactionCreate", async (interaction) => {
-          if (!interaction.isSelectMenu()) return;
+        // Optimisation de l'écouteur d'événements
+        const handleInteraction = async (interaction) => {
+          if (!interaction.isStringSelectMenu()) return;
 
           // Vérifier si c'est le menu déroulant pour exclure un membre
           if (interaction.customId !== "select-kick-member") return;
@@ -557,9 +569,13 @@ module.exports = {
               ephemeral: true,
             });
           }
-        });
+        };
 
-        break;
+        // Détacher les anciens écouteurs s'ils existent
+        client.off("interactionCreate", handleInteraction);
+
+        // Attacher le nouvel écouteur
+        client.on("interactionCreate", handleInteraction);
       case "promote":
         const userIdToPromote = interaction.options.getUser("membre");
         const replyErrorPromote = (content) =>
@@ -631,7 +647,7 @@ module.exports = {
             "1246944911580991549",
             "1246944923526234113",
             "1246944929675087914",
-            "1247280292213948446",
+            "1247280292213948446", //1246780871776665665 //test //1247280292213948446 //prod
           ],
         };
 
@@ -689,6 +705,7 @@ module.exports = {
           newClassId
         );
         const classNameToPromote = await dbManager.getClassName(newClassId);
+        console.log(classNameToPromote);
         console.log(classNameToPromote[0].Nom);
         await dbManager.addGuildBank(
           guildId,
@@ -786,11 +803,11 @@ module.exports = {
           });
         }
 
-        maxJoueur = params.maxJoueurLvl[guildInfo.level];
+        const maxGuildJoueur = params.maxJoueurLvl[guildInfo.level];
 
-        if (getMembers.length >= maxJoueur) {
+        if (getMembers.length >= maxGuildJoueur) {
           return interaction.reply({
-            content: `Impossible d'inviter, La guilde a atteint le nombre maximum de joueurs : ${maxJoueur}`,
+            content: `Impossible d'inviter, La guilde a atteint le nombre maximum de joueurs : ${maxGuildJoueur}`,
             ephemeral: true,
           });
         }
@@ -858,9 +875,11 @@ module.exports = {
             return {
               label: user.username,
               value: user.id,
-              description: `STATS: ${stats.power} ${emoji(emo.power)}, ${
-                stats.sante
-              }💚, ${stats.defense}🛡️, ${stats.attaque}⚔️`,
+              description: `- __Stat:__ **${stats.power}**${emoji(
+                emo.power
+              )}, **${stats.sante}**💚, **${stats.defense}**🛡️, **${
+                stats.attaque
+              }**⚔️`,
             };
           })
         );
@@ -879,8 +898,12 @@ module.exports = {
           new StringSelectMenuBuilder()
             .setCustomId(customId)
             .setPlaceholder(placeholder)
-            .addOptions(memberOptionsToAccept);
-
+            .addOptions(
+              memberOptionsToAccept.map((opt) => ({
+                label: opt.label,
+                value: opt.value,
+              }))
+            );
         const acceptRow = new ActionRowBuilder().addComponents(
           createMenu("select-accept-member", "Choisir un membre à accepter")
         );
