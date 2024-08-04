@@ -17,13 +17,14 @@ const { description, name, options } = require("./guild");
 const player = new Player();
 
 module.exports = {
-  name: "marchand",
-  description: "🚨 Réservé au marchand d'une guilde",
+  name: "alchimiste",
+  description: "🚨 Réservé au marchand / Alchimiste",
   options: [
     {
       type: 1,
       name: "sell",
-      description: "Vendre une Potion Fabriqué aux membre de sa guilde",
+      description:
+        "Vendre une Potion Fabriqué aux membre de sa guilde 🚨 Réservé au marchand d'une guilde",
       options: [
         {
           type: 4,
@@ -53,7 +54,8 @@ module.exports = {
     {
       type: 1,
       name: "fabrique",
-      description: "Fabrique des potions à partir des matériaux possèdé",
+      description:
+        "Fabrique des potions à partir des matériaux possédé (Alchimiste)",
       options: [
         {
           type: 3 /* String */,
@@ -253,16 +255,28 @@ module.exports = {
     }
     const userInfo = await dbManager.getStats(interaction.user.id);
     const guildInfo = await dbManager.getGuildInfo(userInfo.guildId);
-    if (guildInfo.marchand != interaction.user.id) {
+    const member = await interaction.guild.members.fetch(interaction.user.id);
+    const roleCondition = "1246944923526234113";
+    if (!member.roles.cache.has(roleCondition)) {
       const embedError = new EmbedBuilder()
-        .setTitle("🚨 Réservé au marchand d'une guilde")
+        .setTitle("🚨 Réservé au Alchimiste")
         .setColor(color.error)
-        .setDescription(`> Vous n'êtes pas le marchand de votre guilde.`);
+        .setDescription(
+          `> Vous n'avez pas le rôle requis pour cette commande.\n- **Rôle Requis :** <@&${roleCondition}>`
+        );
       return interaction.reply({ embeds: [embedError], ephemeral: true });
     }
+
     const subCommand = interaction.options.getSubcommand();
     switch (subCommand) {
       case "sell":
+        if (guildInfo.marchand != interaction.user.id) {
+          const embedError = new EmbedBuilder()
+            .setTitle("🚨 Réservé au marchand d'une guilde")
+            .setColor(color.error)
+            .setDescription(`> Vous n'êtes pas le marchand de votre guilde.`);
+          return interaction.reply({ embeds: [embedError], ephemeral: true });
+        }
         const potionId = interaction.options.getInteger("idpotion");
         const targetUser = interaction.options.getUser("membre");
         const amount = interaction.options.getInteger("montant");
@@ -411,12 +425,10 @@ module.exports = {
         const possède = await dbManager.getMateriauByUserId(
           interaction.user.id
         );
-        console.log("Possède:", possède);
 
         const possèdeIds = possède.map((material) =>
           parseInt(material.IdMateriau, 10)
         );
-        console.log("Possède IDs:", possèdeIds);
 
         const allMaterialsPresent = filteredChoices.every((choice) =>
           possèdeIds.includes(parseInt(choice, 10))
@@ -442,11 +454,6 @@ module.exports = {
           return material && material.lvl >= 5;
         });
 
-        console.log(
-          "All Materials Level Five or Above:",
-          allMaterialsLevelFiveOrAbove
-        );
-
         if (!allMaterialsLevelFiveOrAbove) {
           const embedFabrique = new EmbedBuilder()
             .setTitle("🧪 Fabrique de potion")
@@ -460,8 +467,6 @@ module.exports = {
           });
         }
 
-        // Tous les matériaux sont présents, continuer avec la logique de fabrication
-        // Retirer les matériaux de l'utilisateur
         for (const choice of filteredChoices) {
           const materialToRemove = possède.find(
             (material) =>
@@ -476,20 +481,12 @@ module.exports = {
         const selectedMaterials = possède.filter((material) =>
           filteredChoices.includes(material.IdMateriau.toString())
         );
-        console.log("Selected Materials:", selectedMaterials);
 
         // Calculer les boosts de la potion
         let attaqueBoost = 10;
-        let defenseBoost = 10;
-        let santeBoost = 10;
+        let defenseBoost = 12;
+        let santeBoost = 15;
         let powerBoost = 10;
-        console.log(
-          "Boosts:(before)",
-          attaqueBoost,
-          defenseBoost,
-          santeBoost,
-          powerBoost
-        );
 
         selectedMaterials.forEach((material) => {
           attaqueBoost += Math.round(material.attaqueBoost * 1.9);
@@ -499,27 +496,12 @@ module.exports = {
         powerBoost = Math.round(
           (attaqueBoost + defenseBoost + santeBoost) * 60.18
         );
-        console.log(
-          "Boosts:(after)",
-          attaqueBoost,
-          defenseBoost,
-          santeBoost,
-          powerBoost
-        );
 
-        // Appliquer le coefficient de puissance
-        const coefficient = 1.2; // Coefficient de puissance
+        const coefficient = 1.3; // Coefficient de puissance
         attaqueBoost = Math.round(attaqueBoost * coefficient);
         defenseBoost = Math.round(defenseBoost * coefficient);
         santeBoost = Math.round(santeBoost * coefficient);
         powerBoost = Math.round(powerBoost * coefficient);
-        console.log(
-          "Boosts:",
-          attaqueBoost,
-          defenseBoost,
-          santeBoost,
-          powerBoost
-        );
 
         // Déterminer le type de la potion
         const typeCounts = {};

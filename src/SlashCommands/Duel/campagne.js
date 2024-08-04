@@ -59,6 +59,10 @@ module.exports = {
           description: "difficulté des Bosses",
           choices: [
             {
+              name: `noob`,
+              value: "0",
+            },
+            {
               name: `Facile`,
               value: "1",
             },
@@ -147,19 +151,26 @@ module.exports = {
           recompenseD = recompenseD * 0.5;
           difficultyString = "Moyen";
         } else if (difficulty === "3") {
-          attaque = Math.round(attaque * 1.55);
-          defense = Math.round(defense * 1.55);
-          sante = Math.round(sante * 1.55);
+          attaque = Math.round(attaque * 1.88);
+          defense = Math.round(defense * 1.88);
+          sante = Math.round(sante * 1.88);
           recompenseV = Math.round(recompenseV * 1.25);
           recompenseD = recompenseD * 1;
           difficultyString = "Difficile";
         } else if (difficulty === "4") {
-          attaque = Math.round(attaque * 2.5);
-          defense = Math.round(defense * 2.5);
-          sante = Math.round(sante * 2.22);
+          attaque = Math.round(attaque * 2.88);
+          defense = Math.round(defense * 2.88);
+          sante = Math.round(sante * 2.97);
           recompenseV = Math.round(recompenseV * 2);
           recompenseD = recompenseD * 1.25;
           difficultyString = "Légendaire";
+        } else if (difficulty === "0") {
+          attaque = Math.round(attaque * 0.1);
+          defense = Math.round(defense * 0.12);
+          sante = Math.round(sante * 0.16);
+          recompenseV = Math.round(recompenseV * 0.04);
+          recompenseD = Math.round(recompenseD * 0.03);
+          difficultyString = "Noob";
         }
         const embed = new EmbedBuilder()
           .setTitle(`Entraînement contre ${bossInfo.nom}`)
