@@ -476,7 +476,8 @@ module.exports = {
           acc[choice] = (acc[choice] || 0) + 1;
           return acc;
         }, {});
-        const materialsToRemove = [];
+
+        const materialsToRemove = new Map(); // Utiliser un Map pour gérer les matériaux à supprimer
 
         // Trouver les matériaux correspondants avec leurs occurrences
         filteredChoices.forEach((choice) => {
@@ -484,16 +485,30 @@ module.exports = {
             (material) =>
               parseInt(material.IdMateriau, 10) === parseInt(choice, 10)
           );
+
           if (materialToRemove) {
-            materialsToRemove.push({
-              mid: materialToRemove.mid,
-              count: choiceCounts[choice],
-            });
+            // Utiliser mid comme clé pour éviter les doublons
+            if (!materialsToRemove.has(materialToRemove.mid)) {
+              materialsToRemove.set(materialToRemove.mid, {
+                mid: materialToRemove.mid,
+                count: choiceCounts[choice],
+              });
+            } else {
+              // Si le mid est déjà dans le Map, ajuster le count
+              const existingMaterial = materialsToRemove.get(
+                materialToRemove.mid
+              );
+              existingMaterial.count = Math.max(
+                existingMaterial.count,
+                choiceCounts[choice]
+              );
+            }
           }
         });
 
         // Supprimer les matériaux en fonction du nombre d'occurrences
-        for (const { mid, count } of materialsToRemove) {
+        for (const { mid, count } of materialsToRemove.values()) {
+          console.log(count);
           for (let i = 0; i < count; i++) {
             await dbManager.removeMaterialFromUser(mid);
             console.log("Removed Material:", mid);
