@@ -426,7 +426,6 @@ module.exports = {
 
         // Filtrer les choix non nuls
         const filteredChoices = choices.filter((choice) => choice !== null);
-        console.log("Filtered Choices:", filteredChoices);
 
         const possède = await dbManager.getMateriauByUserId(
           interaction.user.id
@@ -439,7 +438,6 @@ module.exports = {
         const allMaterialsPresent = filteredChoices.every((choice) =>
           possèdeIds.includes(parseInt(choice, 10))
         );
-        console.log("All Materials Present:", allMaterialsPresent);
 
         if (!allMaterialsPresent) {
           const embedFabrique = new EmbedBuilder()
@@ -481,8 +479,6 @@ module.exports = {
           return acc;
         }, {});
 
-        console.log("Choice Counts:", choiceCounts);
-
         // Liste pour stocker les matériaux à supprimer
         const materialsToRemove = [];
 
@@ -513,7 +509,6 @@ module.exports = {
         // Supprimer les matériaux
         for (const mid of materialsToRemove) {
           await dbManager.removeMaterialFromUser(mid);
-          console.log(`Removed Material with mid ${mid}`);
         }
         // Sélectionner uniquement les matériaux spécifiés par l'utilisateur
         const selectedMaterials = possède.filter((material) =>
