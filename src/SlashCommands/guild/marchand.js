@@ -476,46 +476,40 @@ module.exports = {
           acc[choice] = (acc[choice] || 0) + 1;
           return acc;
         }, {});
-
-        // Trouver les matériaux correspondants avec leurs occurrences
         const materialsToRemove = [];
-
-        // Accumulateur pour vérifier combien d'occurrences ont été supprimées
-        const removalTracker = {};
-
-        // Parcourir les choix et accumuler les matériaux à supprimer
-        filteredChoices.forEach((choice) => {
-          const materialToRemove = possède.find(
-            (material) =>
-              parseInt(material.IdMateriau, 10) === parseInt(choice, 10)
+        console.log("Choice Counts:", choiceCounts);
+        for (const choice of filteredChoices) {
+          const idMateriau = parseInt(choice, 10);
+          const midMaterials = await getMIDMateriauxByIdLVL5(
+            idMateriau,
+            interaction.user.id
           );
 
-          if (materialToRemove) {
-            // Ajoute le matériau à la liste de suppression
-            materialsToRemove.push(materialToRemove);
+          if (midMaterials.length > 0) {
+            // On utilise un tableau pour gérer les mid et les occurrences
+            midMaterials.forEach((material) => {
+              materialsToRemove.push({
+                mid: material.id,
+                idMateriau: idMateriau,
+              });
+            });
           }
-        });
+        }
 
-        // Supprimer les matériaux en fonction du nombre d'occurrences
-        for (const materialToRemove of materialsToRemove) {
-          const mid = materialToRemove.mid;
+        // Supprimer les matériaux dans l'ordre des choix
+        for (const material of materialsToRemove) {
+          const { mid } = material;
+          console.log(`Removing Material with mid ${mid}`);
 
-          // Déterminer combien de fois ce matériau doit être supprimé
-          const occurrencesNeeded = choiceCounts[materialToRemove.IdMateriau];
+          // Supprimer le matériau avec le `mid` spécifique
+          await dbManager.removeMaterialFromUser(mid);
+          console.log(`Removed Material with mid ${mid}`);
 
-          // Compteur d'occurrences pour ce `mid`
-          let occurrencesRemoved = removalTracker[mid] || 0;
-
-          // Supprimer jusqu'à ce que le nombre requis d'occurrences soit atteint
-          while (occurrencesRemoved < occurrencesNeeded) {
-            await dbManager.removeMaterialFromUser(mid);
-            occurrencesRemoved++;
-            console.log("Removed Material:", mid);
-            console.log("Occurrences Removed:", occurrencesRemoved);
+          // Mise à jour du tableau filteredChoices pour éviter les suppressions incorrectes
+          const index = filteredChoices.indexOf(material.idMateriau.toString());
+          if (index > -1) {
+            filteredChoices.splice(index, 1); // Retirer le choix traité
           }
-
-          // Mettre à jour le suivi des suppressions
-          removalTracker[mid] = occurrencesRemoved;
         }
 
         // Sélectionner uniquement les matériaux spécifiés par l'utilisateur

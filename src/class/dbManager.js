@@ -100,6 +100,12 @@ class DatabaseManager {
       type,
     ]);
   }
+  async getMIDMateriauxByIdLVL5(idMateriau, userId) {
+    return this.queryMain(SQL_QUERIES.GET_MID_MATERIAUX_BY_ID_LVL5, [
+      idMateriau,
+      userId,
+    ]);
+  }
 
   async createInvitation(userId, guildId, type) {
     await this.queryMain(SQL_QUERIES.DELETE_INVITATION, [
