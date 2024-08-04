@@ -484,7 +484,6 @@ module.exports = {
               parseInt(material.IdMateriau, 10) === parseInt(choice, 10)
           );
           console.log("Material to Remove:", materialToRemove.mid);
-          console.log(material.IdMateriau);
           if (materialToRemove) {
             for (let i = 0; i < count; i++) {
               await dbManager.removeMaterialFromUser(materialToRemove.mid);
