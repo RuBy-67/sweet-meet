@@ -513,12 +513,11 @@ module.exports = {
         let defenseBoost = 0;
         let santeBoost = 0;
         let powerBoost = 0;
-
-        let materialAttaqueBoost = parseInt(material.attaqueBoost);
-        let materialDefenseBoost = parseInt(material.defenseBoost);
-        let materialSanteBoost = parseInt(material.santeBoost);
-
         selectedMaterials.forEach((material) => {
+          let materialAttaqueBoost = parseInt(material.attaqueBoost);
+          let materialDefenseBoost = parseInt(material.defenseBoost);
+          let materialSanteBoost = parseInt(material.santeBoost);
+
           attaqueBoost += materialAttaqueBoost * 2;
           defenseBoost += materialDefenseBoost * 3;
           santeBoost += materialSanteBoost * 6;
