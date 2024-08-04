@@ -2,13 +2,11 @@ const param = require("../jsons/param.json");
 const DatabaseManager = require("./dbManager");
 const sqlQueries = require("./sqlQueriesPlayer");
 const { pool, poolBo, poolCampagne } = require("../db");
-const { pool, poolBo, poolCampagne } = require("../db");
 const duelMessages = require(`../jsons/gif.json`);
 const emo = require(`../jsons/emoji.json`);
 
 class Player extends DatabaseManager {
   constructor() {
-    super(pool, poolBo);
     super(pool, poolBo);
     this.userId = null;
     this.stats = null;
@@ -182,9 +180,10 @@ class Player extends DatabaseManager {
         defense *= (materiaux.defenseBoost / 100) * (1 + levelBonus / 100) + 1;
         attaque *= (materiaux.attaqueBoost / 100) * (1 + levelBonus / 100) + 1;
       });
+      console.log("PotionBonus(avant)" + userId);
       const potionBonus = await this.getPotionByEtat(userId);
-      console.log("PotionBonus" + potionBonus);
-      if (potionBonus.length > 0) {
+
+      if (potionBonus) {
         potionBonus.forEach((potion) => {
           console.log(potion.santeBoost);
           sante += potion.santeBoost;
@@ -260,9 +259,9 @@ class Player extends DatabaseManager {
   }
 
   async getMaterialsByIdEtat0(userId) {
-    const [result] = await this.connection
-      .promise()
-      .query(sqlQueries.getMaterialsByIdEtat0, [userId]);
+    const [result] = await pool.query(sqlQueries.getMaterialsByIdEtat0, [
+      userId,
+    ]);
     return result || [];
   }
   async getMaterialsByIdEtat1(userId) {
@@ -411,7 +410,7 @@ class Player extends DatabaseManager {
       "freeDayli"
     );
     let power = await this.generateRandomPower();
-    power = Math.floor(power / 7);
+    power = Math.floor(power / 6);
     return { userId, material: selectedMaterial, power };
   }
 
@@ -477,6 +476,7 @@ class Player extends DatabaseManager {
     return weightedMaterials[randomIndex];
   }
   async getPotionByEtat(userId) {
+    console.log("getPotionByEtat" + userId);
     const [result] = await pool.query(sqlQueries.getPotionByEtat, [userId, 1]);
     return result;
   }

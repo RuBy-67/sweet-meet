@@ -758,7 +758,10 @@ module.exports = {
           userId
         );
         if (userPotions.length === 0) {
-          return interaction.reply("Aucune potion disponible.");
+          return interaction.reply({
+            content: "Aucune potion disponible.",
+            ephemeral: true,
+          });
         }
         const potionMenu = new StringSelectMenuBuilder()
           .setCustomId("potion_select")

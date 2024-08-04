@@ -562,33 +562,39 @@ module.exports = {
         break;
       case "promote":
         const userIdToPromote = interaction.options.getUser("membre");
-        if (!userIdToPromote) {
-          return interaction.reply({
-            content: "Vous devez spécifier un membre à promouvoir.",
+        const replyErrorPromote = (content) =>
+          interaction.reply({
+            content,
             ephemeral: true,
           });
+
+        if (!userIdToPromote) {
+          return replyErrorPromote(
+            "Vous devez spécifier un membre à promouvoir."
+          );
         }
 
-        if (guildInfo.banque < params.promote.Ministre + 10000) {
-          return interaction.reply({
-            content: `La banque de guilde doit au minimum posséder **${
-              params.promote.Ministre + 10000
-            }** ${emoji(
+        if (userIdToPromote.id === interaction.user.id) {
+          return replyErrorPromote(
+            "Vous ne pouvez pas vous promouvoir vous-même."
+          );
+        }
+
+        const requiredBank = params.promote.Ministre + 10000;
+        if (guildInfo.banque < requiredBank) {
+          return replyErrorPromote(
+            `La banque de guilde doit au minimum posséder **${requiredBank}** ${emoji(
               emo.power
             )}, pour pouvoir promouvoir un membre\n- __Banque actuelle :__ ${
               guildInfo.banque
-            } / ${params.promote.Ministre + 10000} ${emoji(emo.power)}`,
-            ephemeral: true,
-          });
+            } / ${requiredBank} ${emoji(emo.power)}`
+          );
         }
-
-        // Vérifier si l'utilisateur à promouvoir fait partie de la guilde
         const memberToPromote = await dbManager.getStats(userIdToPromote.id);
         if (memberToPromote.guildId !== guildId) {
-          return interaction.reply({
-            content: "L'utilisateur n'est pas membre de votre guilde.",
-            ephemeral: true,
-          });
+          return replyErrorPromote(
+            "L'utilisateur n'est pas membre de votre guilde."
+          );
         }
 
         const member = await interaction.guild.members.fetch(
@@ -598,9 +604,7 @@ module.exports = {
           userIdToPromote.id,
           guildId
         );
-        console.log(userIdToPromote.id);
-        console.log(guildId);
-        console.log(getMemberClassToPromote);
+
         const newClassId = getMemberClassToPromote[0].idClasse - 1;
         const ministre = await dbManager.getGuildUserByRole(guildId, 2);
         const maxMinistre = params.maxMinistre[guildInfo.level];
@@ -614,13 +618,13 @@ module.exports = {
             "1246944911580991549",
             "1246944923526234113",
             "1246944929675087914",
-          ], // Ministre
+          ],
           3: [
             "1216037978913378389",
             "1246944911580991549",
             "1246944923526234113",
             "1246944929675087914",
-          ], // Noble
+          ],
           4: [
             "1216037978913378388",
             "1216037978913378389",
@@ -628,15 +632,15 @@ module.exports = {
             "1246944923526234113",
             "1246944929675087914",
             "1247280292213948446",
-          ], // Chevalier
+          ],
         };
 
-        // Vérification des rôles requis
+        const checkRequiredRoles = (roles) =>
+          roles.every((roleId) => !member.roles.cache.has(roleId));
+
         if (
           roleConditions[newClassId] &&
-          !roleConditions[newClassId].some((roleId) =>
-            member.roles.cache.has(roleId)
-          )
+          checkRequiredRoles(roleConditions[newClassId])
         ) {
           const requiredRoles = roleConditions[newClassId]
             .map((roleId) => `- <@&${roleId}>`)
@@ -649,12 +653,9 @@ module.exports = {
                 className[0].Nom
               }** ${emoji(
                 emo[`class${newClassId}`]
-              )}, car il ne possède pas au moin un des rôles requis.`
+              )}, car il ne possède pas au moins un des rôles requis.`
             )
-            .addFields({
-              name: "Rôles requis",
-              value: `${requiredRoles}`,
-            })
+            .addFields({ name: "Rôles requis", value: `${requiredRoles}` })
             .setColor(Embedcolors);
 
           return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -666,130 +667,113 @@ module.exports = {
         ) {
           if (newClassId === 1) {
             const className = await dbManager.getClassName(newClassId);
-            return interaction.reply({
-              content: `Un membre ne peut être ${className[0].Nom} ${emoji(
+            return replyErrorPromote(
+              `Un membre ne peut être ${className[0].Nom} ${emoji(
                 emo[`class${newClassId}`]
-              )}, que par le mariage.`,
-              ephemeral: true,
-            });
-          } else if (newClassId === 2 && ministre.length >= maxMinistre) {
-            return interaction.reply({
-              content: `Nombre maximum de ministres atteint : ${maxMinistre}.`,
-              ephemeral: true,
-            });
-          } else {
-            await dbManager.promoteDemoteMember(
-              userIdToPromote.id,
-              guildId,
-              newClassId
+              )}, que par le mariage.`
             );
-            const className = await dbManager.getClassName(newClassId);
-            console.log(className[0].Nom);
-            await dbManager.addGuildBank(
-              guildId,
-              -params.promote[className[0].Nom]
-            );
-            return interaction.reply({
-              content: `Le membre a été promu au rang de ${
-                className[0].Nom
-              } ${emoji(emo[`class${newClassId}`])}\n\nCoût : **${
-                params.promote[className[0].Nom]
-              }** ${emoji(emo.power)}`,
-              ephemeral: true,
-            });
           }
-        } else {
-          if (getMemberClassToPromote === 3) {
-            return interaction.reply({
-              content: `Seul un empereur ou une reine peut promouvoir un nouveau ministre.`,
-              ephemeral: true,
-            });
-          } else {
-            await dbManager.promoteDemoteMember(
-              userIdToPromote.id,
-              guildId,
-              newClassId
+          if (newClassId === 2 && ministre.length >= maxMinistre) {
+            return replyErrorPromote(
+              `Nombre maximum de ministres atteint : ${maxMinistre}.`
             );
-            const className = await dbManager.getClassName(newClassId);
-            console.log(className[0].Nom);
-            await dbManager.addGuildBank(
-              guildId,
-              -params.promote[className[0].Nom]
-            );
-            return interaction.reply({
-              content: `Le membre a été promu au rang de ${
-                className[0].Nom
-              } ${emoji(emo[`class${newClassId}`])}\n\nCoût : **${
-                params.promote[className[0].Nom]
-              }** ${emoji(emo.power)}`,
-              ephemeral: true,
-            });
           }
+        } else if (getMemberClassToPromote === 3) {
+          return replyErrorPromote(
+            "Seul un empereur ou une reine peut promouvoir un nouveau ministre."
+          );
         }
+        await dbManager.promoteDemoteMember(
+          userIdToPromote.id,
+          guildId,
+          newClassId
+        );
+        const classNameToPromote = await dbManager.getClassName(newClassId);
+        console.log(classNameToPromote[0].Nom);
+        await dbManager.addGuildBank(
+          guildId,
+          -params.promote[classNameToPromote[0].Nom]
+        );
 
+        return interaction.reply({
+          content: `Le membre a été promu au rang de ${
+            classNameToPromote[0].Nom
+          } ${emoji(emo[`class${newClassId}`])}\n\nCoût : **${
+            params.promote[classNameToPromote[0].Nom]
+          }** ${emoji(emo.power)}`,
+          ephemeral: true,
+        });
       case "demote":
         const userIdToDemote = interaction.options.getUser("membre");
-        if (!userIdToDemote) {
-          return interaction.reply({
-            content: "Vous devez spécifier un membre à rétrograder.",
+
+        // Fonction utilitaire pour envoyer une réponse d'erreur
+        const replyErrorDemote = (content) =>
+          interaction.reply({
+            content,
             ephemeral: true,
           });
+
+        if (!userIdToDemote) {
+          return replyErrorDemote(
+            "Vous devez spécifier un membre à rétrograder."
+          );
         }
 
-        // Vérifier si l'utilisateur à rétrograder fait partie de la guilde
         const memberToDemote = await dbManager.getStats(userIdToDemote.id);
         if (memberToDemote.guildId !== guildId) {
-          return interaction.reply({
-            content: "L'utilisateur n'est pas membre de votre guilde.",
-            ephemeral: true,
-          });
+          return replyErrorDemote(
+            "L'utilisateur n'est pas membre de votre guilde."
+          );
         }
 
-        const getMemberClassToDemote = await dbManager.getUserClass(
+        if (userIdToDemote.id === interaction.user.id) {
+          return replyErrorDemote(
+            "Vous ne pouvez pas vous rétrograder vous-même."
+          );
+        }
+
+        const [currentClass] = await dbManager.getUserClass(
           userIdToDemote.id,
           guildId
         );
-        const getClassFromUserToDemote = await dbManager.getUserClass(
-          interaction.user.id,
-          guildId
-        );
-        const newClassIdToDemote = getMemberClassToDemote[0].idClasse + 1;
+        const newClassIdToDemote = currentClass.idClasse + 1;
 
-        // Vérification des permissions
-        if (
-          guildInfo.empreur !== interaction.user.id &&
-          getClassFromUserToDemote !== 1 &&
-          getMemberClassToDemote === 2
-        ) {
-          return interaction.reply({
-            content:
-              "Seul un empereur ou une reine peut rétrograder un ministre.",
-            ephemeral: true,
-          });
+        const isUserEmperorOrQueen =
+          userIdToDemote.id === guildInfo.empreur ||
+          currentClass.idClasse === 1;
+        if (isUserEmperorOrQueen) {
+          return replyErrorDemote(
+            "Une rétrogradation d'Empereur ou de Reine n'est pas autorisée."
+          );
         }
 
-        // Vérification de la classe maximum
+        const isUserMinister = currentClass.idClasse === 2;
+        if (isUserMinister) {
+          return replyErrorDemote(
+            "Seul un empereur ou une reine peut rétrograder un ministre."
+          );
+        }
+
         if (newClassIdToDemote > 6) {
-          const className = await dbManager.getClassName(newClassIdToDemote);
-          return interaction.reply({
-            content: `Le membre est déjà au banc de la société (${
-              className[0].Nom
-            } ${emoji(emo[`class${newClassIdToDemote}`])}).`,
-            ephemeral: true,
-          });
+          const [className] = await dbManager.getClassName(newClassIdToDemote);
+          return replyErrorDemote(
+            `Le membre est déjà au banc de la société (${className.Nom} ${emoji(
+              emo[`class${newClassIdToDemote}`]
+            )}).`
+          );
         }
 
-        // Rétrogradation du membre
         console.log(newClassIdToDemote);
         await dbManager.promoteDemoteMember(
           userIdToDemote.id,
           guildId,
           newClassIdToDemote
         );
-        const className = await dbManager.getClassName(newClassIdToDemote);
+        const [className] = await dbManager.getClassName(newClassIdToDemote);
+
         return interaction.reply({
           content: `Le membre a été rétrogradé au rang de ${
-            className[0].Nom
+            className.Nom
           } ${emoji(emo[`class${newClassIdToDemote}`])}.`,
           ephemeral: true,
         });
@@ -851,119 +835,179 @@ module.exports = {
 
       case "accept":
         const invitations = await dbManager.getGuildInvitations(guildId);
-        maxJoueur = params.maxJoueurLvl[guildInfo.level];
+        const maxJoueur = params.maxJoueurLvl[guildInfo.level];
+
         if (invitations.length === 0) {
           return interaction.reply({
             content: "Aucune demande de rejoindre la guilde.",
             ephemeral: true,
           });
-        } else if (getMembers.length >= maxJoueur) {
+        }
+
+        if (getMembers.length >= maxJoueur) {
           return interaction.reply({
-            content: `Il y a des demande en attente Mais, la guilde a atteint le nombre maximum de joueurs : ${maxJoueur}`,
+            content: `Il y a des demandes en attente, mais la guilde a atteint le nombre maximum de joueurs : ${maxJoueur}.`,
             ephemeral: true,
-          });
-        } else {
-          const memberOptions = await Promise.all(
-            invitations.map(async (invitation) => {
-              const user = await client.users.fetch(invitation.userId);
-              const stats = await player.getStatsById(invitation.userId);
-              return {
-                label: user.username,
-                value: user.id,
-                power: stats.power,
-                sante: stats.sante,
-                defense: stats.defense,
-                attaque: stats.attaque,
-              };
-            })
-          );
-          let description = "Sélectionnez les membres à accepter ou refuser:\n";
-          memberOptions.forEach((member) => {
-            description += `**${member.label}**, ***STATS***: **${
-              member.power
-            } ${emoji(emo.power)}**, **${member.sante}💚**, **${
-              member.defense
-            }🛡️**, **${member.attaque}⚔️**\n\n`;
-          });
-          const embed = new EmbedBuilder()
-            .setColor(Embedcolors)
-            .setTitle("Demandes de rejoindre la guilde")
-            .setDescription(description);
-          const acceptMenu = new StringSelectMenuBuilder()
-            .setCustomId("select-accept-member")
-            .setPlaceholder("Choisir un membre à accepter")
-            .addOptions(memberOptions);
-          // Créer le select menu pour refuser
-          const rejectMenu = new StringSelectMenuBuilder()
-            .setCustomId("select-reject-member")
-            .setPlaceholder("Choisir un membre à refuser")
-            .addOptions(memberOptions);
-          const acceptRow = new ActionRowBuilder().addComponents(acceptMenu);
-          const rejectRow = new ActionRowBuilder().addComponents(rejectMenu);
-
-          await interaction.reply({
-            embeds: [embed],
-            components: [acceptRow, rejectRow],
-            ephemeral: true,
-          });
-          client.on("interactionCreate", async (menuInteraction) => {
-            if (!menuInteraction.isStringSelectMenu()) return;
-
-            const selectedMemberId = menuInteraction.values[0];
-            if (menuInteraction.customId === "select-accept-member") {
-              // Accepter le membre
-              await dbManager.joinGuild(selectedMemberId, guildId);
-              await menuInteraction.update({
-                content: `Le membre <@${selectedMemberId}> a été accepté dans la guilde. [${guildInfo.tag}]`,
-                components: [],
-              });
-            } else if (menuInteraction.customId === "select-reject-member") {
-              // Refuser le membre
-              await dbManager.deleteInvitationByUserAndGuildId(
-                selectedMemberId,
-                guildId,
-                1
-              );
-              await menuInteraction.update({
-                content: `La demande du membre <@${selectedMemberId}> a été refusée.`,
-                components: [],
-              });
-            }
           });
         }
+
+        const memberOptionsToAccept = await Promise.all(
+          invitations.map(async (invitation) => {
+            const user = await client.users.fetch(invitation.userId);
+            const stats = await player.getStatsById(invitation.userId);
+            return {
+              label: user.username,
+              value: user.id,
+              description: `STATS: ${stats.power} ${emoji(emo.power)}, ${
+                stats.sante
+              }💚, ${stats.defense}🛡️, ${stats.attaque}⚔️`,
+            };
+          })
+        );
+
+        const embedToAccept = new EmbedBuilder()
+          .setColor(Embedcolors)
+          .setTitle("Demandes de rejoindre la guilde")
+          .setDescription(
+            "Sélectionnez les membres à accepter ou refuser :\n\n" +
+              memberOptionsToAccept
+                .map((opt) => `**${opt.label}**\n${opt.description}\n`)
+                .join("\n")
+          );
+
+        const createMenu = (customId, placeholder) =>
+          new StringSelectMenuBuilder()
+            .setCustomId(customId)
+            .setPlaceholder(placeholder)
+            .addOptions(memberOptionsToAccept);
+
+        const acceptRow = new ActionRowBuilder().addComponents(
+          createMenu("select-accept-member", "Choisir un membre à accepter")
+        );
+        const rejectRow = new ActionRowBuilder().addComponents(
+          createMenu("select-reject-member", "Choisir un membre à refuser")
+        );
+
+        await interaction.reply({
+          embeds: [embedToAccept],
+          components: [acceptRow, rejectRow],
+          ephemeral: true,
+        });
+
+        const handleMenuInteraction = async (menuInteraction) => {
+          if (!menuInteraction.isStringSelectMenu()) return;
+
+          const selectedMemberId = menuInteraction.values[0];
+          if (menuInteraction.customId === "select-accept-member") {
+            // Accepter le membre
+            await dbManager.joinGuild(selectedMemberId, guildId);
+            await menuInteraction.update({
+              content: `Le membre <@${selectedMemberId}> a été accepté dans la guilde [${guildInfo.tag}].`,
+              components: [],
+            });
+          } else if (menuInteraction.customId === "select-reject-member") {
+            // Refuser le membre
+            await dbManager.deleteInvitationByUserAndGuildId(
+              selectedMemberId,
+              guildId,
+              1
+            );
+            await menuInteraction.update({
+              content: `La demande du membre <@${selectedMemberId}> a été refusée.`,
+              components: [],
+            });
+          }
+        };
+        client.off("interactionCreate", handleMenuInteraction);
+        client.on("interactionCreate", handleMenuInteraction);
 
       case "setmarchand":
         const userIdTo = interaction.options.getUser("membre");
+        const replyErrorSetMarchand = (content) =>
+          interaction.reply({
+            content,
+            ephemeral: true,
+          });
+        const replyUpdateSetMarchand = (content, components) =>
+          interaction.update({
+            content,
+            components,
+            ephemeral: true,
+          });
+
         if (guildInfo.level < 3) {
-          return interaction.reply({
-            content:
-              "La guilde doit au moin être niveau 3 pour promouvoir un marchand.",
-            ephemeral: true,
-          });
+          return replyErrorSetMarchand(
+            "La guilde doit au moins être niveau 3 pour promouvoir un marchand."
+          );
         }
 
-        // Vérifier si l'utilisateur est l'empereur
         if (interaction.user.id !== guildInfo.empreur) {
-          return interaction.reply({
-            content: "Seul l'empereur peut promouvoir un marchand.",
-            ephemeral: true,
-          });
+          return replyErrorSetMarchand(
+            "Seul l'empereur peut promouvoir un marchand."
+          );
         }
 
-        // Vérifier si le membre à promouvoir est membre de la guilde
+        if (guildInfo.empreur === userIdTo.id) {
+          return replyErrorSetMarchand(
+            "Vous ne pouvez pas promouvoir l'empereur au rang de marchand."
+          );
+        }
+
         const stat = await dbManager.getStats(userIdTo.id);
         if (stat.guildId !== guildId) {
-          return interaction.reply({
-            content: "Le membre à promouvoir doit être membre de la guilde.",
-            ephemeral: true,
-          });
+          return replyErrorSetMarchand(
+            "Le membre à promouvoir doit être membre de la guilde."
+          );
         }
 
-        const requiredRoleId = "1246944923526234113"; //1246781092929994833 test  //prod 1246944923526234113
+        const requiredRoleId = "1246944923526234113";
         const requiredRole = interaction.guild.roles.cache.get(requiredRoleId);
+        const cost = params.promote.Marchand;
 
-        // Vérifier si un marchand est déjà en place
+        const memberToSetMarchand = await interaction.guild.members.fetch(
+          userIdTo.id
+        );
+        if (!memberToSetMarchand.roles.cache.has(requiredRoleId)) {
+          return replyErrorSetMarchand(
+            `Le membre à promouvoir doit posséder le rôle requis : **@${requiredRole.name}**.`
+          );
+        }
+
+        if (guildInfo.banque < cost) {
+          return replyErrorSetMarchand(
+            `La guilde n'a pas assez de fragments pour promouvoir un marchand.\n **${
+              guildInfo.banque
+            } / ${cost}** ${emoji(emo.power)}`
+          );
+        }
+
         const currentMarchand = guildInfo.marchand;
+        const handleConfirmation = async (menuInteraction) => {
+          if (!menuInteraction.isButton()) return;
+
+          if (menuInteraction.customId === "replace-marchand-no") {
+            return replyUpdateSetMarchand(
+              "Le marchand actuel n'a pas été remplacé.",
+              []
+            );
+          } else if (menuInteraction.customId === "delete-marchand") {
+            await dbManager.updateMarchand(null, guildId);
+            return replyUpdateSetMarchand(
+              "Le marchand actuel a été supprimé, pas de marchand en place.",
+              []
+            );
+          } else if (menuInteraction.customId === "replace-marchand-yes") {
+            await dbManager.updateMarchand(userIdTo.id, guildId);
+            await dbManager.addGuildBank(guildId, -cost);
+            return replyUpdateSetMarchand(
+              `Le membre <@${userIdTo.id}> a été promu au rang de marchand de la guilde [${guildInfo.tag}]`,
+              []
+            );
+          }
+        };
+        client.off("interactionCreate", handleConfirmation);
+        client.on("interactionCreate", handleConfirmation);
+
         if (currentMarchand) {
           const confirmationMessage = await interaction.reply({
             content:
@@ -987,88 +1031,26 @@ module.exports = {
             ephemeral: true,
           });
 
-          // Attendre la réponse de l'utilisateur
           const filter = (i) =>
-            i.customId === "replace-marchand-yes" ||
-            i.customId === "replace-marchand-no" ||
-            i.customId === "delete-marchand";
+            [
+              "replace-marchand-yes",
+              "replace-marchand-no",
+              "delete-marchand",
+            ].includes(i.customId);
           const response = await confirmationMessage.awaitMessageComponent({
             filter,
             time: 60000,
           });
 
-          if (response.customId === "replace-marchand-no") {
-            return response.update({
-              content: "Le marchand actuel n'a pas été remplacé.",
-              components: [],
-              ephemeral: true,
-            });
-          } else if (response.customId === "delete-marchand") {
-            await dbManager.updateMarchand(null, guildId);
-            return response.update({
-              content:
-                "Le marchand actuel a été supprimé, pas de marchand en place.",
-              components: [],
-              ephemeral: true,
-            });
-          } else {
-            // Vérifier si le membre à promouvoir possède le rôle requis
-            const member = await interaction.guild.members.fetch(userIdTo);
-            if (!member.roles.cache.has(requiredRoleId)) {
-              return response.update({
-                content: `Le membre à promouvoir doit posséder le rôle requis : **@${requiredRole.name}**.`,
-                components: [],
-                ephemeral: true,
-              });
-            }
-
-            // Vérifier que la guilde a assez de fragments
-            const cost = params.promote.Marchand;
-            if (guildInfo.banque < cost) {
-              return response.update({
-                content: `La guilde n'a pas assez de fragments pour promouvoir un marchand.\n **${
-                  guildInfo.banque
-                } / ${cost}** ${emoji(emo.power)}`,
-                components: [],
-                ephemeral: true,
-              });
-            }
-
-            await dbManager.updateMarchand(userIdTo.id, guildId);
-            await dbManager.addGuildBank(guildId, -cost);
-            return response.update({
-              content: `Le membre <@${userIdTo.id}> a été promu au rang de marchand de la guilde [${guildInfo.tag}]`,
-              components: [],
-              ephemeral: true,
-            });
-          }
+          handleConfirmation(response); // Appeler la fonction de gestion des confirmations
         } else {
           // Pas de marchand actuellement en place, promouvoir directement
-          const member = await interaction.guild.members.fetch(userIdTo);
-          if (!member.roles.cache.has(requiredRoleId)) {
-            return interaction.reply({
-              content: `Le membre à promouvoir doit posséder le rôle requis : **@${requiredRole.name}**.`,
-              ephemeral: true,
-            });
-          }
-
-          // Vérifier que la guilde a assez de fragments
-          const cost = params.promote.Marchand;
-          if (guildInfo.banque < cost) {
-            return interaction.reply({
-              content: `La guilde n'a pas assez de fragments pour promouvoir un marchand.\n **${
-                guildInfo.banque
-              } / ${cost}** ${emoji(emo.power)}`,
-              ephemeral: true,
-            });
-          }
-
           await dbManager.updateMarchand(userIdTo.id, guildId);
           await dbManager.addGuildBank(guildId, -cost);
-          return interaction.reply({
-            content: `Le membre <@${userIdTo.id}> a été promu au rang de marchand de la guilde [${guildInfo.tag}]`,
-            ephemeral: true,
-          });
+          return replyUpdateSetMarchand(
+            `Le membre <@${userIdTo.id}> a été promu au rang de marchand de la guilde [${guildInfo.tag}]`,
+            []
+          );
         }
 
       default:

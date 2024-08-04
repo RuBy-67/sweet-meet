@@ -123,15 +123,6 @@ module.exports = {
     const subCommand = interaction.options.getSubcommand();
     switch (subCommand) {
       case "entrainement":
-        const commandName = "entrainement";
-        const cooldownDuration = params.cooldownEntrainement;
-        const cooldownInfo = await cooldown.handleCooldown(
-          interaction,
-          commandName,
-          cooldownDuration
-        );
-
-        if (cooldownInfo) return;
         const difficulty = interaction.options.getString("difficulté");
         const boss = interaction.options.getString("boss");
         const bossInfo = await bosses.getInfoBossById(boss);
@@ -142,32 +133,32 @@ module.exports = {
         let recompenseV = 8000;
         let recompenseD = 8000;
         if (difficulty === "1") {
-          attaque = Math.round(attaque * 0.5);
-          defense = Math.round(defense * 0.5);
-          sante = Math.round(sante * 0.5);
-          recompenseV = recompenseV * 0.5;
-          recompenseD = recompenseD * 0.25;
+          attaque = Math.round(attaque * 0.3);
+          defense = Math.round(defense * 0.3);
+          sante = Math.round(sante * 0.3);
+          recompenseV = recompenseV * 0.25;
+          recompenseD = recompenseD * 0.1;
           difficultyString = "Facile";
         } else if (difficulty === "2") {
           attaque = Math.round(attaque * 0.75);
           defense = Math.round(defense * 0.75);
           sante = Math.round(sante * 0.75);
-          recompenseV = recompenseV * 1;
+          recompenseV = Math.round(recompenseV * 0.75);
           recompenseD = recompenseD * 0.5;
           difficultyString = "Moyen";
         } else if (difficulty === "3") {
-          attaque = Math.round(attaque * 1.25);
-          defense = Math.round(defense * 1.25);
-          sante = Math.round(sante * 1.25);
-          recompenseV = recompenseV * 2;
-          recompenseD = recompenseD * 1.25;
+          attaque = Math.round(attaque * 1.55);
+          defense = Math.round(defense * 1.55);
+          sante = Math.round(sante * 1.55);
+          recompenseV = Math.round(recompenseV * 1.25);
+          recompenseD = recompenseD * 1;
           difficultyString = "Difficile";
         } else if (difficulty === "4") {
-          attaque = Math.round(attaque * 1.5);
-          defense = Math.round(defense * 1.5);
-          sante = Math.round(sante * 1.5);
-          recompenseV = recompenseV * 5;
-          recompenseD = recompenseD * 2;
+          attaque = Math.round(attaque * 2.5);
+          defense = Math.round(defense * 2.5);
+          sante = Math.round(sante * 2.22);
+          recompenseV = Math.round(recompenseV * 2);
+          recompenseD = recompenseD * 1.25;
           difficultyString = "Légendaire";
         }
         const embed = new EmbedBuilder()
@@ -223,6 +214,7 @@ module.exports = {
         await interaction.reply({
           embeds: [embed],
           components: [actionRow],
+          ephemeral: true,
         });
 
         // Créer un collector pour gérer les interactions de boutons
@@ -235,6 +227,16 @@ module.exports = {
 
         collector.on("collect", async (i) => {
           if (i.customId === "start_duel") {
+            const commandName = "entrainement";
+            const cooldownDuration = params.cooldownEntrainement;
+            const cooldownInfo = await cooldown.handleCooldown(
+              i,
+              commandName,
+              cooldownDuration
+            );
+
+            if (cooldownInfo) return;
+
             // Logique pour lancer le duel
             const startEmbed = new EmbedBuilder()
               .setTitle("Duel Commencé")
