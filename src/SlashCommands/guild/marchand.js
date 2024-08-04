@@ -509,22 +509,26 @@ module.exports = {
         );
 
         // Calculer les boosts de la potion
-        let attaqueBoost = "";
-        let defenseBoost = "";
-        let santeBoost = "";
-        let powerBoost = "";
-        console.log(attaqueBoost, defenseBoost, santeBoost, powerBoost);
-        console.log("------------------------");
+        let attaqueBoost;
+        let defenseBoost;
+        let santeBoost;
+        let powerBoost;
 
         selectedMaterials.forEach((material) => {
           attaqueBoost += material.attaqueBoost * 2;
           defenseBoost += material.defenseBoost * 3;
           santeBoost += material.santeBoost * 6;
+          console.log(
+            material.attaqueBoost,
+            material.defenseBoost,
+            material.santeBoost
+          );
         });
         powerBoost = (attaqueBoost + defenseBoost + santeBoost) * 61;
         console.log(attaqueBoost, defenseBoost, santeBoost, powerBoost);
+
         console.log("------------------------");
-        const coefficient = 1.23; // Coefficient de puissance
+        const coefficient = 1.5; // Coefficient de puissance
         attaqueBoost = attaqueBoost * coefficient;
         defenseBoost = defenseBoost * coefficient;
         santeBoost = santeBoost * coefficient;
