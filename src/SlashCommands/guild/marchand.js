@@ -503,47 +503,52 @@ module.exports = {
           await dbManager.removeMaterialFromUser(mid);
           console.log(`Removed Material with mid ${mid}`);
         }
+        // Trouver les matériaux spécifiés par les choix et leur occurrence
+        const selectedMaterials = [];
+        for (const [choice, count] of Object.entries(choiceCounts)) {
+          const idMateriau = parseInt(choice, 10);
+          const materials = await dbManager.getMIDMateriauxByIdLVL5(
+            idMateriau,
+            interaction.user.id
+          );
+
+          // Ajouter les matériaux trouvés, en respectant le nombre d'occurrences nécessaires
+          for (let i = 0; i < count && i < materials.length; i++) {
+            selectedMaterials.push(materials[i]);
+          }
+        }
+
+        // Calculer les boosts de la potion
         let attaqueBoost = 0;
         let defenseBoost = 0;
         let santeBoost = 0;
         let powerBoost = 0;
 
-        // Pour chaque matériau compté dans choiceCounts
-        for (const [choice, count] of Object.entries(choiceCounts)) {
-          const idMateriau = parseInt(choice, 10);
+        selectedMaterials.forEach((material) => {
+          let materialAttaqueBoost = parseInt(material.attaqueBoost, 10);
+          let materialDefenseBoost = parseInt(material.defenseBoost, 10);
+          let materialSanteBoost = parseInt(material.santeBoost, 10);
 
-          // Récupérer les matériaux avec le idMateriau spécifié et niveau 5 ou plus
-          const midMaterials = await dbManager.getMIDMateriauxByIdLVL5(
-            idMateriau,
-            interaction.user.id
+          attaqueBoost += materialAttaqueBoost * 2;
+          defenseBoost += materialDefenseBoost * 3;
+          santeBoost += materialSanteBoost * 6;
+
+          console.log(
+            materialSanteBoost,
+            materialDefenseBoost,
+            materialAttaqueBoost
           );
-
-          // Utiliser autant de matériaux que nécessaire en fonction de count
-          for (let i = 0; i < count && i < midMaterials.length; i++) {
-            const material = midMaterials[i];
-            const materialAttaqueBoost = parseInt(material.attaqueBoost, 10);
-            const materialDefenseBoost = parseInt(material.defenseBoost, 10);
-            const materialSanteBoost = parseInt(material.santeBoost, 10);
-
-            attaqueBoost += materialAttaqueBoost * 2;
-            defenseBoost += materialDefenseBoost * 3;
-            santeBoost += materialSanteBoost * 6;
-
-            console.log(
-              `Material ID: ${material.id} - Attaque: ${materialAttaqueBoost}, Defense: ${materialDefenseBoost}, Santé: ${materialSanteBoost}`
-            );
-          }
-        }
+        });
 
         powerBoost = (attaqueBoost + defenseBoost + santeBoost) * 61;
         console.log(attaqueBoost, defenseBoost, santeBoost, powerBoost);
 
         console.log("------------------------");
         const coefficient = 1.5; // Coefficient de puissance
-        attaqueBoost = Math.round(attaqueBoost * coefficient);
-        defenseBoost = Math.round(defenseBoost * coefficient);
-        santeBoost = Math.round(santeBoost * coefficient);
-        powerBoost = Math.round(powerBoost * coefficient);
+        attaqueBoost = attaqueBoost * coefficient;
+        defenseBoost = defenseBoost * coefficient;
+        santeBoost = santeBoost * coefficient;
+        powerBoost = powerBoost * coefficient;
 
         console.log(
           `Boosts: Attaque: ${attaqueBoost}, Defense: ${defenseBoost}, Santé: ${santeBoost}, Puissance: ${powerBoost}`
