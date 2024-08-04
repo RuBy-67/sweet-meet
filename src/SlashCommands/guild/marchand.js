@@ -14,6 +14,10 @@ const params = require("../../jsons/param.json");
 const color = require("../../jsons/color.json");
 const Player = require("../../class/player");
 const { description, name, options } = require("./guild");
+const {
+  getMaterialsById,
+  getMateriaux,
+} = require("../../class/sqlQueriesPlayer");
 const player = new Player();
 
 module.exports = {
@@ -482,13 +486,21 @@ module.exports = {
         // Liste pour stocker les matériaux à supprimer
         const materialsToRemove = [];
 
-        // Trouver et stocker les matériaux à supprimer
+        // Trouver et stocker les matériaux à supprimer + calculer les statistiques de la potion
+        let attaqueBoost = 0;
+        let defenseBoost = 0;
+        let santeBoost = 0;
+        let powerBoost = 0;
         for (const [choice, count] of Object.entries(choiceCounts)) {
           const idMateriau = parseInt(choice, 10);
           const midMaterials = await dbManager.getMIDMateriauxByIdLVL5(
             idMateriau,
             interaction.user.id
           );
+          const [data] = await dbManager.getDataMateriauById(idMateriau);
+          attaqueBoost += data.attaqueBoost * 2.12;
+          defenseBoost += data.defenseBoost * 3.12;
+          santeBoost += data.santeBoost * 6.12;
 
           if (midMaterials.length > 0) {
             // On prend uniquement autant de mid que nécessaire
@@ -503,47 +515,14 @@ module.exports = {
           await dbManager.removeMaterialFromUser(mid);
           console.log(`Removed Material with mid ${mid}`);
         }
-        // Trouver les matériaux spécifiés par les choix et leur occurrence
-        const selectedMaterials = [];
-        for (const [choice, count] of Object.entries(choiceCounts)) {
-          const idMateriau = parseInt(choice, 10);
-          const materials = await dbManager.getMIDMateriauxByIdLVL5(
-            idMateriau,
-            interaction.user.id
-          );
-
-          // Ajouter les matériaux trouvés, en respectant le nombre d'occurrences nécessaires
-          for (let i = 0; i < count && i < materials.length; i++) {
-            selectedMaterials.push(materials[i]);
-          }
-        }
-
-        // Calculer les boosts de la potion
-        let attaqueBoost = 0;
-        let defenseBoost = 0;
-        let santeBoost = 0;
-        let powerBoost = 0;
-
-        selectedMaterials.forEach((material) => {
-          let materialAttaqueBoost = parseInt(material.attaqueBoost, 10);
-          let materialDefenseBoost = parseInt(material.defenseBoost, 10);
-          let materialSanteBoost = parseInt(material.santeBoost, 10);
-
-          attaqueBoost += materialAttaqueBoost * 2;
-          defenseBoost += materialDefenseBoost * 3;
-          santeBoost += materialSanteBoost * 6;
-
-          console.log(
-            materialSanteBoost,
-            materialDefenseBoost,
-            materialAttaqueBoost
-          );
-        });
+        // Sélectionner uniquement les matériaux spécifiés par l'utilisateur
+        const selectedMaterials = possède.filter((material) =>
+          filteredChoices.includes(material.IdMateriau.toString())
+        );
 
         powerBoost = (attaqueBoost + defenseBoost + santeBoost) * 61;
         console.log(attaqueBoost, defenseBoost, santeBoost, powerBoost);
 
-        console.log("------------------------");
         const coefficient = 1.5; // Coefficient de puissance
         attaqueBoost = attaqueBoost * coefficient;
         defenseBoost = defenseBoost * coefficient;
