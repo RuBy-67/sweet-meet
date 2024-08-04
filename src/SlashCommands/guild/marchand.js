@@ -483,9 +483,12 @@ module.exports = {
             (material) =>
               parseInt(material.IdMateriau, 10) === parseInt(choice, 10)
           );
+          console.log("Material to Remove:", materialToRemove.mid);
+          console.log(material.IdMateriau);
           if (materialToRemove) {
             for (let i = 0; i < count; i++) {
               await dbManager.removeMaterialFromUser(materialToRemove.mid);
+              console.log("Removed Material:", materialToRemove.mid);
             }
           }
         }
@@ -565,6 +568,7 @@ module.exports = {
               `- **Boost de puissance:** +${powerBoost}\n` +
               `- **Durée d'efficacité:** ${duration} secondes\n> ***Vous pouvez vendre vos potions à vos membres de guilde, si vous êtes marchand***`
           );
+
         await dbManager.insertPotionData(
           interaction.user.id,
           potionName,
