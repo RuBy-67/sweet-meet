@@ -235,7 +235,7 @@ module.exports = {
     },
   ],
   run: async (client, interaction, args) => {
-    if (config.maintenance) {
+    /*if (config.maintenance) {
       const embed = new EmbedBuilder()
         .setTitle("⚒️ Maintenance ⚒️")
         .setColor(color.error)
@@ -244,7 +244,7 @@ module.exports = {
         )
         .setColor(color.error);
       return interaction.reply({ embeds: [embed] });
-    }
+    }*/
     const Embedcolors = await dbManager.getColor(interaction.user.id);
 
     function emoji(id) {
