@@ -43,7 +43,8 @@ async function handleVoiceReward(userId, totalTime, channel) {
       await db.updatePower(userId, powerIncrement);
       if ((stats.guildId = !null)) {
         // à verifier si c'est pas trop
-        await db.updateGuildXp(stats.guildId, powerIncrement * 7);
+        await db.updateGuildXp(stats.guildId, powerIncrement * 2);
+        await db.addGuildBank(stats.guildId, powerIncrement);
       }
     } catch (error) {
       console.error(

@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const emo = require(`../../jsons/emoji.json`);
 const color = require(`../../jsons/color.json`);
-const { connection } = require("../../db");
+const { pool } = require("../../db");
 //const bonus = require("../../jsons/userBonus.json");
 
 module.exports = {
@@ -43,12 +43,12 @@ module.exports = {
           );
 
           // Insert the 'first-arrival' badge into the user's badge collection
-          await connection
+          /*await connection
             .promise()
             .query("INSERT INTO badge_user (idUser, idBadge) VALUES (?, 1)", [
               member.id,
             ]);
-          /*if (bonus[member.id]) {
+          if (bonus[member.id]) {
             // Insert the badge corresponding to the user's ID from userBonus.json
             await connection
               .promise()
@@ -79,7 +79,7 @@ module.exports = {
 
     const embed = new EmbedBuilder()
       .setTitle("Accounts Created")
-      .setColor(color)
+      .setColor(color.pink)
       .setDescription(
         `Les comptes ont été créés pour ${i} membres. avec 5000 Fragments. `
       )

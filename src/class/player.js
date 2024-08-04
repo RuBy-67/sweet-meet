@@ -180,9 +180,10 @@ class Player extends DatabaseManager {
         defense *= (materiaux.defenseBoost / 100) * (1 + levelBonus / 100) + 1;
         attaque *= (materiaux.attaqueBoost / 100) * (1 + levelBonus / 100) + 1;
       });
+      console.log("PotionBonus(avant)" + userId);
       const potionBonus = await this.getPotionByEtat(userId);
-      console.log("PotionBonus" + potionBonus);
-      if (potionBonus.length > 0) {
+
+      if (potionBonus) {
         potionBonus.forEach((potion) => {
           console.log(potion.santeBoost);
           sante += potion.santeBoost;
@@ -409,7 +410,7 @@ class Player extends DatabaseManager {
       "freeDayli"
     );
     let power = await this.generateRandomPower();
-    power = Math.floor(power / 7);
+    power = Math.floor(power / 6);
     return { userId, material: selectedMaterial, power };
   }
 
@@ -475,6 +476,7 @@ class Player extends DatabaseManager {
     return weightedMaterials[randomIndex];
   }
   async getPotionByEtat(userId) {
+    console.log("getPotionByEtat" + userId);
     const [result] = await pool.query(sqlQueries.getPotionByEtat, [userId, 1]);
     return result;
   }
