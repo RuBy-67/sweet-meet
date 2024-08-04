@@ -477,9 +477,13 @@ module.exports = {
           return acc;
         }, {});
 
-        const materialsToRemove = new Map(); // Utiliser un Map pour gérer les matériaux à supprimer
-
         // Trouver les matériaux correspondants avec leurs occurrences
+        const materialsToRemove = [];
+
+        // Accumulateur pour vérifier combien d'occurrences ont été supprimées
+        const removalTracker = {};
+
+        // Parcourir les choix et accumuler les matériaux à supprimer
         filteredChoices.forEach((choice) => {
           const materialToRemove = possède.find(
             (material) =>
@@ -487,32 +491,31 @@ module.exports = {
           );
 
           if (materialToRemove) {
-            // Utiliser mid comme clé pour éviter les doublons
-            if (!materialsToRemove.has(materialToRemove.mid)) {
-              materialsToRemove.set(materialToRemove.mid, {
-                mid: materialToRemove.mid,
-                count: choiceCounts[choice],
-              });
-            } else {
-              // Si le mid est déjà dans le Map, ajuster le count
-              const existingMaterial = materialsToRemove.get(
-                materialToRemove.mid
-              );
-              existingMaterial.count = Math.max(
-                existingMaterial.count,
-                choiceCounts[choice]
-              );
-            }
+            // Ajoute le matériau à la liste de suppression
+            materialsToRemove.push(materialToRemove);
           }
         });
 
         // Supprimer les matériaux en fonction du nombre d'occurrences
-        for (const { mid, count } of materialsToRemove.values()) {
-          console.log(count);
-          for (let i = 0; i < count; i++) {
+        for (const materialToRemove of materialsToRemove) {
+          const mid = materialToRemove.mid;
+
+          // Déterminer combien de fois ce matériau doit être supprimé
+          const occurrencesNeeded = choiceCounts[materialToRemove.IdMateriau];
+
+          // Compteur d'occurrences pour ce `mid`
+          let occurrencesRemoved = removalTracker[mid] || 0;
+
+          // Supprimer jusqu'à ce que le nombre requis d'occurrences soit atteint
+          while (occurrencesRemoved < occurrencesNeeded) {
             await dbManager.removeMaterialFromUser(mid);
+            occurrencesRemoved++;
             console.log("Removed Material:", mid);
+            console.log("Occurrences Removed:", occurrencesRemoved);
           }
+
+          // Mettre à jour le suivi des suppressions
+          removalTracker[mid] = occurrencesRemoved;
         }
 
         // Sélectionner uniquement les matériaux spécifiés par l'utilisateur
