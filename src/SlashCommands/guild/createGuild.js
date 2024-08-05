@@ -130,7 +130,7 @@ module.exports = {
       const conjoint = await dbManager.getMarriage(userId);
       console.log("conjointTab" + conjoint[0]);
       if (conjoint[0].Id > 0) {
-        if (conjoint.userId != userId) {
+        if (conjoint[0].userId != userId) {
           console.log("conjoint 1 " + conjoint[0].userId);
           console.log(guildId[0].id);
           await dbManager.addClassToUser(conjoint[0].userId, guildId[0].id, 1);
