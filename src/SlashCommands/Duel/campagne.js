@@ -293,7 +293,8 @@ module.exports = {
                   cooldownDuration
                 );
               }
-              if (cooldownInfo || cooldownInfo2) return;
+              if (cooldownInfo) return;
+              if (cooldownInfo2) return;
 
               // Logique pour lancer le duel
               const startEmbed = new EmbedBuilder()
