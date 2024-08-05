@@ -166,11 +166,11 @@ module.exports = {
 
         let totalFlags = 0;
         for (let i = 1; i <= guildInfo.level; i++) {
-          totalFlags += maxFlag[i.toString()];
+          totalFlags += params.maxFlag[i.toString()];
         }
         let totalMaxFlags = 0;
-        for (const level in maxFlag) {
-          totalMaxFlags += maxFlag[level];
+        for (const level in params.maxFlag) {
+          totalMaxFlags += params.maxFlag[level];
         }
         const xpString =
           guildInfo.xp + "/" + parseInt(params.xp[guildInfo.level]);
