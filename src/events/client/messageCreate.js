@@ -60,7 +60,8 @@ module.exports = {
         // à verifier si c'est pas trop
 
         const GuildStat = db.getGuildById(stats.guildId);
-        console.log("GuildStat", GuildStat[0].xp);
+        console.log("GuildStat", GuildStat);
+        console.log("GuildStat", GuildStat.xp);
         if (
           parseInt(GuildStat[0].xp) < parseInt(param.xp[GuildStat[0].level])
         ) {
