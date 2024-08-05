@@ -128,9 +128,9 @@ module.exports = {
       await dbManager.updateUserGuild(guildId[0].id, userId);
       await dbManager.updatePower(userId, -params.guildPrice);
       const [conjoint] = await dbManager.getMarriage(userId);
-      console.log(conjoint);
+      console.log("conjointTab" + conjoint);
       if (conjoint.Id > 0) {
-        if (conjoint[0].userId != userId) {
+        if (conjoint.userId != userId) {
           console.log("conjoint 1 " + conjoint.userId);
           console.log(guildId[0].id);
           await dbManager.addClassToUser(conjoint.userId, guildId[0].id, 1);
