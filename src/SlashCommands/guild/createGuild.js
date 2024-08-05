@@ -132,15 +132,15 @@ module.exports = {
       console.log(conjoint);
       if (conjoint.length > 0) {
         if (conjoint[0].idUser1 != userId) {
-          console.log("conjoint 1 " + conjoint.idUser1);
+          console.log("conjoint 1 " + conjoint.idUser);
           console.log(guildId[0].id);
-          await dbManager.addClassToUser(conjoint[0].idUser1, guildId[0].id, 1);
-          await dbManager.updateUserGuild(guildId[0].id, conjoint[0].idUser2);
+          await dbManager.addClassToUser(conjoint.idUser, guildId[0].id, 1);
+          await dbManager.updateUserGuild(guildId[0].id, conjoint.idUser2);
         } else if (conjoint[0].idUser2 != userId) {
-          console.log("conjoint 2" + conjoint[0].idUser2);
+          console.log("conjoint 2" + conjoint.idUser2);
           console.log(guildId[0].id);
-          await dbManager.addClassToUser(conjoint[0].idUser2, guildId[0].id, 1);
-          await dbManager.updateUserGuild(guildId[0].id, conjoint[0].idUser2);
+          await dbManager.addClassToUser(conjoint.idUser2, guildId[0].id, 1);
+          await dbManager.updateUserGuild(guildId[0].id, conjoint.idUser);
         }
       }
 
