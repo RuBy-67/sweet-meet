@@ -237,7 +237,7 @@ class DatabaseManager {
 
     const userIsOwner = await this.getGuildByOwnerId(userId);
     if (userIsOwner.length > 0) {
-      return "Un empreur ne peut pas quitter sa guilde";
+      return "Un Empereur ne peut pas quitter sa guilde";
     }
     const guildInfo = await this.queryMain(SQL_QUERIES.GET_GUILD_INFO, [
       userGuildResult,

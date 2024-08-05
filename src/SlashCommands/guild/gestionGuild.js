@@ -18,7 +18,7 @@ const player = new Player();
 
 module.exports = {
   name: "gestionguild",
-  description: "🚨 Empreur, reine et ministre de la guilde",
+  description: "🚨 Empereur, reine et ministre de la guilde",
   options: [
     {
       type: 1,
@@ -192,7 +192,7 @@ module.exports = {
         .setTitle("🚨 Erreur 🚨")
         .setColor(color.error)
         .setDescription(
-          `> Vous n'êtes pas autorisé à utiliser cette commande, vous devez être Empreur, Reine ou Ministre de guild`
+          `> Vous n'êtes pas autorisé à utiliser cette commande, vous devez être Empereur, Reine ou Ministre de guild`
         );
       return interaction.reply({ embeds: [embed] });
     }
@@ -557,7 +557,7 @@ module.exports = {
           if (isAdmin) {
             await interaction.update({
               content:
-                "Impossible de kick un membre important de la guilde [EMPREUR, REINE, MINISTRE]",
+                "Impossible de kick un membre important de la guilde [EMPEREUR, REINE, MINISTRE]",
               components: [],
               ephemeral: true,
             });
@@ -972,7 +972,7 @@ module.exports = {
 
         if (guildInfo.empreur === userIdTo.id) {
           return replyErrorSetMarchand(
-            "Vous ne pouvez pas promouvoir l'empereur au rang de marchand."
+            "Vous ne pouvez pas promouvoir l'Empereur au rang de marchand."
           );
         }
 

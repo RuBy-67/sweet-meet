@@ -22,7 +22,7 @@ const cooldown = new Cooldown();
 
 module.exports = {
   name: "campagne",
-  description: "🚨 Empreur, reine et ministre de la guilde",
+  description: "🚨 Empereur, reine et ministre de la guilde",
   options: [
     {
       type: 1,
@@ -282,8 +282,7 @@ module.exports = {
                 commandName2,
                 cooldownDuration2
               );
-
-              let cooldownInfo = false;
+              let cooldownInfo;
               if (!cooldownInfo2) {
                 const commandName = `entrainement_${bossInfo.nom}_${difficulty}`;
                 const cooldownDuration = 172800;

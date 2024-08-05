@@ -186,7 +186,7 @@ module.exports = {
               value: `[${guildInfo.tag}]`,
             },
             {
-              name: `${emoji(emo.King)} Empreur`,
+              name: `${emoji(emo.King)} Empereur`,
               value: `<@${guildInfo.empreur}>`,
               inline: true,
             },
