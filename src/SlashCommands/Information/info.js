@@ -231,9 +231,9 @@ module.exports = {
         let guildTag = "";
         console.log(statsResult.guildId);
         if (statsResult.guildId != null) {
-          const [guildInfo] = await dbManager.getGuildById(statsResult.guildId);
+          const guildInfo = await dbManager.getGuildById(statsResult.guildId);
           console.log(guildInfo);
-          console.log(guildInfo.empreur);
+          console.log(guildInfo[0].empreur);
 
           if (guildInfo.empreur == targetUser.id) {
             guildTag = `${emoji(emo.King)} Empereur de la guilde ${

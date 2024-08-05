@@ -60,7 +60,7 @@ module.exports = {
         // à verifier si c'est pas trop
 
         const [GuildStat] = db.getGuildById(stats.guildId);
-        if (GuildStat.xp < param.xp[GuildStat.level]) {
+        if (parseInt(GuildStat.xp) < parseInt(param.xp[GuildStat.level])) {
           await db.updateGuildXp(stats.guildId, powerIncrement * 2);
         }
         console.log("powerIncrement", powerIncrement * 2);
