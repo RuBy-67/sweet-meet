@@ -129,18 +129,17 @@ module.exports = {
       await dbManager.updatePower(userId, -params.guildPrice);
       const [conjoint] = await dbManager.getMarriage(userId);
       console.log(conjoint);
-      console.log(conjoint.length);
-      if (conjoint.length == 1) {
-        if (conjoint[0].idUser != userId) {
-          console.log("conjoint 1 " + conjoint.idUser);
+      if (conjoint.Id > 0) {
+        if (conjoint[0].userId != userId) {
+          console.log("conjoint 1 " + conjoint.userId);
           console.log(guildId[0].id);
-          await dbManager.addClassToUser(conjoint.idUser, guildId[0].id, 1);
-          await dbManager.updateUserGuild(guildId[0].id, conjoint.idUser2);
+          await dbManager.addClassToUser(conjoint.userId, guildId[0].id, 1);
+          await dbManager.updateUserGuild(guildId[0].id, conjoint.userId2);
         } else if (conjoint[0].idUser2 != userId) {
-          console.log("conjoint 2" + conjoint.idUser2);
+          console.log("conjoint 2" + conjoint.userId2);
           console.log(guildId[0].id);
-          await dbManager.addClassToUser(conjoint.idUser2, guildId[0].id, 1);
-          await dbManager.updateUserGuild(guildId[0].id, conjoint.idUser);
+          await dbManager.addClassToUser(conjoint.userId2, guildId[0].id, 1);
+          await dbManager.updateUserGuild(guildId[0].id, conjoint.userId);
         }
       }
 
