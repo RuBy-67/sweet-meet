@@ -30,7 +30,7 @@ module.exports = {
     // Check si l'user fait partie d'une guild
     const guild = await dbManager.getGuildByOwnerId(userId);
 
-    if (!guild) {
+    if (guild.length < 0) {
       const embed = new EmbedBuilder()
         .setTitle("⚠️ Aucune Guilde Trouvée ⚠️")
         .setColor(color.error)
