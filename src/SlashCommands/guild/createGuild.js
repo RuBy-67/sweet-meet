@@ -124,15 +124,14 @@ module.exports = {
         userId
       );
       const guildId = await dbManager.getGuildByOwnerId(userId);
-      console.log(guildId[0].id);
+      console.log("guildId" + guildId[0].id);
       await dbManager.updateUserGuild(guildId[0].id, userId);
-
       await dbManager.updatePower(userId, -params.guildPrice);
       const [conjoint] = await dbManager.getMarriage(userId);
       console.log(conjoint);
       console.log(conjoint.length);
       if (conjoint.length == 1) {
-        if (conjoint[0].idUser1 != userId) {
+        if (conjoint[0].idUser != userId) {
           console.log("conjoint 1 " + conjoint.idUser);
           console.log(guildId[0].id);
           await dbManager.addClassToUser(conjoint.idUser, guildId[0].id, 1);
