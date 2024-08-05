@@ -235,11 +235,11 @@ module.exports = {
           console.log(guildInfo);
           console.log(guildInfo[0].empreur);
 
-          if (guildInfo.empreur == targetUser.id) {
+          if (guildInfo[0].empreur == targetUser.id) {
             guildTag = `${emoji(emo.King)} Empereur de la guilde ${
-              guildInfo.nom
-            } **[${guildInfo.tag}]**`;
-            EmbedColor = guildInfo.bannière;
+              guildInfo[0].nom
+            } **[${guildInfo[0].tag}]**`;
+            EmbedColor = guildInfo[0].bannière;
           } else {
             const guildInfoClassId = await dbManager.getUserClass(
               targetUser.id,
@@ -252,8 +252,8 @@ module.exports = {
 
             guildTag = `${emoji(emo[`class${guildInfoClassId[0].idClasse}`])} ${
               guildInfoClassName[0].Nom
-            } de la guilde ${guildInfo.nom} **[${guildInfo.tag}]**`;
-            EmbedColor = guildInfo.bannière;
+            } de la guilde ${guildInfo[0].nom} **[${guildInfo[0].tag}]**`;
+            EmbedColor = guildInfo[0].bannière;
           }
         } else {
           guildTag = "Aucune guilde associée";
