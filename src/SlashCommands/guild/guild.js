@@ -114,7 +114,7 @@ module.exports = {
         let reineInfo = "";
         if (reine.length > 0) {
           //test
-          reineInfo = `<@${reine.idUser}>`;
+          reineInfo = `<@${reine[0].idUser}>`;
         } else {
           reineInfo = "Aucune reine";
         }
