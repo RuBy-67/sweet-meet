@@ -130,7 +130,8 @@ module.exports = {
       await dbManager.updatePower(userId, -params.guildPrice);
       const [conjoint] = await dbManager.getMarriage(userId);
       console.log(conjoint);
-      if (conjoint.length > 0) {
+      console.log(conjoint.length);
+      if (conjoint.length == 1) {
         if (conjoint[0].idUser1 != userId) {
           console.log("conjoint 1 " + conjoint.idUser);
           console.log(guildId[0].id);
