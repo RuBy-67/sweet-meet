@@ -68,8 +68,7 @@ module.exports = {
       }
 
       const userData = await dbManager.getStats(userId);
-      const userGuildId = userData.guildId;
-      if (userGuildId !== null) {
+      if (userData.guildId !== null) {
         throw new Error(
           "Vous êtes déjà associé à une guilde. Veuillez quitter votre guilde actuelle pour en créer une nouvelle."
         );
@@ -132,9 +131,13 @@ module.exports = {
       conjoint = await dbManager.getMarriage(userId);
       if (conjoint.length > 0) {
         if (conjoint.idUser1 != userId) {
+          console.log(conjoint[0].idUser1);
+          console.log(guildId[0].id);
           await dbManager.addClassToUser(conjoint[0].idUser1, guildId[0].id, 1);
           await dbManager.updateUserGuild(guildId[0].id, conjoint[0].idUser2);
         } else if (conjoint.idUser2 != userId) {
+          console.log(conjoint[0].idUser2);
+          console.log(guildId[0].id);
           await dbManager.addClassToUser(conjoint[0].idUser2, guildId[0].id, 1);
           await dbManager.updateUserGuild(guildId[0].id, conjoint[0].idUser2);
         }

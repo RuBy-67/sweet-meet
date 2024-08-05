@@ -550,6 +550,7 @@ class DatabaseManager {
     await this.queryMain(SQL_QUERIES.REMOVE_GUILD_ID_FROM_USER, [
       guildId[0].id,
     ]);
+    await this.queryMain(SQL_QUERIES.DELETE_CLASS_BY_GUILD_ID, [guildId[0].id]);
   }
   async getRolesFromDB() {
     return this.queryMain(SQL_QUERIES.GET_ROLES);

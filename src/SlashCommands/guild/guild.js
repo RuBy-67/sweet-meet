@@ -113,7 +113,8 @@ module.exports = {
         const reine = await dbManager.getGuildUserByRole(guildInfo.id, 1);
         let reineInfo = "";
         if (reine.length > 0) {
-          reineInfo = `<@${reine.id}>`;
+          //test
+          reineInfo = `<@${reine.idUser}>`;
         } else {
           reineInfo = "Aucune reine";
         }
@@ -162,6 +163,15 @@ module.exports = {
         } else if (guildInfo.level === 5) {
           emoLevel = emoji(emo.level5);
         }
+
+        let totalFlags = 0;
+        for (let i = 1; i <= guildInfo.level; i++) {
+          totalFlags += maxFlag[i.toString()];
+        }
+        let totalMaxFlags = 0;
+        for (const level in maxFlag) {
+          totalMaxFlags += maxFlag[level];
+        }
         const xpString =
           guildInfo.xp + "/" + parseInt(params.xp[guildInfo.level]);
         const colors = guildInfo.bannière;
@@ -203,6 +213,11 @@ module.exports = {
             {
               name: emoLevel + " Niveau",
               value: guildInfo.level.toString(),
+              inline: true,
+            },
+            {
+              name: "🚩 Nombre de Flag",
+              value: `${totalFlags} / ${totalMaxFlags}`,
               inline: true,
             },
             {

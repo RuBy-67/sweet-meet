@@ -5,7 +5,6 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  Colors,
 } = require("discord.js");
 const DatabaseManager = require("../../class/dbManager");
 const dbManager = new DatabaseManager();
@@ -275,16 +274,23 @@ module.exports = {
             }
 
             if (i.customId === `start_duel_${interaction.id}`) {
-              const commandName = "entrainement";
-              const cooldownDuration =
-                params.cooldownEntrainement * difficulty + 350;
+              const commandName = `entrainement_${bossInfo.nom}_${difficulty}`;
+              const cooldownDuration = 172800;
               const cooldownInfo = await cooldown.handleCooldown(
                 i,
                 commandName,
                 cooldownDuration
               );
 
-              if (cooldownInfo) return;
+              const CommandName2 = `entrainement`;
+              const cooldownDuration2 =
+                params.cooldownEntrainement * difficulty + 350;
+              const cooldownInfo2 = await cooldown.handleCooldown(
+                i,
+                CommandName2,
+                cooldownDuration2
+              );
+              if (cooldownInfo || cooldownInfo2) return;
 
               // Logique pour lancer le duel
               const startEmbed = new EmbedBuilder()
