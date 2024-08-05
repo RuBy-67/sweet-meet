@@ -131,7 +131,7 @@ module.exports = {
       conjoint = await dbManager.getMarriage(userId);
       if (conjoint.length > 0) {
         if (conjoint[0].idUser1 != userId) {
-          console.log("conjoint 1" + conjoint[0].idUser1);
+          console.log("conjoint 1" + conjoint.idUser1);
           console.log(guildId[0].id);
           await dbManager.addClassToUser(conjoint[0].idUser1, guildId[0].id, 1);
           await dbManager.updateUserGuild(guildId[0].id, conjoint[0].idUser2);
