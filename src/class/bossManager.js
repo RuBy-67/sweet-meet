@@ -233,7 +233,7 @@ class Boss extends DatabaseManager {
             playerScore / (playerScore + bossScore)) *
             100
         );
-        const restStat = Math.max(rest, 0);
+        const restStat = Math.max(rest, 1);
         stringDesc = `\n\nVous avez perdu contre **${bossName}** et avez perdu **${recompenseD}**  ${emoji(
           emo.power
         )} stat restante boss : **${restStat}%**`;
@@ -244,7 +244,7 @@ class Boss extends DatabaseManager {
             bossScore / (playerScore + bossScore)) *
             100
         );
-        const restStat = Math.max(rest, 0);
+        const restStat = Math.max(rest, 1);
         stringDesc = `\n\nVous avez gagné contre **${bossName}** et avez reçu **${recompenseV}**  ${emoji(
           emo.power
         )}\nstat restante : **${restStat}%**`;
