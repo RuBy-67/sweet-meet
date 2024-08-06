@@ -285,6 +285,8 @@ module.exports = {
                   content: `> Vous avez pas honte de vous en prendre au plus faible ?\n **-100** ${emoji(
                     emo.power
                   )}`,
+                  embeds: [],
+                  components: [],
                 });
               } else if (
                 stats.attaque >= 500 &&
@@ -295,6 +297,8 @@ module.exports = {
                   content: `> Vous avez pas honte de vous en prendre au plus faible ?\n **-200** ${emoji(
                     emo.power
                   )}`,
+                  embeds: [],
+                  components: [],
                 });
               }
 
@@ -425,6 +429,7 @@ module.exports = {
               interaction.editReply({
                 content: "Le temps est écoulé.",
                 components: [],
+                embeds: [],
               });
             }
 
