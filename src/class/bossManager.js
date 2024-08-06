@@ -224,16 +224,8 @@ class Boss extends DatabaseManager {
       updateEmbed(`**${bossName2}**: *${message}*`, endTimesStampString);
       await new Promise((resolve) => setTimeout(resolve, 60000));
       let stringDesc = "";
-      if (winner) {
-        await dbManager.updatePower(userId, recompenseV);
-        const restStat = Math.round(
-          (playerScore / (playerScore + bossScore) -
-            bossScore / (playerScore + bossScore)) *
-            100
-        );
-        stringDesc = `\n\nVous avez gagné contre **${bossName}** et avez reçu **${recompenseV}**  ${emoji(
-          emo.power
-        )}\nstat restante : **${restStat}%**`;
+      if (winner === "equal") {
+        stringDesc = `\n\nVous avez fait match nul contre **${bossName}** Rien n'a été distribué`;
       } else if (!winner) {
         await dbManager.updatePower(userId, -recompenseD);
         const restStat = Math.round(
@@ -245,7 +237,15 @@ class Boss extends DatabaseManager {
           emo.power
         )} stat restante boss : **${restStat}%**`;
       } else {
-        stringDesc = `\n\nVous avez fait match nul contre **${bossName}** Rien n'a été distribué`;
+        await dbManager.updatePower(userId, recompenseV);
+        const restStat = Math.round(
+          (playerScore / (playerScore + bossScore) -
+            bossScore / (playerScore + bossScore)) *
+            100
+        );
+        stringDesc = `\n\nVous avez gagné contre **${bossName}** et avez reçu **${recompenseV}**  ${emoji(
+          emo.power
+        )}\nstat restante : **${restStat}%**`;
       }
 
       const endEmbed = new EmbedBuilder()
