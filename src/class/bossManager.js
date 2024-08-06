@@ -228,21 +228,23 @@ class Boss extends DatabaseManager {
         stringDesc = `\n\nVous avez fait match nul contre **${bossName}** Rien n'a été distribué`;
       } else if (!winner) {
         await dbManager.updatePower(userId, -recompenseD);
-        const restStat = Math.round(
+        const rest = Math.round(
           (bossScore / (playerScore + bossScore) -
             playerScore / (playerScore + bossScore)) *
             100
         );
+        const restStat = Math.max(rest, 0);
         stringDesc = `\n\nVous avez perdu contre **${bossName}** et avez perdu **${recompenseD}**  ${emoji(
           emo.power
         )} stat restante boss : **${restStat}%**`;
       } else {
         await dbManager.updatePower(userId, recompenseV);
-        const restStat = Math.round(
+        const rest = Math.round(
           (playerScore / (playerScore + bossScore) -
             bossScore / (playerScore + bossScore)) *
             100
         );
+        const restStat = Math.max(rest, 0);
         stringDesc = `\n\nVous avez gagné contre **${bossName}** et avez reçu **${recompenseV}**  ${emoji(
           emo.power
         )}\nstat restante : **${restStat}%**`;
