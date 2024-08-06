@@ -43,11 +43,13 @@ module.exports = {
       );
     }
     const commandName = "marriage";
-    const cooldownDuration = param.cooldownMariage; // en secondes
+    const cooldownDuration = param.cooldownMariage;
+    const cooldownMessage = `Vous avez déjà demandé en mariage quelqu'un. Veuillez réessayer plus tard`;
     const cooldownInfo = await cooldown.handleCooldown(
       interaction,
       commandName,
-      cooldownDuration
+      cooldownDuration,
+      cooldownMessage
     );
     if (cooldownInfo) return;
 

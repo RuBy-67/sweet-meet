@@ -27,10 +27,12 @@ module.exports = {
     }
     const commandName = "freedaylibox";
     const cooldownDuration = param.cooldownBox;
+    const cooldownMessage = `Vous avez déjà réclamé votre free daily box. Veuillez réessayer dans quelques heures.`;
     const cooldownInfo = await cooldown.handleCooldown(
       interaction,
       commandName,
-      cooldownDuration
+      cooldownDuration,
+      cooldownMessage
     );
     if (cooldownInfo) return;
 

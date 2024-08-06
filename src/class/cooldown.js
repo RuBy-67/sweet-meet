@@ -23,7 +23,12 @@ class Cooldown {
     return { remainingTime, cooldownDuration };
   }
 
-  async handleCooldown(interaction, commandName, cooldownDuration) {
+  async handleCooldown(
+    interaction,
+    commandName,
+    cooldownDuration,
+    message = ""
+  ) {
     const userId = interaction.user.id;
     const cooldownInfo = await this.isOnCooldown(
       userId,
@@ -35,7 +40,7 @@ class Cooldown {
       const remainingTime = cooldownInfo.remainingTime.toFixed(1);
       const timestamp = Math.floor((Date.now() + remainingTime * 1000) / 1000);
       await interaction.reply({
-        content: `Vous êtes en cooldown pour cette commande. Veuillez réessayer <t:${timestamp}:R>`,
+        content: `Vous êtes en cooldown pour cette commande. Veuillez réessayer <t:${timestamp}:R>\n\n${message}`,
         ephemeral: true,
       });
       return true;

@@ -277,23 +277,40 @@ module.exports = {
               const commandName2 = `entrainement`;
               const cooldownDuration2 =
                 params.cooldownEntrainement * difficulty + 350;
+              const cooldownDurationSpecific = 3600;
+              const cooldownDurationBossSpecific = 172800;
+              let messageString = "Pour la commande d'entrainement";
+
               const cooldownInfo2 = await cooldown.handleCooldown(
                 i,
                 commandName2,
-                cooldownDuration2
+                cooldownDuration2,
+                messageString
               );
-              let cooldownInfo;
-              if (!cooldownInfo2) {
-                const commandName = `entrainement_${bossInfo.nom}_${difficulty}`;
-                const cooldownDuration = 172800;
-                cooldownInfo = await cooldown.handleCooldown(
-                  i,
-                  commandName,
-                  cooldownDuration
-                );
-              }
-              if (cooldownInfo) return;
+
               if (cooldownInfo2) return;
+
+              const cooldownDiffculty = `entrainement_${difficulty}`;
+              messageString = `Pour la difficulté ${difficultyString}`;
+              const cooldownInfoSpecific = await cooldown.handleCooldown(
+                i,
+                cooldownDiffculty,
+                cooldownDurationSpecific,
+                messageString
+              );
+
+              if (cooldownInfoSpecific) return;
+
+              const commandName = `entrainement_${bossInfo.nom}_${difficulty}`;
+              messageString = `Pour le boss ${bossInfo.nom} en difficulté ${difficultyString}`;
+              const cooldownInfo = await cooldown.handleCooldown(
+                i,
+                commandName,
+                cooldownDurationBossSpecific,
+                messageString
+              );
+
+              if (cooldownInfo) return;
 
               // Logique pour lancer le duel
               const startEmbed = new EmbedBuilder()

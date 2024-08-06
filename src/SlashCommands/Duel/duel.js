@@ -38,10 +38,13 @@ module.exports = {
   run: async (client, interaction, args) => {
     const commandName = "duel";
     const cooldownDuration = param.cooldownDuel;
+    const cooldownMessage =
+      "Pour éviter les abus, vous ne pouvez pas utiliser la commande DUEL trop souvent. Veuillez réessayer plus tard.";
     const cooldownInfo = await cooldown.handleCooldown(
       interaction,
       commandName,
-      cooldownDuration
+      cooldownDuration,
+      cooldownMessage
     );
     if (config.maintenance) {
       const embed = new EmbedBuilder()

@@ -16,10 +16,12 @@ module.exports = {
     const cooldown = new Cooldown();
     const commandName = "codeSecret";
     const cooldownDuration = param.cooldownSecret;
+    const cooldownMessage = `Vous avez déjà généré un code secret.`;
     const cooldownInfo = await cooldown.handleCooldown(
       interaction,
       commandName,
-      cooldownDuration
+      cooldownDuration,
+      cooldownMessage
     );
     if (!config.maintenance) {
       const embed = new EmbedBuilder()

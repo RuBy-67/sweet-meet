@@ -10,6 +10,8 @@ const dbManager = require("../../class/dbManager");
 const db = new dbManager();
 const param = require("../../jsons/param.json");
 const config = require("../../jsons/config.json");
+const Cooldown = require("../../class/cooldown");
+const cooldown = new Cooldown();
 
 module.exports = {
   name: "roulette",
@@ -35,6 +37,7 @@ module.exports = {
     }
     const commandName = "roulette";
     const cooldownDuration = param.cooldownroulette;
+    const cooldownMessage = `Vous avez déjà joué à la roulette russe. Vous êtes suicidaire ou quoi ?`;
     const cooldownInfo = await cooldown.handleCooldown(
       interaction,
       commandName,

@@ -26,7 +26,7 @@ module.exports = {
   run: async (client, interaction, args) => {
     const userId = interaction.user.id;
 
-    /*if (config.maintenance) {
+    if (config.maintenance) {
       const embed = new EmbedBuilder()
         .setTitle("⚒️ Maintenance ⚒️")
         .setColor(color.error)
@@ -34,7 +34,7 @@ module.exports = {
           `> Le bot est actuellement en maintenance, veuillez réessayer plus tard.`
         );
       return interaction.reply({ embeds: [embed] });
-    }*/
+    }
     function emoji(id) {
       return (
         client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
