@@ -274,12 +274,37 @@ module.exports = {
             }
 
             if (i.customId === `start_duel_${interaction.id}`) {
+              const stats = await player.getStatsById(interaction.user.id);
+
+              if (
+                stats.attaque >= 100 &&
+                (difficulty == 0 || difficulty == 1)
+              ) {
+                await dbManager.updatePower(interaction.user.id, -100);
+                return i.update({
+                  content: `> Vous avez pas honte de vous en prendre au plus faible ?\n **-100** ${emoji(
+                    emo.power
+                  )}`,
+                });
+              } else if (
+                stats.attaque >= 500 &&
+                (difficulty == 0 || difficulty == 1 || difficulty == 2)
+              ) {
+                await dbManager.updatePower(interaction.user.id, -200);
+                return i.update({
+                  content: `> Vous avez pas honte de vous en prendre au plus faible ?\n **-200** ${emoji(
+                    emo.power
+                  )}`,
+                });
+              }
+
               const commandName2 = `entrainement`;
               const cooldownDuration2 =
                 params.cooldownEntrainement * difficulty + 350;
               const cooldownDurationSpecific = 3600;
               const cooldownDurationBossSpecific = 172800;
-              let messageString = "Pour la commande d'entrainement";
+              let messageString =
+                "Pour la commande d'entrainement, laissez le temps de repos à votre personnage";
 
               const cooldownInfo2 = await cooldown.handleCooldown(
                 i,
@@ -302,7 +327,7 @@ module.exports = {
               if (cooldownInfoSpecific) return;
 
               const commandName = `entrainement_${bossInfo.nom}_${difficulty}`;
-              messageString = `Pour le boss ${bossInfo.nom} en difficulté ${difficultyString}`;
+              messageString = `Pour le boss ${bossInfo.nom} en difficulté ${difficultyString}, laisser le temps de repos au boss.`;
               const cooldownInfo = await cooldown.handleCooldown(
                 i,
                 commandName,
