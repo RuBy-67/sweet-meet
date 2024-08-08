@@ -273,7 +273,7 @@ module.exports = {
               });
             }
 
-            if (i.customId === `start_duel_${i.id}`) {
+            if (i.customId === `start_duel_${interaction.id}`) {
               const stats = await player.getStatsById(interaction.user.id);
 
               if (
