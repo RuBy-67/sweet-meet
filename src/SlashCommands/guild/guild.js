@@ -499,34 +499,35 @@ module.exports = {
         // Trier les guildes par richesse décroissante
         guildData.sort((a, b) => b.totalWealth - a.totalWealth);
         const colorEmbed = await dbManager.getColor(interaction.user.id);
-
-        const embed = new EmbedBuilder()
-          .setTitle("Liste des Guildes")
-          .setColor(colorEmbed);
-        const startIndex = page * 5;
-        const endIndex = Math.min(startIndex + 5, guildData.length);
-        for (let i = startIndex; i < endIndex; i++) {
-          guildData.forEach((guild) => {
-            let statutInvit = "Inconnu";
-            if (guild.status === 1) {
-              statutInvit = "🟡 Sur invitation";
-            } else if (guild.status === 2) {
-              statutInvit = "🔴 Fermé";
-            } else if (guild.status === 3) {
-              statutInvit = "🟢 Ouvert";
-            }
-            embed.addFields({
-              name: `Guilde: ${guild.name}`,
-              value: `Richesse: ${guild.totalWealth} ${emoji(
-                emo.power
-              )}\nMembres: ${guild.membersCount}/${
-                guild.maxMembers
-              }👤\nEmpereur: <@${guild.emperor}>👑\nStatut: ${statutInvit}`,
-              inline: false,
+        const createEmbed = (page) => {
+          const embed = new EmbedBuilder()
+            .setTitle("Liste des Guildes")
+            .setColor(colorEmbed);
+          const startIndex = page * 5;
+          const endIndex = Math.min(startIndex + 5, guildData.length);
+          for (let i = startIndex; i < endIndex; i++) {
+            guildData.forEach((guild) => {
+              let statutInvit = "Inconnu";
+              if (guild.status === 1) {
+                statutInvit = "🟡 Sur invitation";
+              } else if (guild.status === 2) {
+                statutInvit = "🔴 Fermé";
+              } else if (guild.status === 3) {
+                statutInvit = "🟢 Ouvert";
+              }
+              embed.addFields({
+                name: `Guilde: ${guild.name}`,
+                value: `Richesse: ${guild.totalWealth} ${emoji(
+                  emo.power
+                )}\nMembres: ${guild.membersCount}/${
+                  guild.maxMembers
+                }👤\nEmpereur: <@${guild.emperor}>👑\nStatut: ${statutInvit}`,
+                inline: false,
+              });
             });
-          });
+          }
           return embed;
-        }
+        };
         const totalPages = Math.ceil(guildData.length / 5);
         // Créer les boutons de navigation
         const listRow = new ActionRowBuilder().addComponents(
