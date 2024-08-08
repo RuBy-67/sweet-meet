@@ -311,8 +311,6 @@ module.exports = {
               const commandNameBoss = `entrainement_${bossInfo.nom}_${difficulty}`;
               const commandNameTrain = `entrainement`;
 
-              let messageString;
-
               // Vérifiez d'abord le cooldown spécifique au boss
               const cooldownInfosBoss = await cooldown.isOnCooldown(
                 interaction.user.id,
@@ -326,9 +324,9 @@ module.exports = {
                 const timestamp = Math.floor(
                   (Date.now() + remainingTime * 1000) / 1000
                 );
-                messageString = `Pour le boss ${bossInfo.nom} en difficulté ${difficultyString}, laissez le temps de repos au boss.`;
+
                 await i.reply({
-                  content: `Vous êtes en cooldown pour le boss. Veuillez réessayer <t:${timestamp}:R>\n\n${messageString}`,
+                  content: `Vous êtes en cooldown pour le boss **${bossInfo.nom}** en difficulté **${difficultyString}**, laissez un temps de repos 💤 au boss.\n\n> Veuillez réessayer <t:${timestamp}:R>`,
                   ephemeral: true,
                 });
                 return;
@@ -347,9 +345,8 @@ module.exports = {
                 const timestamp = Math.floor(
                   (Date.now() + remainingTime * 1000) / 1000
                 );
-                messageString = `Pour la difficulté ${difficultyString}`;
                 await i.reply({
-                  content: `Vous êtes en cooldown pour la difficulté. Veuillez réessayer <t:${timestamp}:R>\n\n${messageString}`,
+                  content: `Vous êtes en cooldown pour la difficulté: **${difficultyString}**\n> Veuillez réessayer dans <t:${timestamp}:R>`,
                   ephemeral: true,
                 });
                 return;
@@ -368,10 +365,8 @@ module.exports = {
                 const timestamp = Math.floor(
                   (Date.now() + remainingTime * 1000) / 1000
                 );
-                messageString =
-                  "Pour la commande d'entrainement, laissez le temps de repos à votre personnage";
                 await i.reply({
-                  content: `Vous êtes en cooldown pour l'entraînement. Veuillez réessayer <t:${timestamp}:R>\n\n${messageString}`,
+                  content: `Vous êtes en cooldown pour la commande d’entraînement, laissez un temps de repos 💤 à votre personnage\n\n> Veuillez réessayer <t:${timestamp}:R>`,
                   ephemeral: true,
                 });
               }
@@ -407,12 +402,6 @@ module.exports = {
                 i.user.id,
                 commandNameTrain,
                 cooldownDurationTrain
-              );
-
-              console.log(
-                "after on" + cooldownInfosTrain2.remainingTime,
-                cooldownInfosDifficulty2.remainingTime,
-                cooldownInfosBoss2.remainingTime
               );
 
               // Logique pour lancer le duel
