@@ -319,6 +319,7 @@ module.exports = {
                 commandNameBoss,
                 cooldownDurationBoss
               );
+              console.log(cooldownInfosBoss.remainingTime);
               if (cooldownInfosBoss.remainingTime > 0) {
                 const remainingTime =
                   cooldownInfosBoss.remainingTime.toFixed(1);
@@ -330,7 +331,7 @@ module.exports = {
                   content: `Vous êtes en cooldown pour le boss. Veuillez réessayer <t:${timestamp}:R>\n\n${messageString}`,
                   ephemeral: true,
                 });
-                return;
+                //return;
               }
 
               // Vérifiez ensuite le cooldown spécifique à la difficulté
@@ -339,6 +340,7 @@ module.exports = {
                 commandNameDifficulty,
                 cooldownDurationDifficulty
               );
+              console.log(cooldownInfosDifficulty.remainingTime);
               if (cooldownInfosDifficulty.remainingTime > 0) {
                 const remainingTime =
                   cooldownInfosDifficulty.remainingTime.toFixed(1);
@@ -350,7 +352,7 @@ module.exports = {
                   content: `Vous êtes en cooldown pour la difficulté. Veuillez réessayer <t:${timestamp}:R>\n\n${messageString}`,
                   ephemeral: true,
                 });
-                return;
+                //return;
               }
               console.log(i.user.id);
               console.log(interaction.user.id);
@@ -361,6 +363,7 @@ module.exports = {
                 commandNameTrain,
                 cooldownDurationTrain
               );
+              console.log(cooldownInfosTrain.remainingTime);
               if (cooldownInfosTrain.remainingTime > 0) {
                 const remainingTime =
                   cooldownInfosTrain.remainingTime.toFixed(1);
