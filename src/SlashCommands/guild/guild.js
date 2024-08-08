@@ -488,6 +488,7 @@ module.exports = {
 
             return {
               id: guild.id,
+              tag: guild.tag,
               name: guild.nom,
               emperor: guild.empreur,
               membersCount: getMembers.length,
@@ -498,7 +499,7 @@ module.exports = {
           })
         );
         // Trier les guildes par richesse décroissante
-        guildData.sort((a, b) => b.totalWealth - a.totalWealth);
+        guildData.sort((a, b) => a.totalWealth - b.totalWealth);
         const colorEmbed = await dbManager.getColor(interaction.user.id);
         const createEmbed = (page) => {
           const embed = new EmbedBuilder()
@@ -518,8 +519,14 @@ module.exports = {
             }
 
             embed.addFields({
-              name: `Guilde: ${guild.name}`,
-              value: `__Richesse:__ **${guild.totalWealth}** fragments\n__Statut:__ ${statutInvit}\n- 👤 Membres: ${guild.membersCount}/${guild.maxMembers}\n- 👑 Empereur: <@${guild.emperor}>\n-----------`,
+              name: `${i}. ${guild.name} [${guild.tag}]`,
+              value: `__Richesse:__ **${guild.totalWealth}** ${emoji(
+                emo.power
+              )}\n__Statut:__ ${statutInvit}\n- 👤 Membres: ${
+                guild.membersCount
+              }/${guild.maxMembers}\n- 👑 Empereur: <@${
+                guild.emperor
+              }>\n-----------`,
               inline: false,
             });
           }
