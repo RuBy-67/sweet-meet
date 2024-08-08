@@ -751,7 +751,7 @@ module.exports = {
           .addFields({
             name: "🏰 - Guilde Commande",
             value:
-              "__Pour les Admin de guilde:__\n- `/gestionguild help`\n**-----**\n__Pour les membres de guilde:__\n- `/guild join`,\n- `/guild leave`,\n- `/guild info`,\n- `/guild give [amount]`\n**-----**\n__Pour le Marchand / Alchimiste:__\n- `/alchimiste sell`\n- `/alchimiste stock`\n- `/alchimiste fabrique`",
+              "__Pour les Admin de guilde:__\n- `/gestionguild help`\n**-----**\n__Pour les membres de guilde:__\n- `/guild join`,\n- `/guild leave`,\n- `/guild give [amount]`\n**-----**\n__Pour le Marchand / Alchimiste:__\n- `/alchimiste sell`\n- `/alchimiste stock`\n- `/alchimiste fabrique`",
           })
           .setFooter({
             text: `Demandé(e) par ${interaction.user.tag}`,
@@ -852,7 +852,9 @@ module.exports = {
               "`/info guildes` - Informations sur les guildes\n" +
               "`/info roleguildes` - Informations sur les rôles de guilde\n" +
               "`/info entrainement` - Informations sur l'entraînement\n" +
-              "`/gestionguild help` - Aide pour la gestion de guilde\n",
+              "`/gestionguild help` - Aide pour la gestion de guilde\n" +
+              "`/guild info` - Informations sur la guilde\n" +
+              "`/guild list` - Liste des guildes\n",
           })
           .setFooter({
             text: `Demandé(e) par ${interaction.user.tag}`,
