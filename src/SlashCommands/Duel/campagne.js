@@ -424,7 +424,7 @@ module.exports = {
             actionRow.components.forEach((component) =>
               component.setDisabled(true)
             );
-            interaction.update({ components: [actionRow] });
+            interaction.editReply({ components: [actionRow] });
           });
         };
 
