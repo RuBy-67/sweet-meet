@@ -543,7 +543,7 @@ module.exports = {
         );
         const message = await interaction.reply({
           embeds: [createEmbed(0)],
-          components: [row],
+          components: [listRow],
           fetchReply: true,
         });
         // Créer un collector pour les interactions avec les boutons
@@ -575,13 +575,13 @@ module.exports = {
 
           await i.update({
             embeds: [createEmbed(currentPage)],
-            components: [row],
+            components: [listRow],
           });
         });
 
         collector.on("end", (collected, reason) => {
           row.components.forEach((component) => component.setDisabled(true));
-          message.edit({ components: [row] });
+          message.edit({ components: [listRow] });
         });
 
       default:
