@@ -519,7 +519,7 @@ module.exports = {
             }
 
             embed.addFields({
-              name: `${i}. ${guild.name} [${guild.tag}]`,
+              name: `${i + 1}. ${guild.name} [${guild.tag}]`,
               value: `__Richesse:__ **${guild.totalWealth}** ${emoji(
                 emo.power
               )}\n__Statut:__ ${statutInvit}\n- 👤 Membres: ${
