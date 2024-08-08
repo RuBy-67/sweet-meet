@@ -420,26 +420,12 @@ module.exports = {
               await i.update({ embeds: [cancelEmbed], components: [] });
             }
           });
-          // Fonction pour désactiver les boutons après 1 minute
-          setTimeout(async () => {
-            // Créer des boutons désactivés
-            const disabledActionRow = new ActionRowBuilder().addComponents(
-              new ButtonBuilder()
-                .setCustomId(`start_duel_${interaction.id}`)
-                .setLabel("Lancer le duel")
-                .setStyle(ButtonStyle.Primary)
-                .setDisabled(true),
-              new ButtonBuilder()
-                .setCustomId(`cancel_duel_${interaction.id}`)
-                .setLabel("Annuler le duel")
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true)
+          collector.on("end", () => {
+            actionRow.components.forEach((component) =>
+              component.setDisabled(true)
             );
-
-            await interaction.editReply({
-              components: [disabledActionRow],
-            });
-          }, 60000);
+            interaction.update({ components: [actionRow] });
+          });
         };
 
         // Appeler la fonction pour gérer le collector
