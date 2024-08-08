@@ -138,31 +138,31 @@ module.exports = {
             factor: 0.1,
             rewardMultiplierVictory: 0.04,
             rewardMultiplierDefeat: 0.03,
-            label: "Noob",
+            label: "Noob 🍼",
           },
           1: {
             factor: 0.3,
             rewardMultiplierVictory: 0.25,
             rewardMultiplierDefeat: 0.1,
-            label: "Facile",
+            label: "Facile 👼",
           },
           2: {
             factor: 0.75,
             rewardMultiplierVictory: 0.75,
             rewardMultiplierDefeat: 0.5,
-            label: "Moyen",
+            label: "Moyen 🧒",
           },
           3: {
             factor: 1.88,
             rewardMultiplierVictory: 1.25,
             rewardMultiplierDefeat: 1,
-            label: "Difficile",
+            label: "Difficile 💪",
           },
           4: {
             factor: 2.88,
             rewardMultiplierVictory: 2,
             rewardMultiplierDefeat: 1.25,
-            label: "Légendaire",
+            label: "Légendaire 👑",
           },
         };
 
@@ -182,9 +182,9 @@ module.exports = {
 
         // Créer l'embed pour le duel
         const embed = new EmbedBuilder()
-          .setTitle(`Entraînement contre ${bossInfo.nom}`)
+          .setTitle(`Entraînement avec ${bossInfo.nom}`)
           .setThumbnail(bossInfo.image)
-          .setDescription(`*${bossInfo.lore}*\n\n***Carte du boss***`)
+          .setDescription(`*${bossInfo.lore}*\n\n***Carte du boss 🃏***`)
           .addFields(
             { name: "Nom du Boss", value: bossInfo.nom, inline: true },
             {
@@ -194,11 +194,11 @@ module.exports = {
             },
             { name: " ", value: ` ` },
             {
-              name: "Habilités",
+              name: "➕ Habilités",
               value: `- *${bossInfo.habilite1}*\n- *${bossInfo.habilite2}*`,
             },
             {
-              name: "Faiblesse",
+              name: "➖ Faiblesse",
               value: `- *${bossInfo.faiblesse1}*\n- *${bossInfo.faiblesse2}*`,
             },
             {
