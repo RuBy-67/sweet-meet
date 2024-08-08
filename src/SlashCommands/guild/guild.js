@@ -1,4 +1,11 @@
-const { EmbedBuilder } = require("discord.js");
+const {
+  EmbedBuilder,
+  StringSelectMenuBuilder,
+  StringSelectMenuOptionBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+} = require("discord.js");
 const DatabaseManager = require("../../class/dbManager");
 const dbManager = new DatabaseManager();
 const emo = require("../../jsons/emoji.json");
@@ -43,6 +50,11 @@ module.exports = {
     },
     {
       type: 1,
+      name: "list",
+      description: "Liste des guildes",
+    },
+    {
+      type: 1,
       name: "give",
       description: "Donner des fragments à sa guilde",
       options: [
@@ -58,7 +70,7 @@ module.exports = {
   run: async (client, interaction, args) => {
     const subcommand = interaction.options.getSubcommand();
     const userId = interaction.user.id;
-    /* if (config.maintenance) {
+    if (config.maintenance) {
       const embed = new EmbedBuilder()
         .setTitle("⚒️ Maintenance ⚒️")
         .setColor(color.error)
@@ -67,7 +79,7 @@ module.exports = {
         )
         .setColor(color.error);
       return interaction.reply({ embeds: [embed] });
-    }*/
+    }
     function emoji(id) {
       return (
         client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
@@ -462,6 +474,114 @@ module.exports = {
             ephemeral: true,
           });
         }
+      case "list":
+        const guilds = await dbManager.getAllGuilds();
+        const guildData = await Promise.all(
+          guilds.map(async (guild) => {
+            const getMembers = await dbManager.getGuildMembers(guild.id);
+            const totalPower = getMembers.reduce(
+              (acc, member) => acc + member.power,
+              0
+            );
+            const guildBank = await dbManager.getGuildBank(guild.id);
+            const totalWealth = totalPower + guildBank.fragments;
+
+            return {
+              id: guild.id,
+              name: guild.nom,
+              emperor: guild.empreur,
+              membersCount: getMembers.length,
+              maxMembers: params.maxJoueurLvl[guild.level],
+              totalWealth,
+              status: guild.statutInvit,
+            };
+          })
+        );
+        // Trier les guildes par richesse décroissante
+        guildData.sort((a, b) => b.totalWealth - a.totalWealth);
+
+        const embed = new EmbedBuilder()
+          .setTitle("Liste des Guildes")
+          .setColor(colors);
+        const startIndex = page * 5;
+        const endIndex = Math.min(startIndex + 5, guildData.length);
+        for (let i = startIndex; i < endIndex; i++) {
+          guildData.forEach((guild) => {
+            let statutInvit = "Inconnu";
+            if (guild.status === 1) {
+              statutInvit = "🟡 Sur invitation";
+            } else if (guild.status === 2) {
+              statutInvit = "🔴 Fermé";
+            } else if (guild.status === 3) {
+              statutInvit = "🟢 Ouvert";
+            }
+            embed.addFields({
+              name: `Guilde: ${guild.name}`,
+              value: `Richesse: ${guild.totalWealth} ${emoji(
+                emo.power
+              )}\nMembres: ${guild.membersCount}/${
+                guild.maxMembers
+              }👤\nEmpereur: <@${guild.emperor}>👑\nStatut: ${statutInvit}`,
+              inline: false,
+            });
+          });
+          return embed;
+        }
+        const totalPages = Math.ceil(guildData.length / 5);
+        // Créer les boutons de navigation
+        const listRow = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId("prev_page")
+            .setLabel("◀️ Précédent")
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(true),
+          new ButtonBuilder()
+            .setCustomId("next_page")
+            .setLabel("Suivant ▶️")
+            .setStyle(ButtonStyle.Secondary)
+        );
+        const message = await interaction.reply({
+          embeds: [createEmbed(0)],
+          components: [row],
+          fetchReply: true,
+        });
+        // Créer un collector pour les interactions avec les boutons
+        const filter = (i) =>
+          i.customId === "prev_page" || i.customId === "next_page";
+        const collector = message.createMessageComponentCollector({
+          filter,
+          time: 60000,
+        });
+
+        let currentPage = 0;
+
+        collector.on("collect", async (i) => {
+          if (i.user.id !== interaction.user.id) {
+            return i.reply({
+              content: "Vous ne pouvez pas interagir avec ce message.",
+              ephemeral: true,
+            });
+          }
+
+          if (i.customId === "prev_page") {
+            currentPage = Math.max(currentPage - 1, 0);
+          } else if (i.customId === "next_page") {
+            currentPage = Math.min(currentPage + 1, totalPages - 1);
+          }
+
+          row.components[0].setDisabled(currentPage === 0);
+          row.components[1].setDisabled(currentPage === totalPages - 1);
+
+          await i.update({
+            embeds: [createEmbed(currentPage)],
+            components: [row],
+          });
+        });
+
+        collector.on("end", (collected, reason) => {
+          row.components.forEach((component) => component.setDisabled(true));
+          message.edit({ components: [row] });
+        });
 
       default:
         return interaction.reply({

@@ -234,9 +234,9 @@ module.exports = {
           const guildInfo = await dbManager.getGuildById(statsResult.guildId);
 
           if (guildInfo[0].empreur == targetUser.id) {
-            guildTag = `${emoji(emo.King)} Empereur de la guilde ${
+            guildTag = `${emoji(emo.King)} Empereur de **${
               guildInfo[0].nom
-            } **[${guildInfo[0].tag}]**`;
+            }** - ***[${guildInfo[0].tag}]***`;
             EmbedColor = guildInfo[0].bannière;
           } else {
             const guildInfoClassId = await dbManager.getUserClass(
@@ -250,7 +250,7 @@ module.exports = {
 
             guildTag = `${emoji(emo[`class${guildInfoClassId[0].idClasse}`])} ${
               guildInfoClassName[0].Nom
-            } de la guilde ${guildInfo[0].nom} **[${guildInfo[0].tag}]**`;
+            } de **${guildInfo[0].nom}** - ***[${guildInfo[0].tag}]***`;
             EmbedColor = guildInfo[0].bannière;
           }
         } else {
@@ -654,7 +654,7 @@ module.exports = {
           }
         }
         embedClassement.addFields({
-          name: "🏆 Top ",
+          name: `${emoji(emo.power)} - Top Players `,
           value: powerDescription,
           inline: true,
         });
@@ -674,9 +674,9 @@ module.exports = {
             }\n`;
           }
         }
-        embedClassement.addFields({ name: " ", value: " ", inline: true });
+
         embedClassement.addFields({
-          name: "👑 Top - Victoires",
+          name: "👑 - Victoires",
           value: winDescription,
           inline: true,
         });
@@ -693,9 +693,9 @@ module.exports = {
           )
           .join("\n");
         embedClassement.addFields({
-          name: "👑 - Top Guild",
+          name: `${emoji(emo.power)} - Guildes`,
           value: topGuildsDescription || "Aucune guilde disponible",
-          inline: false,
+          inline: true,
         });
 
         // Rank par Win Rate
@@ -713,9 +713,8 @@ module.exports = {
             ).toFixed(2)}%\n`;
           }
         }
-        embedClassement.addFields({ name: " ", value: " ", inline: true });
         embedClassement.addFields({
-          name: "👑 Top - Taux de victoire",
+          name: "👑 - Taux de victoire",
           value: rateDescription,
           inline: true,
         });

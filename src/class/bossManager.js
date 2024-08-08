@@ -188,7 +188,7 @@ class Boss extends DatabaseManager {
           name: "Récompense:",
           value: `__Victoire:__ ${recompenseV}${emoji(
             emo.power
-          )}\n__Défaite:__ ${recompenseD}${emoji(emo.power)}`,
+          )}\n__Défaite:__ -${recompenseD}${emoji(emo.power)}`,
         });
 
       i.editReply({ embeds: [embed], components: [] });
