@@ -527,6 +527,7 @@ module.exports = {
         };
         const totalPages = Math.ceil(guildData.length / 5);
         // Créer les boutons de navigation
+        let currentPage = 0;
         const listRow = new ActionRowBuilder().addComponents(
           new ButtonBuilder()
             .setCustomId("prev_page")
@@ -551,8 +552,6 @@ module.exports = {
           filter,
           time: 60000,
         });
-
-        let currentPage = 0;
 
         collector.on("collect", async (i) => {
           if (i.user.id !== interaction.user.id) {
