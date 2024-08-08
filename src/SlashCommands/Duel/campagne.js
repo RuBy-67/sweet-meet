@@ -436,7 +436,7 @@ module.exports = {
                 .setDisabled(true)
             );
 
-            await i.update({
+            await interaction.update({
               components: [disabledActionRow],
             });
           }, 60000);
