@@ -327,10 +327,10 @@ module.exports = {
                   (Date.now() + remainingTime * 1000) / 1000
                 );
                 messageString = `Pour le boss ${bossInfo.nom} en difficulté ${difficultyString}, laissez le temps de repos au boss.`;
-                await i.reply({
-                  content: `Vous êtes en cooldown pour le boss. Veuillez réessayer <t:${timestamp}:R>\n\n${messageString}`,
-                  ephemeral: true,
-                });
+                //await i.reply({
+                // content: `Vous êtes en cooldown pour le boss. Veuillez réessayer <t:${timestamp}:R>\n\n${messageString}`,
+                // ephemeral: true,
+                //  });
                 //return;
               }
 
@@ -348,10 +348,10 @@ module.exports = {
                   (Date.now() + remainingTime * 1000) / 1000
                 );
                 messageString = `Pour la difficulté ${difficultyString}`;
-                await i.reply({
-                  content: `Vous êtes en cooldown pour la difficulté. Veuillez réessayer <t:${timestamp}:R>\n\n${messageString}`,
-                  ephemeral: true,
-                });
+                //await i.reply({
+                //content: `Vous êtes en cooldown pour la difficulté. Veuillez réessayer <t:${timestamp}:R>\n\n${messageString}`,
+                // ephemeral: true,
+                //  });
                 //return;
               }
               console.log(i.user.id);
@@ -372,11 +372,10 @@ module.exports = {
                 );
                 messageString =
                   "Pour la commande d'entrainement, laissez le temps de repos à votre personnage";
-                await i.reply({
-                  content: `Vous êtes en cooldown pour l'entraînement. Veuillez réessayer <t:${timestamp}:R>\n\n${messageString}`,
-                  ephemeral: true,
-                });
-                return;
+                //await i.reply({
+                // content: `Vous êtes en cooldown pour l'entraînement. Veuillez réessayer <t:${timestamp}:R>\n\n${messageString}`,
+                // ephemeral: true,
+                //  });
               }
               console.log(
                 cooldownInfosTrain,
