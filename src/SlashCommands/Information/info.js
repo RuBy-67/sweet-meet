@@ -229,11 +229,9 @@ module.exports = {
         }
         let EmbedColor = colors;
         let guildTag = "";
-        console.log(statsResult.guildId);
+
         if (statsResult.guildId != null) {
           const guildInfo = await dbManager.getGuildById(statsResult.guildId);
-          console.log(guildInfo);
-          console.log(guildInfo[0].empreur);
 
           if (guildInfo[0].empreur == targetUser.id) {
             guildTag = `${emoji(emo.King)} Empereur de la guilde ${

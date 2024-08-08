@@ -303,9 +303,9 @@ module.exports = {
               }
 
               const cooldownDurationTrain =
-                params.cooldownEntrainement * difficulty + 350;
-              const cooldownDurationDifficulty = 3600; // 1 heure en secondes
-              const cooldownDurationBoss = 172800; // 2 jours en secondes
+                (params.cooldownEntrainement * difficulty + 350) * 1000;
+              const cooldownDurationDifficulty = 3600 * 1000; // 1 heure en secondes
+              const cooldownDurationBoss = 172800 * 1000; // 2 jours en secondes
 
               const commandNameDifficulty = `entrainement_${difficulty}`;
               const commandNameBoss = `entrainement_${bossInfo.nom}_${difficulty}`;
@@ -319,7 +319,7 @@ module.exports = {
                 commandNameBoss,
                 cooldownDurationBoss
               );
-              console.log(cooldownInfosBoss.remainingTime);
+
               if (cooldownInfosBoss.remainingTime > 0) {
                 const remainingTime =
                   cooldownInfosBoss.remainingTime.toFixed(1);
@@ -327,11 +327,11 @@ module.exports = {
                   (Date.now() + remainingTime * 1000) / 1000
                 );
                 messageString = `Pour le boss ${bossInfo.nom} en difficulté ${difficultyString}, laissez le temps de repos au boss.`;
-                //await i.reply({
-                // content: `Vous êtes en cooldown pour le boss. Veuillez réessayer <t:${timestamp}:R>\n\n${messageString}`,
-                // ephemeral: true,
-                //  });
-                //return;
+                await i.reply({
+                  content: `Vous êtes en cooldown pour le boss. Veuillez réessayer <t:${timestamp}:R>\n\n${messageString}`,
+                  ephemeral: true,
+                });
+                return;
               }
 
               // Vérifiez ensuite le cooldown spécifique à la difficulté
@@ -340,7 +340,7 @@ module.exports = {
                 commandNameDifficulty,
                 cooldownDurationDifficulty
               );
-              console.log(cooldownInfosDifficulty.remainingTime);
+
               if (cooldownInfosDifficulty.remainingTime > 0) {
                 const remainingTime =
                   cooldownInfosDifficulty.remainingTime.toFixed(1);
@@ -348,14 +348,12 @@ module.exports = {
                   (Date.now() + remainingTime * 1000) / 1000
                 );
                 messageString = `Pour la difficulté ${difficultyString}`;
-                //await i.reply({
-                //content: `Vous êtes en cooldown pour la difficulté. Veuillez réessayer <t:${timestamp}:R>\n\n${messageString}`,
-                // ephemeral: true,
-                //  });
-                //return;
+                await i.reply({
+                  content: `Vous êtes en cooldown pour la difficulté. Veuillez réessayer <t:${timestamp}:R>\n\n${messageString}`,
+                  ephemeral: true,
+                });
+                return;
               }
-              console.log(i.user.id);
-              console.log(interaction.user.id);
 
               // Vérifiez enfin le cooldown général de l'entraînement
               const cooldownInfosTrain = await cooldown.isOnCooldown(
@@ -363,7 +361,7 @@ module.exports = {
                 commandNameTrain,
                 cooldownDurationTrain
               );
-              console.log(cooldownInfosTrain.remainingTime);
+
               if (cooldownInfosTrain.remainingTime > 0) {
                 const remainingTime =
                   cooldownInfosTrain.remainingTime.toFixed(1);
@@ -372,16 +370,11 @@ module.exports = {
                 );
                 messageString =
                   "Pour la commande d'entrainement, laissez le temps de repos à votre personnage";
-                //await i.reply({
-                // content: `Vous êtes en cooldown pour l'entraînement. Veuillez réessayer <t:${timestamp}:R>\n\n${messageString}`,
-                // ephemeral: true,
-                //  });
+                await i.reply({
+                  content: `Vous êtes en cooldown pour l'entraînement. Veuillez réessayer <t:${timestamp}:R>\n\n${messageString}`,
+                  ephemeral: true,
+                });
               }
-              console.log(
-                cooldownInfosTrain,
-                cooldownInfosDifficulty,
-                cooldownInfosBoss
-              );
 
               // Si aucun cooldown n'est actif, configurez les nouveaux cooldowns
               await cooldown.setCooldown(

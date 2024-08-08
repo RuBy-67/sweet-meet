@@ -491,7 +491,6 @@ module.exports = {
 
       case "kick":
         const members = await dbManager.getGuildMembers(guildId);
-        console.log(members);
 
         const nonAdminMembers = [];
         for (const member of members) {
@@ -504,10 +503,10 @@ module.exports = {
               member.discordId,
               guildId
             );
-            console.log(userClass.idClasse);
+
             const emojiName = emo[`class${userClass.idClasse}`] || "❔";
             const user = await client.users.fetch(member.discordId);
-            console.log(emojiName);
+
             nonAdminMembers.push({
               id: member.discordId,
               username: user.username,
@@ -705,8 +704,7 @@ module.exports = {
           newClassId
         );
         const classNameToPromote = await dbManager.getClassName(newClassId);
-        console.log(classNameToPromote);
-        console.log(classNameToPromote[0].Nom);
+
         await dbManager.addGuildBank(
           guildId,
           -params.promote[classNameToPromote[0].Nom]
@@ -780,7 +778,6 @@ module.exports = {
           );
         }
 
-        console.log(newClassIdToDemote);
         await dbManager.promoteDemoteMember(
           userIdToDemote.id,
           guildId,
@@ -820,7 +817,7 @@ module.exports = {
         }
         /// check si l'user est dans une guild
         const userToInvite = await dbManager.getStats(userIdToInvite.id);
-        console.log("userToInvite" + userToInvite.guildId);
+
         if (userToInvite.guildId == null) {
           /// check si l'user à déjà proposé une invitation si oui faire rejoindre le joueurs
           const invitation = await dbManager.getUserInvitationByGuild(

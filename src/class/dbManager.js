@@ -600,7 +600,6 @@ class DatabaseManager {
     await this.queryMain(SQL_QUERIES.INSERT_BADGE_USER, [userId, badgeId]);
   }
   async removeBadgeById(badgeId) {
-    console.log("selected", badgeId);
     await this.queryMain(SQL_QUERIES.DELETE_BADGE_USER, [badgeId]);
   }
 

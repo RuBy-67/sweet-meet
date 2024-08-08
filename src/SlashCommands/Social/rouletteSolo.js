@@ -142,7 +142,7 @@ module.exports = {
       if (survived) {
         const multiplier = [1.2, 1.9, 3, 5, 10][shots - 1];
         const powerGain = Math.floor(bet * multiplier);
-        console.log(powerGain);
+
         await db.updatePower(userId, powerGain);
         const successEmbed = new EmbedBuilder()
           .setTitle("Roulette Russe - Victoire")

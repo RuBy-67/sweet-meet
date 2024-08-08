@@ -65,6 +65,7 @@ module.exports = {
       // Send welcome message
       if (welcomeChannel) {
         welcomeChannel.send({ embeds: [embed] });
+        console.log(`Welcome message sent`);
       } else {
         console.log(`No Welcome Room Find`);
       }

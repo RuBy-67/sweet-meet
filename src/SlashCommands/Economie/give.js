@@ -173,7 +173,7 @@ module.exports = {
         if (i.customId === "material_select") {
           await dbManager.addMaterialToUser(utilisateur.id, selectedMaterialId);
           const material = await dbManager.materiauById(selectedMaterialId);
-          console.log(material);
+
           await i.update({
             content: `Vous avez donné **${material[0].nom} - (lvl1)** à ${utilisateur}.`,
             ephemeral: true,
@@ -210,8 +210,7 @@ module.exports = {
           const selectedMaterials = i.values;
           const selectedMaterialId = selectedMaterials[0];
           const badge = await dbManager.getBadgeById(selectedMaterialId);
-          console.log(badge);
-          console.log(badge.length);
+
           if (badge.length === 0) {
             await i.update({
               content: `Le badge n'appartient pas à quelqu'un.`,
@@ -220,7 +219,7 @@ module.exports = {
             return;
           } else {
             await dbManager.removeBadgeById(selectedMaterialId);
-            console.log("selected", selectedMaterialId);
+
             await i.update({
               content: `Vous avez retiré le badge à un user.`,
               ephemeral: true,

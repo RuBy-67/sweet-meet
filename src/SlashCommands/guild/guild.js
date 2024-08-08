@@ -83,7 +83,6 @@ module.exports = {
         if (guildName) {
           // Recherche de la guilde par son nom
           guildInfo = await dbManager.getGuildByName(guildName);
-          console.log(guildInfo);
 
           if (!guildInfo) {
             interaction.reply({
@@ -175,7 +174,7 @@ module.exports = {
         const xpString =
           guildInfo.xp + "/" + parseInt(params.xp[guildInfo.level]);
         const colors = guildInfo.bannière;
-        console.log(colors);
+
         const embedInfo = new EmbedBuilder()
           .setTitle(`Infos de la guilde ${guildInfo.nom}`)
           .setColor(colors)
@@ -272,7 +271,6 @@ module.exports = {
         }
         try {
           if (!tag) {
-            console.log("Pas de tag");
             // User n'a pas fournis de TAG
             const invitations = await dbManager.getUserInvitation(userId);
             if (invitations.length === 0) {
@@ -322,8 +320,6 @@ module.exports = {
               return interaction.reply({ embeds: [embed], ephemeral: true });
             }
           } else {
-            console.log("tag fournis");
-            console.log(tag);
             // User Fournis un tag
             const guild = await dbManager.getGuildByTag(tag);
             if (!guild) {
@@ -411,7 +407,7 @@ module.exports = {
 
       case "leave":
         const InGuild = await dbManager.getStats(userId);
-        console.log(InGuild.guildId);
+
         if (InGuild.guildId == null) {
           return interaction.reply({
             content: "Vous n'êtes membre d'aucune guilde.",

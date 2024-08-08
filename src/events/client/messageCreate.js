@@ -60,12 +60,10 @@ module.exports = {
         // à verifier si c'est pas trop
 
         const GuildStat = await db.getGuildById(stats.guildId);
-        console.log("GuildStat", GuildStat);
-        console.log("GuildStat", GuildStat[0].xp);
+
         if (GuildStat[0].xp < param.xp[GuildStat[0].level]) {
           await db.updateGuildXp(stats.guildId, powerIncrement * 2);
         }
-        console.log("powerIncrement", powerIncrement * 2);
 
         await db.addGuildBank(stats.guildId, powerIncrement);
       }

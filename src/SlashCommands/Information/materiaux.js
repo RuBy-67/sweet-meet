@@ -258,7 +258,6 @@ module.exports = {
               userInfo.guildId
             );
             if (!userMarchandId[0].marchand) {
-              console.log(userMarchandId[0].marchand);
               return interaction.reply({
                 content: "Le Marchand n'est pas disponible dans votre guilde.",
                 ephemeral: true,
@@ -402,7 +401,7 @@ module.exports = {
 
                   const newFilter = (interaction) =>
                     interaction.user.id === marchandId;
-                  console.log(marchandId);
+
                   const collectorSell = message.createMessageComponentCollector(
                     {
                       newFilter,
@@ -411,8 +410,6 @@ module.exports = {
                   );
 
                   collectorSell.on("collect", async (interaction) => {
-                    console.log(interaction);
-                    console.log(marchandId);
                     if (interaction.customId === "accept_sale") {
                       await dbManager.updateMateriauxOwner(
                         marchandId,
@@ -806,7 +803,7 @@ module.exports = {
           const endTimestamp = Math.floor(
             Date.now() / 1000 + potion[0].duration
           );
-          console.log(potion);
+
           await i.update({
             content: `La potion **${potion[0].potionName}** a été activée avec succès.\Fin d'activation: <t:${endTimestamp}:R>`,
             components: [],
@@ -815,9 +812,6 @@ module.exports = {
           setTimeout(async () => {
             try {
               await dbManager.deletePotionById(potion[0].idPotion);
-              console.log(
-                `Potion ${potion[0].potionName} supprimée avec succès.`
-              );
             } catch (error) {
               console.error(
                 `Erreur lors de la suppression de la potion ${potion[0].potionName}:`,

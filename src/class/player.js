@@ -180,12 +180,11 @@ class Player extends DatabaseManager {
         defense *= (materiaux.defenseBoost / 100) * (1 + levelBonus / 100) + 1;
         attaque *= (materiaux.attaqueBoost / 100) * (1 + levelBonus / 100) + 1;
       });
-      console.log("PotionBonus(avant)" + userId);
+
       const potionBonus = await this.getPotionByEtat(userId);
 
       if (potionBonus) {
         potionBonus.forEach((potion) => {
-          console.log(potion.santeBoost);
           sante += potion.santeBoost;
           defense += potion.defenseBoost;
           attaque += potion.attaqueBoost;
@@ -476,7 +475,6 @@ class Player extends DatabaseManager {
     return weightedMaterials[randomIndex];
   }
   async getPotionByEtat(userId) {
-    console.log("getPotionByEtat" + userId);
     const [result] = await pool.query(sqlQueries.getPotionByEtat, [userId, 1]);
     return result;
   }
