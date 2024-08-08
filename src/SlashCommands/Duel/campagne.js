@@ -398,6 +398,28 @@ module.exports = {
                 cooldownDurationDifficulty
               );
 
+              const cooldownInfosBoss2 = await cooldown.isOnCooldown(
+                interaction.user.id,
+                commandNameBoss,
+                cooldownDurationBoss
+              );
+              const cooldownInfosDifficulty2 = await cooldown.isOnCooldown(
+                i.user.id,
+                commandNameDifficulty,
+                cooldownDurationDifficulty
+              );
+              const cooldownInfosTrain2 = await cooldown.isOnCooldown(
+                i.user.id,
+                commandNameTrain,
+                cooldownDurationTrain
+              );
+
+              console.log(
+                "before on" + cooldownInfosTrain2,
+                cooldownInfosDifficulty2,
+                cooldownInfosBoss2
+              );
+
               // Logique pour lancer le duel
               const startEmbed = new EmbedBuilder()
                 .setTitle("Duel Commencé")
