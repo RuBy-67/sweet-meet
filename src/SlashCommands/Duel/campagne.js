@@ -388,22 +388,6 @@ module.exports = {
                 cooldownDurationDifficulty
               );
 
-              const cooldownInfosBoss2 = await cooldown.isOnCooldown(
-                interaction.user.id,
-                commandNameBoss,
-                cooldownDurationBoss
-              );
-              const cooldownInfosDifficulty2 = await cooldown.isOnCooldown(
-                i.user.id,
-                commandNameDifficulty,
-                cooldownDurationDifficulty
-              );
-              const cooldownInfosTrain2 = await cooldown.isOnCooldown(
-                i.user.id,
-                commandNameTrain,
-                cooldownDurationTrain
-              );
-
               // Logique pour lancer le duel
               const startEmbed = new EmbedBuilder()
                 .setTitle("Duel Commencé")
@@ -436,6 +420,26 @@ module.exports = {
               await i.update({ embeds: [cancelEmbed], components: [] });
             }
           });
+          // Fonction pour désactiver les boutons après 1 minute
+          setTimeout(async () => {
+            // Créer des boutons désactivés
+            const disabledActionRow = new ActionRowBuilder().addComponents(
+              new ButtonBuilder()
+                .setCustomId(`start_duel_${interaction.id}`)
+                .setLabel("Lancer le duel")
+                .setStyle(ButtonStyle.Primary)
+                .setDisabled(true),
+              new ButtonBuilder()
+                .setCustomId(`cancel_duel_${interaction.id}`)
+                .setLabel("Annuler le duel")
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true)
+            );
+
+            await i.update({
+              components: [disabledActionRow],
+            });
+          }, 60000);
         };
 
         // Appeler la fonction pour gérer le collector
