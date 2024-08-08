@@ -273,14 +273,14 @@ module.exports = {
               });
             }
 
-            if (i.customId === `start_duel_${interaction.id}`) {
+            if (i.customId === `start_duel_${i.id}`) {
               const stats = await player.getStatsById(interaction.user.id);
 
               if (
                 stats.attaque >= 100 &&
                 (difficulty == 0 || difficulty == 1)
               ) {
-                await dbManager.updatePower(interaction.user.id, -100);
+                await dbManager.updatePower(i.user.id, -100);
                 return i.update({
                   content: `> Vous avez pas honte de vous en prendre au plus faible ?\n **-100** ${emoji(
                     emo.power
@@ -292,7 +292,7 @@ module.exports = {
                 stats.attaque >= 500 &&
                 (difficulty == 0 || difficulty == 1 || difficulty == 2)
               ) {
-                await dbManager.updatePower(interaction.user.id, -200);
+                await dbManager.updatePower(i.user.id, -200);
                 return i.update({
                   content: `> Vous avez pas honte de vous en prendre au plus faible ?\n **-200** ${emoji(
                     emo.power
@@ -326,7 +326,7 @@ module.exports = {
                   (Date.now() + remainingTime * 1000) / 1000
                 );
                 messageString = `Pour le boss ${bossInfo.nom} en difficulté ${difficultyString}, laissez le temps de repos au boss.`;
-                await interaction.reply({
+                await i.reply({
                   content: `Vous êtes en cooldown pour le boss. Veuillez réessayer <t:${timestamp}:R>\n\n${messageString}`,
                   ephemeral: true,
                 });
@@ -335,7 +335,7 @@ module.exports = {
 
               // Vérifiez ensuite le cooldown spécifique à la difficulté
               const cooldownInfosDifficulty = await cooldown.isOnCooldown(
-                interaction.user.id,
+                i.user.id,
                 commandNameDifficulty,
                 cooldownDurationDifficulty
               );
@@ -346,16 +346,18 @@ module.exports = {
                   (Date.now() + remainingTime * 1000) / 1000
                 );
                 messageString = `Pour la difficulté ${difficultyString}`;
-                await interaction.reply({
+                await i.reply({
                   content: `Vous êtes en cooldown pour la difficulté. Veuillez réessayer <t:${timestamp}:R>\n\n${messageString}`,
                   ephemeral: true,
                 });
                 return;
               }
+              console.log(i.user.id);
+              console.log(interaction.user.id);
 
               // Vérifiez enfin le cooldown général de l'entraînement
               const cooldownInfosTrain = await cooldown.isOnCooldown(
-                interaction.user.id,
+                i.user.id,
                 commandNameTrain,
                 cooldownDurationTrain
               );
@@ -367,26 +369,31 @@ module.exports = {
                 );
                 messageString =
                   "Pour la commande d'entrainement, laissez le temps de repos à votre personnage";
-                await interaction.reply({
+                await i.reply({
                   content: `Vous êtes en cooldown pour l'entraînement. Veuillez réessayer <t:${timestamp}:R>\n\n${messageString}`,
                   ephemeral: true,
                 });
                 return;
               }
+              console.log(
+                cooldownInfosTrain,
+                cooldownInfosDifficulty,
+                cooldownInfosBoss
+              );
 
               // Si aucun cooldown n'est actif, configurez les nouveaux cooldowns
               await cooldown.setCooldown(
-                interaction.user.id,
+                i.user.id,
                 commandNameBoss,
                 cooldownDurationBoss
               );
               await cooldown.setCooldown(
-                interaction.user.id,
+                i.user.id,
                 commandNameTrain,
                 cooldownDurationTrain
               );
               await cooldown.setCooldown(
-                interaction.user.id,
+                i.user.id,
                 commandNameDifficulty,
                 cooldownDurationDifficulty
               );
@@ -422,19 +429,6 @@ module.exports = {
 
               await i.update({ embeds: [cancelEmbed], components: [] });
             }
-          });
-
-          collector.on("end", (collected, reason) => {
-            if (reason === "time") {
-              interaction.editReply({
-                content: "Le temps est écoulé.",
-                components: [],
-                embeds: [],
-              });
-            }
-
-            // Nettoyer le collector stocké
-            delete client.collectors[interaction.id];
           });
         };
 
