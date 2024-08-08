@@ -498,10 +498,11 @@ module.exports = {
         );
         // Trier les guildes par richesse décroissante
         guildData.sort((a, b) => b.totalWealth - a.totalWealth);
+        const colorEmbed = await dbManager.getColor(interaction.user.id);
 
         const embed = new EmbedBuilder()
           .setTitle("Liste des Guildes")
-          .setColor(colors);
+          .setColor(colorEmbed);
         const startIndex = page * 5;
         const endIndex = Math.min(startIndex + 5, guildData.length);
         for (let i = startIndex; i < endIndex; i++) {
