@@ -483,8 +483,7 @@ module.exports = {
               (acc, member) => acc + member.power,
               0
             );
-            const guildBank = await dbManager.getGuildBank(guild.id);
-            const totalWealth = totalPower + guildBank.fragments;
+            const totalWealth = totalPower + guild.banque;
 
             return {
               id: guild.id,
