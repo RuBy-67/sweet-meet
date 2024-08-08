@@ -436,7 +436,7 @@ module.exports = {
                 .setDisabled(true)
             );
 
-            await interaction.update({
+            await interaction.editReply({
               components: [disabledActionRow],
             });
           }, 60000);
