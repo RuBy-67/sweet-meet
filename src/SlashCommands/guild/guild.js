@@ -506,26 +506,23 @@ module.exports = {
           const startIndex = page * 5;
           const endIndex = Math.min(startIndex + 5, guildData.length);
           for (let i = startIndex; i < endIndex; i++) {
-            guildData.forEach((guild) => {
-              let statutInvit = "Inconnu";
-              if (guild.status === 1) {
-                statutInvit = "🟡 Sur invitation";
-              } else if (guild.status === 2) {
-                statutInvit = "🔴 Fermé";
-              } else if (guild.status === 3) {
-                statutInvit = "🟢 Ouvert";
-              }
-              embed.addFields({
-                name: `Guilde: ${guild.name}`,
-                value: `Richesse: ${guild.totalWealth} ${emoji(
-                  emo.power
-                )}\nMembres: ${guild.membersCount}/${
-                  guild.maxMembers
-                }👤\nEmpereur: <@${guild.emperor}>👑\nStatut: ${statutInvit}`,
-                inline: false,
-              });
+            const guild = guildData[i];
+            let statutInvit = "Inconnu";
+            if (guild.status === 1) {
+              statutInvit = "🟡 Sur invitation";
+            } else if (guild.status === 2) {
+              statutInvit = "🔴 Fermé";
+            } else if (guild.status === 3) {
+              statutInvit = "🟢 Ouvert";
+            }
+
+            embed.addFields({
+              name: `Guilde: ${guild.name}`,
+              value: `Richesse: **${guild.totalWealth}** fragments\nStatut: ${statutInvit}\n- 👤 Membres: ${guild.membersCount}/${guild.maxMembers}\n- 👑 Empereur: <@${guild.emperor}>`,
+              inline: false,
             });
           }
+
           return embed;
         };
         const totalPages = Math.ceil(guildData.length / 5);
@@ -535,11 +532,12 @@ module.exports = {
             .setCustomId("prev_page")
             .setLabel("◀️ Précédent")
             .setStyle(ButtonStyle.Secondary)
-            .setDisabled(true),
+            .setDisabled(currentPage === 0),
           new ButtonBuilder()
             .setCustomId("next_page")
             .setLabel("Suivant ▶️")
             .setStyle(ButtonStyle.Secondary)
+            .setDisabled(currentPage === totalPages - 1)
         );
         const message = await interaction.reply({
           embeds: [createEmbed(0)],
@@ -570,8 +568,8 @@ module.exports = {
             currentPage = Math.min(currentPage + 1, totalPages - 1);
           }
 
-          row.components[0].setDisabled(currentPage === 0);
-          row.components[1].setDisabled(currentPage === totalPages - 1);
+          /*listRow.components[0].setDisabled(currentPage === 0);
+          listRow.components[1].setDisabled(currentPage === totalPages - 1);*/
 
           await i.update({
             embeds: [createEmbed(currentPage)],
@@ -580,7 +578,9 @@ module.exports = {
         });
 
         collector.on("end", (collected, reason) => {
-          row.components.forEach((component) => component.setDisabled(true));
+          listRow.components.forEach((component) =>
+            component.setDisabled(true)
+          );
           message.edit({ components: [listRow] });
         });
 
