@@ -483,7 +483,8 @@ module.exports = {
               (acc, member) => acc + member.power,
               0
             );
-            const totalWealth = totalPower + guild.banque;
+            let totalWealth = totalPower + guild.banque;
+            totalWealth = totalWealth.toLocaleString("fr-FR");
 
             return {
               id: guild.id,
@@ -518,7 +519,7 @@ module.exports = {
 
             embed.addFields({
               name: `Guilde: ${guild.name}`,
-              value: `Richesse: **${guild.totalWealth}** fragments\nStatut: ${statutInvit}\n- 👤 Membres: ${guild.membersCount}/${guild.maxMembers}\n- 👑 Empereur: <@${guild.emperor}>`,
+              value: `__Richesse:__ **${guild.totalWealth}** fragments\n__Statut:__ ${statutInvit}\n- 👤 Membres: ${guild.membersCount}/${guild.maxMembers}\n- 👑 Empereur: <@${guild.emperor}>\n-----------`,
               inline: false,
             });
           }
