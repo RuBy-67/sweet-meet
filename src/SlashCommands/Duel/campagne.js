@@ -319,7 +319,7 @@ module.exports = {
                 commandNameBoss,
                 cooldownDurationBoss
               );
-              if (cooldownInfosBoss) {
+              if (cooldownInfosBoss.remainingTime > 0) {
                 const remainingTime =
                   cooldownInfosBoss.remainingTime.toFixed(1);
                 const timestamp = Math.floor(
@@ -339,7 +339,7 @@ module.exports = {
                 commandNameDifficulty,
                 cooldownDurationDifficulty
               );
-              if (cooldownInfosDifficulty) {
+              if (cooldownInfosDifficulty.remainingTime > 0) {
                 const remainingTime =
                   cooldownInfosDifficulty.remainingTime.toFixed(1);
                 const timestamp = Math.floor(
@@ -361,7 +361,7 @@ module.exports = {
                 commandNameTrain,
                 cooldownDurationTrain
               );
-              if (cooldownInfosTrain) {
+              if (cooldownInfosTrain.remainingTime > 0) {
                 const remainingTime =
                   cooldownInfosTrain.remainingTime.toFixed(1);
                 const timestamp = Math.floor(
@@ -415,9 +415,9 @@ module.exports = {
               );
 
               console.log(
-                "before on" + cooldownInfosTrain2,
-                cooldownInfosDifficulty2,
-                cooldownInfosBoss2
+                "after on" + cooldownInfosTrain2.remainingTime,
+                cooldownInfosDifficulty2.remainingTime,
+                cooldownInfosBoss2.remainingTime
               );
 
               // Logique pour lancer le duel
