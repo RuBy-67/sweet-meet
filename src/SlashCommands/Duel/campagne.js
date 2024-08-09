@@ -277,6 +277,12 @@ module.exports = {
             text: `Demandé(e) par ${interaction.user.tag}`,
             iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
           });
+        const isAnyCooldownActive =
+          cooldownInfosBoss.remainingTime > 0 ||
+          cooldownInfosDifficulty.remainingTime > 0 ||
+          cooldownInfosTrain.remainingTime > 0;
+
+        const verify = !isAnyCooldownActive;
 
         // Créer les boutons d'action
         const actionRow = new ActionRowBuilder().addComponents(
@@ -284,16 +290,12 @@ module.exports = {
             .setCustomId(`start_duel_${interaction.id}`)
             .setLabel("Lancer le duel")
             .setStyle(ButtonStyle.Primary)
-            .setDisabled(
-              cooldownInfosBoss || cooldownInfosDifficulty || cooldownInfosTrain
-            ),
+            .setDisabled(verify),
           new ButtonBuilder()
             .setCustomId(`cancel_duel_${interaction.id}`)
             .setLabel("Annuler le duel")
             .setStyle(ButtonStyle.Secondary)
-            .setDisabled(
-              cooldownInfosBoss || cooldownInfosDifficulty || cooldownInfosTrain
-            )
+            .setDisabled(verify)
         );
 
         // Répondre avec l'embed et les boutons
