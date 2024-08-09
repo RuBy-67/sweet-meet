@@ -203,22 +203,23 @@ module.exports = {
           cooldownDurationTrain
         );
         let stringCooldown = "";
+        const nomBoss = bossInfo.nom.split(",")[0].trim();
         if (cooldownInfosBoss.remainingTime > 0) {
           const bossTimestamp = getDiscordTimestamp(
             cooldownInfosBoss.remainingTime
           );
-          stringCooldown += `> **Boss:** 💤 Fin:, ${bossTimestamp}\n`;
+          stringCooldown += `**${nomBoss} : ** 💤\n- Fin ${bossTimestamp}\n`;
         } else {
-          stringCooldown += `> **Boss:** ✅\n`;
+          stringCooldown += `> **${nomBoss} : **  ✅\n`;
         }
 
         if (cooldownInfosTrain.remainingTime > 0) {
           const trainTimestamp = getDiscordTimestamp(
             cooldownInfosTrain.remainingTime
           );
-          stringCooldown += `> **${interaction.user.username}: ** 💤 Fin: ${trainTimestamp}\n`;
+          stringCooldown += `**${interaction.user.username} : ** 💤\n- Fin ${trainTimestamp}\n`;
         } else {
-          stringCooldown += `> **${interaction.user.username}: ** ✅\n`;
+          stringCooldown += `> **${interaction.user.username} : ** ✅\n`;
         }
         // Créer l'embed pour le duel
         const embed = new EmbedBuilder()
