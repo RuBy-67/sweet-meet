@@ -263,7 +263,6 @@ module.exports = {
           });
         const isAnyCooldownActive =
           cooldownInfosBoss.remainingTime > 0 ||
-          cooldownInfosDifficulty.remainingTime > 0 ||
           cooldownInfosTrain.remainingTime > 0;
 
         const verify = isAnyCooldownActive;
