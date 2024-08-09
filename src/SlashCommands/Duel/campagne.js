@@ -226,7 +226,7 @@ module.exports = {
           .setTitle(`Entraînement avec ${bossInfo.nom}`)
           .setThumbnail(bossInfo.image)
           .setDescription(
-            `*${bossInfo.lore}*\n\n${stringCooldown}\n***Carte du boss 🃏***`
+            `${bossInfo.lore}\n\n${stringCooldown}\n***Carte du boss 🃏***`
           )
           .addFields(
             { name: "Nom du Boss", value: bossInfo.nom, inline: true },

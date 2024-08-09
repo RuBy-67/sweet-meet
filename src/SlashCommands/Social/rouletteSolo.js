@@ -146,7 +146,7 @@ module.exports = {
         await db.updatePower(userId, powerGain);
         const successEmbed = new EmbedBuilder()
           .setTitle("Roulette Russe - Victoire")
-          .setColor(color)
+          .setColor(colors)
           .setDescription(
             `Vous avez survécu à ${shots} coups et gagné ${powerGain} ${emoji(
               emo.power
