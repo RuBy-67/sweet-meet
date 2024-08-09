@@ -282,7 +282,7 @@ module.exports = {
           cooldownInfosDifficulty.remainingTime > 0 ||
           cooldownInfosTrain.remainingTime > 0;
 
-        const verify = !isAnyCooldownActive;
+        const verify = isAnyCooldownActive;
 
         // Créer les boutons d'action
         const actionRow = new ActionRowBuilder().addComponents(
