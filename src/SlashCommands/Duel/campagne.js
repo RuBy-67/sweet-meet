@@ -200,12 +200,12 @@ module.exports = {
           cooldownDurationBoss
         );
         const cooldownInfosDifficulty = await cooldown.isOnCooldown(
-          i.user.id,
+          interaction.user.id,
           commandNameDifficulty,
           cooldownDurationDifficulty
         );
         const cooldownInfosTrain = await cooldown.isOnCooldown(
-          i.user.id,
+          interaction.user.id,
           commandNameTrain,
           cooldownDurationTrain
         );
