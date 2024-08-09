@@ -179,12 +179,70 @@ module.exports = {
         const sante = Math.round(bossInfo.sante * factor);
         const recompenseV = Math.round(8000 * rewardMultiplierVictory);
         const recompenseD = Math.round(8000 * rewardMultiplierDefeat);
+        const cooldownDurationTrain =
+          (params.cooldownEntrainement * difficulty + 350) * 1000;
+        const cooldownDurationDifficulty = 3600 * 1000; // 1 heure en secondes
+        const cooldownDurationBoss = 172800 * 1000; // 2 jours en secondes
 
+        const commandNameDifficulty = `entrainement_${difficulty}`;
+        const commandNameBoss = `entrainement_${bossInfo.nom}_${difficulty}`;
+        const commandNameTrain = `entrainement`;
+        const getDiscordTimestamp = (secondsRemaining) => {
+          const timestamp = Math.floor(
+            (Date.now() + secondsRemaining * 1000) / 1000
+          );
+          return `<t:${timestamp}:R>`;
+        };
+
+        const cooldownInfosBoss = await cooldown.isOnCooldown(
+          interaction.user.id,
+          commandNameBoss,
+          cooldownDurationBoss
+        );
+        const cooldownInfosDifficulty = await cooldown.isOnCooldown(
+          i.user.id,
+          commandNameDifficulty,
+          cooldownDurationDifficulty
+        );
+        const cooldownInfosTrain = await cooldown.isOnCooldown(
+          i.user.id,
+          commandNameTrain,
+          cooldownDurationTrain
+        );
+        let stringCooldown = "";
+        if (cooldownInfosBoss.remainingTime > 0) {
+          const bossTimestamp = getDiscordTimestamp(
+            cooldownInfosBoss.remainingTime
+          );
+          stringCooldown += `Boss: ❌ En cooldown, ${bossTimestamp}\n`;
+        } else {
+          stringCooldown += `Boss: ✅\n`;
+        }
+
+        if (cooldownInfosDifficulty.remainingTime > 0) {
+          const difficultyTimestamp = getDiscordTimestamp(
+            cooldownInfosDifficulty.remainingTime
+          );
+          stringCooldown += `Difficulté: ❌ En cooldown, ${difficultyTimestamp}\n`;
+        } else {
+          stringCooldown += `Difficulté: ✅\n`;
+        }
+
+        if (cooldownInfosTrain.remainingTime > 0) {
+          const trainTimestamp = getDiscordTimestamp(
+            cooldownInfosTrain.remainingTime
+          );
+          stringCooldown += `Entraînement: ❌ En cooldown, ${trainTimestamp}\n`;
+        } else {
+          stringCooldown += `Entraînement: ✅\n`;
+        }
         // Créer l'embed pour le duel
         const embed = new EmbedBuilder()
           .setTitle(`Entraînement avec ${bossInfo.nom}`)
           .setThumbnail(bossInfo.image)
-          .setDescription(`*${bossInfo.lore}*\n\n***Carte du boss 🃏***`)
+          .setDescription(
+            `*${bossInfo.lore}*\n\n${stringCooldown}\n***Carte du boss 🃏***`
+          )
           .addFields(
             { name: "Nom du Boss", value: bossInfo.nom, inline: true },
             {
@@ -225,11 +283,17 @@ module.exports = {
           new ButtonBuilder()
             .setCustomId(`start_duel_${interaction.id}`)
             .setLabel("Lancer le duel")
-            .setStyle(ButtonStyle.Primary),
+            .setStyle(ButtonStyle.Primary)
+            .setDisabled(
+              cooldownInfosBoss || cooldownInfosDifficulty || cooldownInfosTrain
+            ),
           new ButtonBuilder()
             .setCustomId(`cancel_duel_${interaction.id}`)
             .setLabel("Annuler le duel")
             .setStyle(ButtonStyle.Secondary)
+            .setDisabled(
+              cooldownInfosBoss || cooldownInfosDifficulty || cooldownInfosTrain
+            )
         );
 
         // Répondre avec l'embed et les boutons
@@ -289,7 +353,7 @@ module.exports = {
                   components: [],
                 });
               } else if (
-                stats.attaque >= 500 &&
+                stats.attaque >= 560 &&
                 (difficulty == 0 || difficulty == 1 || difficulty == 2)
               ) {
                 await dbManager.updatePower(i.user.id, -200);
@@ -302,21 +366,7 @@ module.exports = {
                 });
               }
 
-              const cooldownDurationTrain =
-                (params.cooldownEntrainement * difficulty + 350) * 1000;
-              const cooldownDurationDifficulty = 3600 * 1000; // 1 heure en secondes
-              const cooldownDurationBoss = 172800 * 1000; // 2 jours en secondes
-
-              const commandNameDifficulty = `entrainement_${difficulty}`;
-              const commandNameBoss = `entrainement_${bossInfo.nom}_${difficulty}`;
-              const commandNameTrain = `entrainement`;
-
-              // Vérifiez d'abord le cooldown spécifique au boss
-              const cooldownInfosBoss = await cooldown.isOnCooldown(
-                interaction.user.id,
-                commandNameBoss,
-                cooldownDurationBoss
-              );
+              //reverification des cooldowns
 
               if (cooldownInfosBoss.remainingTime > 0) {
                 const remainingTime =
@@ -324,7 +374,6 @@ module.exports = {
                 const timestamp = Math.floor(
                   (Date.now() + remainingTime * 1000) / 1000
                 );
-
                 await i.reply({
                   content: `Vous êtes en cooldown pour le boss **${bossInfo.nom}** en difficulté **${difficultyString}**, laissez un temps de repos 💤 au boss.\n\n> Veuillez réessayer <t:${timestamp}:R>`,
                   ephemeral: true,
@@ -333,11 +382,6 @@ module.exports = {
               }
 
               // Vérifiez ensuite le cooldown spécifique à la difficulté
-              const cooldownInfosDifficulty = await cooldown.isOnCooldown(
-                i.user.id,
-                commandNameDifficulty,
-                cooldownDurationDifficulty
-              );
 
               if (cooldownInfosDifficulty.remainingTime > 0) {
                 const remainingTime =
@@ -346,18 +390,13 @@ module.exports = {
                   (Date.now() + remainingTime * 1000) / 1000
                 );
                 await i.reply({
-                  content: `Vous êtes en cooldown pour la difficulté: **${difficultyString}**\n> Veuillez réessayer dans <t:${timestamp}:R>`,
+                  content: `Vous êtes en cooldown pour la difficulté: **${difficultyString}**\n> Veuillez réessayer <t:${timestamp}:R>`,
                   ephemeral: true,
                 });
                 return;
               }
 
               // Vérifiez enfin le cooldown général de l'entraînement
-              const cooldownInfosTrain = await cooldown.isOnCooldown(
-                i.user.id,
-                commandNameTrain,
-                cooldownDurationTrain
-              );
 
               if (cooldownInfosTrain.remainingTime > 0) {
                 const remainingTime =
@@ -369,6 +408,7 @@ module.exports = {
                   content: `Vous êtes en cooldown pour la commande d’entraînement, laissez un temps de repos 💤 à votre personnage\n\n> Veuillez réessayer <t:${timestamp}:R>`,
                   ephemeral: true,
                 });
+                return;
               }
 
               // Si aucun cooldown n'est actif, configurez les nouveaux cooldowns
