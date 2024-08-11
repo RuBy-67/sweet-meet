@@ -46,7 +46,7 @@ process.on("unhandledRejection", (reason, promise) => {
   );
 });
 
-client.login(botToken3Test).then(() => {
+client.login(botToken).then(() => {
   console.log(
     ` Successfully logged in as: ${client.user.username}#${client.user.discriminator} `
   );
