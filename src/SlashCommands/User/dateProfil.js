@@ -11,7 +11,7 @@ const dateManager = new Dating();
 
 module.exports = {
   name: "dateprofil",
-  description: "créer un profil de date",
+  description: "dateprofil",
   options: null,
   run: async (client, interaction, args) => {
     if (!config.maintenance) {
