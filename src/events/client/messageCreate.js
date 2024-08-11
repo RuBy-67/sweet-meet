@@ -4,6 +4,7 @@ const db = new DatabaseManager();
 const userLastMessage = new Map();
 const config = require("../../jsons/config.json");
 const guild = require("../../SlashCommands/guild/guild");
+const param = require("../../jsons/param.json");
 
 module.exports = {
   name: Events.MessageCreate,
@@ -57,8 +58,13 @@ module.exports = {
       const stats = await db.getStats(userId);
       if (stats.guildId != null) {
         // à verifier si c'est pas trop
-        console.log("powerIncrement", powerIncrement * 2);
-        await db.updateGuildXp(stats.guildId, powerIncrement * 2);
+
+        const GuildStat = await db.getGuildById(stats.guildId);
+
+        if (GuildStat[0].xp < param.xp[GuildStat[0].level]) {
+          await db.updateGuildXp(stats.guildId, powerIncrement * 2);
+        }
+
         await db.addGuildBank(stats.guildId, powerIncrement);
       }
     } catch (error) {

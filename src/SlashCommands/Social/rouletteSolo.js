@@ -10,6 +10,8 @@ const dbManager = require("../../class/dbManager");
 const db = new dbManager();
 const param = require("../../jsons/param.json");
 const config = require("../../jsons/config.json");
+const Cooldown = require("../../class/cooldown");
+const cooldown = new Cooldown();
 
 module.exports = {
   name: "roulette",
@@ -35,6 +37,7 @@ module.exports = {
     }
     const commandName = "roulette";
     const cooldownDuration = param.cooldownroulette;
+    const cooldownMessage = `Vous avez déjà joué à la roulette russe. Vous êtes suicidaire ou quoi ?`;
     const cooldownInfo = await cooldown.handleCooldown(
       interaction,
       commandName,
@@ -139,11 +142,11 @@ module.exports = {
       if (survived) {
         const multiplier = [1.2, 1.9, 3, 5, 10][shots - 1];
         const powerGain = Math.floor(bet * multiplier);
-        console.log(powerGain);
+
         await db.updatePower(userId, powerGain);
         const successEmbed = new EmbedBuilder()
           .setTitle("Roulette Russe - Victoire")
-          .setColor(color)
+          .setColor(colors)
           .setDescription(
             `Vous avez survécu à ${shots} coups et gagné ${powerGain} ${emoji(
               emo.power

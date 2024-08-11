@@ -157,11 +157,13 @@ module.exports = {
           emo.power
         )}`,
         ephemeral: true,
+        fetchReply: true,
       });
     } else if (type === "materiel") {
       interaction.reply({
         content: "Veuillez choisir le matériel à donner.",
         ephemeral: true,
+        fetchReply: true,
         components: await componentMaterial(),
       });
       collector.on("collect", async (i) => {
@@ -171,10 +173,11 @@ module.exports = {
         if (i.customId === "material_select") {
           await dbManager.addMaterialToUser(utilisateur.id, selectedMaterialId);
           const material = await dbManager.materiauById(selectedMaterialId);
-          console.log(material);
+
           await i.update({
             content: `Vous avez donné **${material[0].nom} - (lvl1)** à ${utilisateur}.`,
             ephemeral: true,
+            fetchReply: true,
           });
         }
       });
@@ -183,6 +186,7 @@ module.exports = {
         content: "Veuillez choisir le badge à donner (ou à reprendre).",
         components: await componentBadge(),
         ephemeral: true,
+        fetchReply: true,
       });
       collector.on("collect", async (i) => {
         const selectedMaterials = i.values;
@@ -206,8 +210,7 @@ module.exports = {
           const selectedMaterials = i.values;
           const selectedMaterialId = selectedMaterials[0];
           const badge = await dbManager.getBadgeById(selectedMaterialId);
-          console.log(badge);
-          console.log(badge.length);
+
           if (badge.length === 0) {
             await i.update({
               content: `Le badge n'appartient pas à quelqu'un.`,
@@ -216,7 +219,7 @@ module.exports = {
             return;
           } else {
             await dbManager.removeBadgeById(selectedMaterialId);
-            console.log("selected", selectedMaterialId);
+
             await i.update({
               content: `Vous avez retiré le badge à un user.`,
               ephemeral: true,
@@ -228,6 +231,7 @@ module.exports = {
       interaction.reply({
         content: "Type de donnée non reconnu.",
         ephemeral: true,
+        fetchReply: true,
       });
     }
 

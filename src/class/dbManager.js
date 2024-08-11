@@ -100,6 +100,12 @@ class DatabaseManager {
       type,
     ]);
   }
+  async getMIDMateriauxByIdLVL5(idMateriau, userId) {
+    return this.queryMain(SQL_QUERIES.GET_MID_MATERIAUX_BY_ID_LVL5, [
+      idMateriau,
+      userId,
+    ]);
+  }
 
   async createInvitation(userId, guildId, type) {
     await this.queryMain(SQL_QUERIES.DELETE_INVITATION, [
@@ -231,7 +237,7 @@ class DatabaseManager {
 
     const userIsOwner = await this.getGuildByOwnerId(userId);
     if (userIsOwner.length > 0) {
-      return "Un empreur ne peut pas quitter sa guilde";
+      return "Un Empereur ne peut pas quitter sa guilde";
     }
     const guildInfo = await this.queryMain(SQL_QUERIES.GET_GUILD_INFO, [
       userGuildResult,
@@ -544,6 +550,7 @@ class DatabaseManager {
     await this.queryMain(SQL_QUERIES.REMOVE_GUILD_ID_FROM_USER, [
       guildId[0].id,
     ]);
+    await this.queryMain(SQL_QUERIES.DELETE_CLASS_BY_GUILD_ID, [guildId[0].id]);
   }
   async getRolesFromDB() {
     return this.queryMain(SQL_QUERIES.GET_ROLES);
@@ -593,7 +600,6 @@ class DatabaseManager {
     await this.queryMain(SQL_QUERIES.INSERT_BADGE_USER, [userId, badgeId]);
   }
   async removeBadgeById(badgeId) {
-    console.log("selected", badgeId);
     await this.queryMain(SQL_QUERIES.DELETE_BADGE_USER, [badgeId]);
   }
 
@@ -686,15 +692,6 @@ class DatabaseManager {
     powerBoost,
     duration
   ) {
-    console.log(userId);
-    console.log(potionName);
-    console.log(attaqueBoost);
-    console.log(defenseBoost);
-    console.log(santeBoost);
-    console.log(type);
-    console.log(powerBoost);
-    console.log(duration);
-
     return this.queryMain(SQL_QUERIES.INSERT_POTION_DATA, [
       userId,
       potionName,

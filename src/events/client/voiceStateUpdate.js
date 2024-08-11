@@ -41,9 +41,16 @@ async function handleVoiceReward(userId, totalTime, channel) {
   if (powerIncrement > 0) {
     try {
       await db.updatePower(userId, powerIncrement);
-      if ((stats.guildId = !null)) {
+      const stats = await db.getStats(userId);
+      if (stats.guildId != null) {
         // à verifier si c'est pas trop
-        await db.updateGuildXp(stats.guildId, powerIncrement * 2);
+
+        const GuildStat = await db.getGuildById(stats.guildId);
+
+        if (GuildStat[0].xp < param.xp[GuildStat[0].level]) {
+          await db.updateGuildXp(stats.guildId, powerIncrement * 2);
+        }
+
         await db.addGuildBank(stats.guildId, powerIncrement);
       }
     } catch (error) {

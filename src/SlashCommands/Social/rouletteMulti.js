@@ -37,10 +37,12 @@ module.exports = {
     }
     const commandName = "roulette2";
     const cooldownDuration = param.cooldownroulette;
+    const cooldownMessage = `Vous avez déjà joué à la roulette russe, évitons de tuer tout le monde !`;
     const cooldownInfo = await cooldown.handleCooldown(
       interaction,
       commandName,
-      cooldownDuration
+      cooldownDuration,
+      cooldownMessage
     );
     if (cooldownInfo) return;
     function emoji(id) {

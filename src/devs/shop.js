@@ -226,10 +226,12 @@ async function daysBox(client, interaction, power, materialId) {
   power = Math.floor(power);
   const commandName = "daylibox";
   const cooldownDuration = param.cooldownBox;
+  const messageCd = "Vous avez déjà acheté une DaysBox aujourd'hui";
   const cooldownInfo = await cooldown.handleCooldown(
     interaction,
     commandName,
-    cooldownDuration
+    cooldownDuration,
+    messageCd
   );
   if (cooldownInfo) return;
   function emoji(id) {

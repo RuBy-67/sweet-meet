@@ -43,11 +43,13 @@ module.exports = {
       );
     }
     const commandName = "marriage";
-    const cooldownDuration = param.cooldownMariage; // en secondes
+    const cooldownDuration = param.cooldownMariage;
+    const cooldownMessage = `Vous avez déjà demandé en mariage quelqu'un. Veuillez réessayer plus tard`;
     const cooldownInfo = await cooldown.handleCooldown(
       interaction,
       commandName,
-      cooldownDuration
+      cooldownDuration,
+      cooldownMessage
     );
     if (cooldownInfo) return;
 
@@ -138,39 +140,39 @@ module.exports = {
         const inGuild = await dbManager.getStats(targetId);
         const inGuild2 = await dbManager.getStats(authorId);
 
-        // Vérification si les utilisateurs sont déjà dans une guilde
-        if (inGuild2.guildId !== null && guild.id !== inGuild2.guildId) {
-          return interaction.editReply({
-            content: `Mariage Impossible, l'un est empereur d'une guilde différente de la vôtre.`,
-            embeds: [],
-            components: [],
-          });
-        } else if (inGuild.guildId !== null && guild2.id !== inGuild.guildId) {
-          return interaction.editReply({
-            content: `Mariage Impossible, l'un est empereur d'une guilde différente de la vôtre.`,
-            embeds: [],
-            components: [],
-          });
-        }
+        const isTargetEmperor = guild.length > 0;
+        const isAuthorEmperor = guild2.length > 0;
 
-        // Vérification si les deux utilisateurs sont empereurs de guilde
-        if (guild.length > 0 && guild2.length > 0) {
+        if (isTargetEmperor && isAuthorEmperor) {
+          // Les deux utilisateurs sont Empereurs, le mariage est impossible
           return interaction.editReply({
-            content: `Mariage Impossible, les deux utilisateurs sont tous deux empereurs de guilde.`,
+            content: `Mariage Impossible, les deux utilisateurs sont Empereurs.`,
             embeds: [],
             components: [],
           });
         }
+        if (isTargetEmperor || isAuthorEmperor) {
+          if (
+            inGuild.guildId !== null &&
+            inGuild2.guildId !== null &&
+            inGuild.guildId !== inGuild2.guildId
+          ) {
+            // Les utilisateurs doivent être dans la même guilde si l'un d'eux est Empereur
+            return interaction.editReply({
+              content: `Mariage Impossible, l'un des utilisateurs est Empereur d'une guilde différente à l'époux / épouse.`,
+              embeds: [],
+              components: [],
+            });
+          }
 
-        // Mise à jour des guildes et des classes d'utilisateurs
-        if (guild.length > 0) {
-          await dbManager.addClassToUser(authorId, guild[0].id, 1);
-          await dbManager.updateUserGuild(guild[0].id, targetId);
-        } else if (guild2.length > 0) {
-          await dbManager.addClassToUser(targetId, guild2[0].id, 1);
-          await dbManager.updateUserGuild(guild2[0].id, authorId);
+          if (isTargetEmperor) {
+            await dbManager.addClassToUser(authorId, guild[0].id, 1);
+            await dbManager.updateUserGuild(guild[0].id, authorId);
+          } else if (isAuthorEmperor) {
+            await dbManager.addClassToUser(targetId, guild2[0].id, 1);
+            await dbManager.updateUserGuild(guild2[0].id, targetId);
+          }
         }
-
         // Mise à jour des informations de mariage et des badges
         await dbManager.setMarriage(authorId, targetId);
         await dbManager.updateBadge(targetId, "love");

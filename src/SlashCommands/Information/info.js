@@ -102,7 +102,7 @@ module.exports = {
     },
   ],
   run: async (client, interaction, args) => {
-    if (config.maintenance) {
+    /*if (config.maintenance) {
       const embed = new EmbedBuilder()
         .setTitle("⚒️ Maintenance ⚒️")
         .setColor(color.error)
@@ -111,7 +111,7 @@ module.exports = {
         )
         .setColor(color.error);
       return interaction.reply({ embeds: [embed] });
-    }
+    }*/
     const colors = await dbManager.getColor(interaction.user.id);
     const userId = interaction.user.id;
 
@@ -229,14 +229,15 @@ module.exports = {
         }
         let EmbedColor = colors;
         let guildTag = "";
-        if (statsResult.guildId != null) {
-          const [guildInfo] = await dbManager.getGuildById(statsResult.guildId);
 
-          if (guildInfo.empreur === targetUser.id) {
-            guildTag = `${emoji(emo.King)} Empereur de la guilde ${
-              guildInfo.nom
-            } **[${guildInfo.tag}]**`;
-            EmbedColor = guildInfo.bannière;
+        if (statsResult.guildId != null) {
+          const guildInfo = await dbManager.getGuildById(statsResult.guildId);
+
+          if (guildInfo[0].empreur == targetUser.id) {
+            guildTag = `${emoji(emo.King)} Empereur de **${
+              guildInfo[0].nom
+            }** - ***[${guildInfo[0].tag}]***`;
+            EmbedColor = guildInfo[0].bannière;
           } else {
             const guildInfoClassId = await dbManager.getUserClass(
               targetUser.id,
@@ -249,8 +250,8 @@ module.exports = {
 
             guildTag = `${emoji(emo[`class${guildInfoClassId[0].idClasse}`])} ${
               guildInfoClassName[0].Nom
-            } de la guilde ${guildInfo.nom} **[${guildInfo.tag}]**`;
-            EmbedColor = guildInfo.bannière;
+            } de **${guildInfo[0].nom}** - ***[${guildInfo[0].tag}]***`;
+            EmbedColor = guildInfo[0].bannière;
           }
         } else {
           guildTag = "Aucune guilde associée";
@@ -429,33 +430,6 @@ module.exports = {
           .setColor(colors)
           .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
           .setDescription("description")
-          .addFields(
-            {
-              name: "📖 - Histoire",
-              value:
-                "Les origines de Valoria remontent à une époque oubliée, où les dieux marchaient parmi les mortels et où la magie régnait en maître. Les premières civilisations ont émergé des profondeurs de l'histoire, construisant des cités majestueuses et érigeant des temples dédiés aux puissances divines. Mais avec le pouvoir est venu le conflit, et les guerres ont ravagé les terres de Valoria, laissant derrière elles des ruines et des cicatrices.",
-            },
-            {
-              name: "🧙‍♂️ - Magie",
-              value:
-                "La magie est le tissu même de Valoria, imprégnant chaque pierre, chaque arbre et chaque souffle de vent. Les arcanes sont étudiés et maîtrisés par ceux qui cherchent le savoir et la puissance. Des sorciers solitaires aux ordres mystiques, les praticiens de la magie utilisent leurs dons pour façonner le monde selon leur volonté, invoquant des tempêtes et des étoiles, guérissant les malades et invoquant des démons.",
-            },
-            {
-              name: "⛰️ - Géographie",
-              value:
-                "Les terres de Valoria sont aussi vastes que variées, allant des sommets enneigés des montagnes de l'Est aux jungles luxuriantes de l'Ouest. Au nord, les déserts brûlants abritent des tribus nomades et des ruines anciennes, tandis qu'au sud, les vastes étendues des plaines fertiles sont le berceau de villes prospères et de cultures florissantes. Les océans entourent Valoria, offrant des voies commerciales et des mystères insondables.",
-            },
-            {
-              name: "📕 - Culture",
-              value:
-                "La culture de Valoria est aussi diverse que ses habitants. Des festivals colorés célèbrent les saisons et les traditions, tandis que les guildes d'artisans et de marchands prospèrent dans les rues animées des villes. Les légendes et les chansons sont transmises de génération en génération, immortalisant les exploits des héros et les chutes des tyrans. C'est dans ce kaléidoscope de cultures et de croyances que l'histoire de Valoria se déroule, tissée de fils de destinée et de choix.",
-            },
-            {
-              name: `${emoji(emo.power)} - Fragments de Protection`,
-              value:
-                "Ces fragments, représente l'énergie vitale et la force de défense des habitants du royaume, sont convoités par tous. Ils sont utilisés comme monnaie pour acquérir des biens, des services et des compétences. Les joueurs se lancent dans des duels acharnés pour obtenir ces précieux fragments et renforcer leur position dans le royaume.",
-            }
-          )
           .setFooter({
             text: `Demandé(e) par ${interaction.user.tag}`,
             iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
@@ -680,7 +654,7 @@ module.exports = {
           }
         }
         embedClassement.addFields({
-          name: "🏆 Top ",
+          name: `${emoji(emo.power)} - Top Players `,
           value: powerDescription,
           inline: true,
         });
@@ -700,9 +674,9 @@ module.exports = {
             }\n`;
           }
         }
-        embedClassement.addFields({ name: " ", value: " ", inline: true });
+
         embedClassement.addFields({
-          name: "👑 Top - Victoires",
+          name: "👑 - Victoires",
           value: winDescription,
           inline: true,
         });
@@ -719,9 +693,9 @@ module.exports = {
           )
           .join("\n");
         embedClassement.addFields({
-          name: "👑 - Top Guild",
+          name: `${emoji(emo.power)} - Guildes`,
           value: topGuildsDescription || "Aucune guilde disponible",
-          inline: false,
+          inline: true,
         });
 
         // Rank par Win Rate
@@ -739,9 +713,8 @@ module.exports = {
             ).toFixed(2)}%\n`;
           }
         }
-        embedClassement.addFields({ name: " ", value: " ", inline: true });
         embedClassement.addFields({
-          name: "👑 Top - Taux de victoire",
+          name: "👑 - Taux de victoire",
           value: rateDescription,
           inline: true,
         });
@@ -778,7 +751,7 @@ module.exports = {
           .addFields({
             name: "🏰 - Guilde Commande",
             value:
-              "__Pour les Admin de guilde:__\n- `/gestionguild help`\n**-----**\n__Pour les membres de guilde:__\n- `/guild join`,\n- `/guild leave`,\n- `/guild info`,\n- `/guild give [amount]`\n**-----**\n__Pour le Marchand:__\n- `/marchand sell`\n- `/marchand stock`\n- `/marchand fabrique`",
+              "__Pour les Admin de guilde:__\n- `/gestionguild help`\n**-----**\n__Pour les membres de guilde:__\n- `/guild join`,\n- `/guild leave`,\n- `/guild give [amount]`\n**-----**\n__Pour le Marchand / Alchimiste:__\n- `/alchimiste sell`\n- `/alchimiste stock`\n- `/alchimiste fabrique`",
           })
           .setFooter({
             text: `Demandé(e) par ${interaction.user.tag}`,
@@ -819,12 +792,12 @@ module.exports = {
             {
               name: `${emoji(emo.class3)} - Noble`,
               value:
-                "Pour être promus chevalier il faut posséder les rôles suivant :\n- <@&1246944929675087914>\n- <@&1246944923526234113>\n- <@&1246944911580991549>\n- <@&1216037978913378389>\n\n*Le Nobles à des droits et des devoirs envers la guilde. [A venir]*",
+                "Pour être promus Noble il faut posséder les rôles suivant :\n- <@&1246944929675087914>\n- <@&1246944923526234113>\n- <@&1246944911580991549>\n- <@&1216037978913378389>\n\n*Le Nobles à des droits et des devoirs envers la guilde. [A venir]*",
             },
             {
               name: `${emoji(emo.class4)} - Chevalier`,
               value:
-                "Pour être promus chevalier il faut posséder les rôles suivant :\n- <@&1247280292213948446>\n- <@&1246944929675087914>\n- <@&1246944923526234113>\n- <@&1246944911580991549>\n- <&@1216037978913378389>\n- <@&1216037978913378388>\n\n*Le Chevalier à des droits et des devoirs envers la guilde.[A venir]*",
+                "Pour être promus chevalier il faut posséder les rôles suivant :\n- <@&1247280292213948446>\n- <@&1246944929675087914>\n- <@&1246944923526234113>\n- <@&1246944911580991549>\n- <@&1216037978913378389>\n- <@&1216037978913378388>\n\n*Le Chevalier à des droits et des devoirs envers la guilde.[A venir]*",
             },
             {
               name: `${emoji(emo.class5)} - Paysan`,
@@ -879,7 +852,9 @@ module.exports = {
               "`/info guildes` - Informations sur les guildes\n" +
               "`/info roleguildes` - Informations sur les rôles de guilde\n" +
               "`/info entrainement` - Informations sur l'entraînement\n" +
-              "`/gestionguild help` - Aide pour la gestion de guilde\n",
+              "`/gestionguild help` - Aide pour la gestion de guilde\n" +
+              "`/guild info` - Informations sur la guilde\n" +
+              "`/guild list` - Liste des guildes\n",
           })
           .setFooter({
             text: `Demandé(e) par ${interaction.user.tag}`,

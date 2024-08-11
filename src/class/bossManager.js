@@ -49,13 +49,17 @@ class Boss extends DatabaseManager {
       defense = defense * 0.75;
       sante = sante * 0.75;
     } else if (difficulty === "3") {
-      attaque = attaque * 1.55;
-      defense = defense * 1.55;
-      sante = sante * 1.55;
+      attaque = attaque * 1.88;
+      defense = defense * 1.88;
+      sante = sante * 1.88;
     } else if (difficulty === "4") {
-      attaque = attaque * 2.5;
-      defense = defense * 2.5;
-      sante = sante * 2.22;
+      attaque = attaque * 2.88;
+      defense = defense * 2.88;
+      sante = sante * 2.97;
+    } else if (difficulty === "0") {
+      attaque = Math.round(attaque * 0.1);
+      defense = Math.round(defense * 0.12);
+      sante = Math.round(sante * 0.16);
     }
     let power = Math.round((attaque + defense + sante) * multiplicateur); // inconue du joueurs
     const playerScore = await this.getFightScore(
@@ -141,13 +145,12 @@ class Boss extends DatabaseManager {
 
       if (phase === "end") {
         console.log(winner);
-        if (winner) {
+        if (winner === "equal") {
+          phrases = dialog.bosses[bossId][phase]["tie"];
+        } else if (winner) {
           phrases = dialog.bosses[bossId][phase]["lose"];
         } else if (!winner) {
           phrases = dialog.bosses[bossId][phase]["win"];
-        } else {
-          console.log("egalité");
-          phrases = dialog.bosses[bossId][phase]["tie"];
         }
       } else {
         phrases = dialog.bosses[bossId][phase];
@@ -180,9 +183,15 @@ class Boss extends DatabaseManager {
           )}`
         )
         .setTitle(`⚔️  Duel contre ${bossName}`)
-        .setImage(bossInfo.image);
+        .setImage(bossInfo.image)
+        .addFields({
+          name: "Récompense:",
+          value: `__Victoire:__ ${recompenseV}${emoji(
+            emo.power
+          )}\n__Défaite:__ -${recompenseD}${emoji(emo.power)}`,
+        });
 
-      i.editReply({ embeds: [embed] });
+      i.editReply({ embeds: [embed], components: [] });
     }
 
     async function simulateDuel() {
@@ -221,28 +230,30 @@ class Boss extends DatabaseManager {
       updateEmbed(`**${bossName2}**: *${message}*`, endTimesStampString);
       await new Promise((resolve) => setTimeout(resolve, 60000));
       let stringDesc = "";
-      if (winner) {
-        await dbManager.updatePower(userId, recompenseV);
-        const restStat = Math.round(
-          (playerScore / (playerScore + bossScore) -
-            bossScore / (playerScore + bossScore)) *
-            100
-        );
-        stringDesc = `\n\nVous avez gagné contre **${bossName}** et avez reçu **${recompenseV}**  ${emoji(
-          emo.power
-        )}\nstat restante : **${restStat}%**`;
+      if (winner === "equal") {
+        stringDesc = `\n\nVous avez fait match nul contre **${bossName}** Rien n'a été distribué`;
       } else if (!winner) {
         await dbManager.updatePower(userId, -recompenseD);
-        const restStat = Math.round(
+        const rest = Math.round(
           (bossScore / (playerScore + bossScore) -
             playerScore / (playerScore + bossScore)) *
             100
         );
+        const restStat = Math.max(rest, 1);
         stringDesc = `\n\nVous avez perdu contre **${bossName}** et avez perdu **${recompenseD}**  ${emoji(
           emo.power
         )} stat restante boss : **${restStat}%**`;
       } else {
-        stringDesc = `\n\nVous avez fait match nul contre **${bossName}** Rien n'a été distribué`;
+        await dbManager.updatePower(userId, recompenseV);
+        const rest = Math.round(
+          (playerScore / (playerScore + bossScore) -
+            bossScore / (playerScore + bossScore)) *
+            100
+        );
+        const restStat = Math.max(rest, 1);
+        stringDesc = `\n\nVous avez gagné contre **${bossName}** et avez reçu **${recompenseV}**  ${emoji(
+          emo.power
+        )}\nstat restante : **${restStat}%**`;
       }
 
       const endEmbed = new EmbedBuilder()

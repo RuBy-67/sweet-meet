@@ -3,7 +3,7 @@
   "closeInterval": 14400,
   "cooldownDuel": "240",
   "cooldownMariage": "1000",
-  "cooldownEntrainement": "1800",
+  "cooldownEntrainement": "450",
   "cooldownBox": "86400",
   "cooldownSecret": "1200",
   "guildPrice": "50000",
@@ -23,11 +23,11 @@
   },
 
   "xp": {
-    "1": "150000",
-    "2": "305000",
-    "3": "503000",
-    "4": "1000001",
-    "5": "2000003"
+    "1": "200000",
+    "2": "405000",
+    "3": "650000",
+    "4": "1000012",
+    "5": "2000067"
   },
   "upgradePrice": {
     "1": "100000",

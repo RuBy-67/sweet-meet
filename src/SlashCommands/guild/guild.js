@@ -1,4 +1,11 @@
-const { EmbedBuilder } = require("discord.js");
+const {
+  EmbedBuilder,
+  StringSelectMenuBuilder,
+  StringSelectMenuOptionBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+} = require("discord.js");
 const DatabaseManager = require("../../class/dbManager");
 const dbManager = new DatabaseManager();
 const emo = require("../../jsons/emoji.json");
@@ -43,6 +50,11 @@ module.exports = {
     },
     {
       type: 1,
+      name: "list",
+      description: "Liste des guildes",
+    },
+    {
+      type: 1,
       name: "give",
       description: "Donner des fragments à sa guilde",
       options: [
@@ -83,7 +95,6 @@ module.exports = {
         if (guildName) {
           // Recherche de la guilde par son nom
           guildInfo = await dbManager.getGuildByName(guildName);
-          console.log(guildInfo);
 
           if (!guildInfo) {
             interaction.reply({
@@ -113,7 +124,8 @@ module.exports = {
         const reine = await dbManager.getGuildUserByRole(guildInfo.id, 1);
         let reineInfo = "";
         if (reine.length > 0) {
-          reineInfo = `<@${reine.id}>`;
+          //test
+          reineInfo = `<@${reine[0].idUser}>`;
         } else {
           reineInfo = "Aucune reine";
         }
@@ -121,7 +133,7 @@ module.exports = {
         const marchand = guildInfo.marchand;
         let descMarchand = "Pas de Marchand désigné";
         if (marchand != null) {
-          descMarchand = guildInfo.marchand;
+          descMarchand = `<@${guildInfo.marchand}>`;
         }
         // verification s'il y a un ou des ministres
         const ministres = await dbManager.getGuildUserByRole(guildInfo.id, 2);
@@ -146,6 +158,15 @@ module.exports = {
         } else if (guildInfo.statutInvit === 3) {
           statutInvit = "🟢 Ouvert";
         }
+        let invitationInWait = "";
+        const invitation = await dbManager.getGuildInvitations(guildInfo.id);
+        if (invitation.length === 1) {
+          invitationInWait = invitation.length + "demande";
+        } else if (invitation.length > 1) {
+          invitationInWait = invitation.length + "demandes";
+        } else {
+          invitationInWait = "Aucune demande en attente";
+        }
 
         let emoLevel = emoji(emo.level12);
         if (guildInfo.level === 3 || guildInfo.level === 4) {
@@ -153,21 +174,30 @@ module.exports = {
         } else if (guildInfo.level === 5) {
           emoLevel = emoji(emo.level5);
         }
+
+        let totalFlags = 0;
+        for (let i = 1; i <= guildInfo.level; i++) {
+          totalFlags += params.maxFlag[i.toString()];
+        }
+        let totalMaxFlags = 0;
+        for (const level in params.maxFlag) {
+          totalMaxFlags += params.maxFlag[level];
+        }
         const xpString =
           guildInfo.xp + "/" + parseInt(params.xp[guildInfo.level]);
         const colors = guildInfo.bannière;
-        console.log(colors);
+
         const embedInfo = new EmbedBuilder()
           .setTitle(`Infos de la guilde ${guildInfo.nom}`)
           .setColor(colors)
-          .setDescription("***" + guildInfo.description + "***")
+          .setDescription(guildInfo.description)
           .addFields(
             {
               name: `tag de guilde`,
               value: `[${guildInfo.tag}]`,
             },
             {
-              name: `${emoji(emo.King)} Empreur`,
+              name: `${emoji(emo.King)} Empereur`,
               value: `<@${guildInfo.empreur}>`,
               inline: true,
             },
@@ -194,6 +224,11 @@ module.exports = {
             {
               name: emoLevel + " Niveau",
               value: guildInfo.level.toString(),
+              inline: true,
+            },
+            {
+              name: "🚩 Nombre de Flag",
+              value: `${totalFlags} / ${totalMaxFlags}`,
               inline: true,
             },
             {
@@ -226,6 +261,12 @@ module.exports = {
                 " " +
                 emoji(emo.power),
               inline: true,
+            },
+            {
+              name: "📜 Demande en Attente",
+              value: invitationInWait,
+
+              inline: true,
             }
           );
 
@@ -242,7 +283,6 @@ module.exports = {
         }
         try {
           if (!tag) {
-            console.log("Pas de tag");
             // User n'a pas fournis de TAG
             const invitations = await dbManager.getUserInvitation(userId);
             if (invitations.length === 0) {
@@ -292,8 +332,6 @@ module.exports = {
               return interaction.reply({ embeds: [embed], ephemeral: true });
             }
           } else {
-            console.log("tag fournis");
-            console.log(tag);
             // User Fournis un tag
             const guild = await dbManager.getGuildByTag(tag);
             if (!guild) {
@@ -381,7 +419,8 @@ module.exports = {
 
       case "leave":
         const InGuild = await dbManager.getStats(userId);
-        if (InGuild.guildId > 0) {
+
+        if (InGuild.guildId == null) {
           return interaction.reply({
             content: "Vous n'êtes membre d'aucune guilde.",
             ephemeral: true,
@@ -435,6 +474,122 @@ module.exports = {
             ephemeral: true,
           });
         }
+      case "list":
+        const guilds = await dbManager.getAllGuilds();
+        const guildData = await Promise.all(
+          guilds.map(async (guild) => {
+            const getMembers = await dbManager.getGuildMembers(guild.id);
+            const totalPower = getMembers.reduce(
+              (acc, member) => acc + member.power,
+              0
+            );
+            let totalWealth = totalPower + guild.banque;
+            totalWealth = totalWealth.toLocaleString("fr-FR");
+
+            return {
+              id: guild.id,
+              tag: guild.tag,
+              name: guild.nom,
+              emperor: guild.empreur,
+              membersCount: getMembers.length,
+              maxMembers: params.maxJoueurLvl[guild.level],
+              totalWealth,
+              status: guild.statutInvit,
+            };
+          })
+        );
+        // Trier les guildes par richesse décroissante
+        guildData.sort((a, b) => a.totalWealth - b.totalWealth);
+        const colorEmbed = await dbManager.getColor(interaction.user.id);
+        const createEmbed = (page) => {
+          const embed = new EmbedBuilder()
+            .setTitle("Liste des Guildes")
+            .setColor(colorEmbed);
+          const startIndex = page * 5;
+          const endIndex = Math.min(startIndex + 5, guildData.length);
+          for (let i = startIndex; i < endIndex; i++) {
+            const guild = guildData[i];
+            let statutInvit = "Inconnu";
+            if (guild.status === 1) {
+              statutInvit = "🟡 Sur invitation";
+            } else if (guild.status === 2) {
+              statutInvit = "🔴 Fermé";
+            } else if (guild.status === 3) {
+              statutInvit = "🟢 Ouvert";
+            }
+
+            embed.addFields({
+              name: `${i + 1}. ${guild.name} [${guild.tag}]`,
+              value: `__Richesse:__ **${guild.totalWealth}** ${emoji(
+                emo.power
+              )}\n__Statut:__ ${statutInvit}\n- 👤 Membres: ${
+                guild.membersCount
+              }/${guild.maxMembers}\n- 👑 Empereur: <@${
+                guild.emperor
+              }>\n-----------`,
+              inline: false,
+            });
+          }
+
+          return embed;
+        };
+        const totalPages = Math.ceil(guildData.length / 5);
+        // Créer les boutons de navigation
+        let currentPage = 0;
+        const listRow = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId("prev_page")
+            .setLabel("◀️ Précédent")
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(currentPage === 0),
+          new ButtonBuilder()
+            .setCustomId("next_page")
+            .setLabel("Suivant ▶️")
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(currentPage === totalPages - 1)
+        );
+        const message = await interaction.reply({
+          embeds: [createEmbed(0)],
+          components: [listRow],
+          fetchReply: true,
+        });
+        // Créer un collector pour les interactions avec les boutons
+        const filter = (i) =>
+          i.customId === "prev_page" || i.customId === "next_page";
+        const collector = message.createMessageComponentCollector({
+          filter,
+          time: 60000,
+        });
+
+        collector.on("collect", async (i) => {
+          if (i.user.id !== interaction.user.id) {
+            return i.reply({
+              content: "Vous ne pouvez pas interagir avec ce message.",
+              ephemeral: true,
+            });
+          }
+
+          if (i.customId === "prev_page") {
+            currentPage = Math.max(currentPage - 1, 0);
+          } else if (i.customId === "next_page") {
+            currentPage = Math.min(currentPage + 1, totalPages - 1);
+          }
+
+          /*listRow.components[0].setDisabled(currentPage === 0);
+          listRow.components[1].setDisabled(currentPage === totalPages - 1);*/
+
+          await i.update({
+            embeds: [createEmbed(currentPage)],
+            components: [listRow],
+          });
+        });
+
+        collector.on("end", (collected, reason) => {
+          listRow.components.forEach((component) =>
+            component.setDisabled(true)
+          );
+          message.edit({ components: [listRow] });
+        });
 
       default:
         return interaction.reply({

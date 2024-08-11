@@ -176,6 +176,8 @@ WHERE u.discordId = ?`,
   UPDATE_POTION_ETAT: `UPDATE potion_user SET etat = ?, powerBoost=0 WHERE idPotion = ?`,
   DELETE_POTION: `DELETE FROM potion_user WHERE idPotion = ?`,
   GET_POTION_DATA_BY_ETAT: `SELECT * FROM potion_user WHERE idUser = ? AND etat = 0`,
+  GET_MID_MATERIAUX_BY_ID_LVL5: `SELECT * FROM materiau_user WHERE IdMateriau = ? AND lvl = 5 AND idUser = ?`,
+  DELETE_CLASS_BY_GUILD_ID: `DELETE FROM class_user WHERE idGuild = ?`,
 };
 
 module.exports = SQL_QUERIES;
