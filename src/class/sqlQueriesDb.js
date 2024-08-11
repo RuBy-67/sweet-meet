@@ -58,11 +58,7 @@ const SQL_QUERIES = {
     SELECT idUser 
     FROM badge_user 
     WHERE idBadge = ?`,
-  UPDATE_USER_POWER: `
-    UPDATE user 
-    SET power = ? 
-    WHERE discordId = ?`,
-  GENERATE_RANDOM_POWER: `
+  SELECT_MATERIAUX_BY_RARITY: `
     SELECT * 
     FROM materiau 
     WHERE rarete = ?`,
@@ -96,7 +92,6 @@ JOIN materiau m ON mu.IdMateriau = m.id`,
     JOIN materiau m ON mu.IdMateriau = m.id 
     WHERE mu.id = ?`,
   GET_USER_DATA_BO: `SELECT * FROM backup_user  WHERE discordId = ?`,
-  GET_USER_DATA: `SELECT * FROM user  WHERE discordId = ?`,
   INSERT_USER_DATA: `INSERT INTO user (discordId, power, winCounter, loseCounter) VALUES (?, ?, ?, ?)`,
   GET_MATERIAU_DATA: `SELECT * FROM backup_materiau_user WHERE idUser = ?`,
   INSERT_MATERIAU_DATA: `INSERT INTO materiau_user (idUser, idMateriau, lvl) VALUES (?, ?, ?)`,

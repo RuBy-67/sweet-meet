@@ -296,11 +296,9 @@ module.exports = {
             client.collectors[interaction.id].stop();
           }
 
-          // Créer un nouveau collector pour gérer les interactions des boutons
           const filter = (i) =>
             i.customId.startsWith(`start_duel_${interaction.id}`) ||
             i.customId.startsWith(`cancel_duel_${interaction.id}`);
-
           const collector = interaction.channel.createMessageComponentCollector(
             {
               filter,
@@ -324,65 +322,29 @@ module.exports = {
             }
 
             if (i.customId === `start_duel_${interaction.id}`) {
+              const powerCosts = [
+                { minAttack: 560, cost: 200, validDifficulties: [0, 1, 2] },
+                { minAttack: 100, cost: 100, validDifficulties: [0, 1] },
+              ];
               const stats = await player.getStatsById(interaction.user.id);
 
-              if (
-                stats.attaque >= 100 &&
-                (difficulty == 0 || difficulty == 1)
-              ) {
-                await dbManager.updatePower(i.user.id, -100);
+              const powerCost = powerCosts.find(
+                (cost) =>
+                  stats.attaque >= cost.minAttack && // Vérifie si l'attaque de l'utilisateur est suffisante
+                  cost.validDifficulties.includes(difficulty)
+              );
+              if (powerCost) {
+                await dbManager.updatePower(i.user.id, -powerCost.cost);
                 return i.update({
-                  content: `> Vous avez pas honte de vous en prendre au plus faible ?\n **-100** ${emoji(
-                    emo.power
-                  )}`,
-                  embeds: [],
-                  components: [],
-                });
-              } else if (
-                stats.attaque >= 560 &&
-                (difficulty == 0 || difficulty == 1 || difficulty == 2)
-              ) {
-                await dbManager.updatePower(i.user.id, -200);
-                return i.update({
-                  content: `> Vous avez pas honte de vous en prendre au plus faible ?\n **-200** ${emoji(
-                    emo.power
-                  )}`,
+                  content: `> Vous avez pas honte de vous en prendre au plus faible 😱 ?\n **-${
+                    powerCost.cost
+                  }** ${emoji(emo.power)}`,
                   embeds: [],
                   components: [],
                 });
               }
 
-              //reverification des cooldowns
-
-              if (cooldownInfosBoss.remainingTime > 0) {
-                const remainingTime =
-                  cooldownInfosBoss.remainingTime.toFixed(1);
-                const timestamp = Math.floor(
-                  (Date.now() + remainingTime * 1000) / 1000
-                );
-                await i.reply({
-                  content: `Vous êtes en cooldown pour le boss **${bossInfo.nom}** en difficulté **${difficultyString}**, laissez un temps de repos 💤 au boss.\n\n> Veuillez réessayer <t:${timestamp}:R>`,
-                  ephemeral: true,
-                });
-                return;
-              }
-
-              // Vérifiez enfin le cooldown général de l'entraînement
-
-              if (cooldownInfosTrain.remainingTime > 0) {
-                const remainingTime =
-                  cooldownInfosTrain.remainingTime.toFixed(1);
-                const timestamp = Math.floor(
-                  (Date.now() + remainingTime * 1000) / 1000
-                );
-                await i.reply({
-                  content: `Vous êtes en cooldown pour la commande d’entraînement, laissez un temps de repos 💤 à votre personnage\n\n> Veuillez réessayer <t:${timestamp}:R>`,
-                  ephemeral: true,
-                });
-                return;
-              }
-
-              // Si aucun cooldown n'est actif, configurez les nouveaux cooldowns
+              //mettre en place les nouveaux cooldowns
               await cooldown.setCooldown(
                 i.user.id,
                 commandNameBoss,

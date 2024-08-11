@@ -1,5 +1,4 @@
 const sqlQueries = {
-  getUserPower: "SELECT power FROM user WHERE discordId = ?",
   getLastInsertId: "SELECT LAST_INSERT_ID() AS duel_id",
   insertDuel: "INSERT INTO duel (date) VALUES (NOW())",
   insertDuelDetails: "INSERT INTO dueldetails (idDuel, idUser) VALUES (?, ?)",
@@ -29,7 +28,6 @@ const sqlQueries = {
     WHERE idDuel = ? AND idUser = ?
   `,
   updateDuelDetailsDraw: "UPDATE dueldetails SET win = 2 WHERE idDuel = ?",
-  userExists: "SELECT * FROM user WHERE discordId = ?",
   getMaterialsByIdEtat1: `SELECT m.nom AS nom, m.rarete AS rarete, mu.lvl AS materiauLevel, m.type AS materiauType, mu.id AS idMateriau
     FROM materiau m
     JOIN materiau_user mu ON m.id = mu.IdMateriau 

@@ -19,7 +19,7 @@ module.exports = {
       const lastMessageTime = userLastMessage.get(userId);
       const timeDiff = currentTime - lastMessageTime;
 
-      // If the user has sent a message in the last 60 seconds, ignore it
+      //Ignorer les messages envoyés en moins de 60 secondes
       if (timeDiff < 60000) return;
     }
     userLastMessage.set(userId, currentTime);
@@ -39,7 +39,7 @@ module.exports = {
           return range;
         }
       }
-      return ranges[ranges.length - 1]; // Fallback to the last range
+      return ranges[ranges.length - 1]; // Retourne la dernière plage si aucune n'est sélectionnée
     }
     const selectedRange = selectRange();
     const powerIncrement =

@@ -1,4 +1,4 @@
-const DatabaseManager = require("../../class/dbManager"); // Ajustez le chemin si nécessaire
+const DatabaseManager = require("../../class/dbManager");
 const db = new DatabaseManager();
 
 module.exports = {

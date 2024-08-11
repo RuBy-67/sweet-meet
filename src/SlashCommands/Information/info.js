@@ -398,7 +398,7 @@ module.exports = {
             await i.update({ embeds: [hiddenPage], components: [row] });
           } else if (i.customId === "claim") {
             const power = await dbManager.generateRandomPower();
-            await dbManager.setPowerById(interaction.user.id, power);
+            await dbManager.updatePower(interaction.user.id, power);
             const randomMaterial =
               legendaryMaterials[
                 Math.floor(Math.random() * legendaryMaterials.length)
@@ -608,7 +608,7 @@ module.exports = {
             await i.update({ embeds: [hiddenPage], components: [NewRow] });
           } else if (i.customId === "claim") {
             const power = await dbManager.generateRandomPower();
-            await dbManager.setPowerById(interaction.user.id, power);
+            await dbManager.updatePower(interaction.user.id, power);
             const randomMaterial =
               legendaryMaterials[
                 Math.floor(Math.random() * legendaryMaterials.length)

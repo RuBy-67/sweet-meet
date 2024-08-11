@@ -1,7 +1,7 @@
 const param = require("../jsons/param.json");
 const DatabaseManager = require("./dbManager");
 const sqlQueries = require("./sqlQueriesPlayer");
-const { pool, poolBo, poolCampagne } = require("../db");
+const { pool, poolBo } = require("../db");
 const duelMessages = require(`../jsons/gif.json`);
 const emo = require(`../jsons/emoji.json`);
 
@@ -13,19 +13,11 @@ class Player extends DatabaseManager {
     this.materiaux = null;
   }
 
-  async userExists(userId) {
-    const [result] = await pool.query(sqlQueries.userExists, [userId]);
-
-    return result;
-  }
-
   async getStatsById(userId) {
-    const [result] = await pool.query(sqlQueries.getUserPower, [userId]);
-    if (!result[0]) {
-      throw new Error(`User with discordId ${userId} not found`);
-    }
+    const result = await this.getStats(userId);
+    console.log(result);
 
-    const powerUser = result[0].power;
+    const powerUser = result.power;
     const statsADS = await this.calculateStats(powerUser, userId);
 
     this.stats = {
@@ -97,8 +89,6 @@ class Player extends DatabaseManager {
 
     await pool.query(sqlQueries.insertDuelDetails, [duelId, userId]);
     await pool.query(sqlQueries.insertDuelDetails, [duelId, opponentId]);
-    await pool.query(sqlQueries.insertDuelDetails, [duelId, userId]);
-    await pool.query(sqlQueries.insertDuelDetails, [duelId, opponentId]);
 
     const { playerScore, opponentScore } = await this.calculateFightScoreBattle(
       userId,
@@ -116,32 +106,21 @@ class Player extends DatabaseManager {
       userId,
       opponentId
     );
-    if (winner === null) {
-      await pool.query(sqlQueries.updateDuelDetailsDraw, [duelId]);
-      await pool.query(sqlQueries.updateDuelDetailsDraw, [duelId]);
-    } else if (winner === userId) {
-      await pool.query(sqlQueries.updateDuelDetailsWin, [1, userId, duelId]);
-      await pool.query(sqlQueries.updateUserWinCounter, [userId]);
-      await pool.query(sqlQueries.updateUserLoseCounter, [opponentId]);
-      await pool.query(sqlQueries.updateDuelDetailsWin, [1, userId, duelId]);
-      await pool.query(sqlQueries.updateUserWinCounter, [userId]);
-      await pool.query(sqlQueries.updateUserLoseCounter, [opponentId]);
-    } else if (winner === opponentId) {
-      await pool.query(sqlQueries.updateDuelDetailsWin, [
-        1,
-        opponentId,
-        duelId,
-      ]);
-      await pool.query(sqlQueries.updateUserWinCounter, [opponentId]);
-      await pool.query(sqlQueries.updateUserLoseCounter, [userId]);
-      await pool.query(sqlQueries.updateDuelDetailsWin, [
-        1,
-        opponentId,
-        duelId,
-      ]);
-      await pool.query(sqlQueries.updateUserWinCounter, [opponentId]);
-      await pool.query(sqlQueries.updateUserLoseCounter, [userId]);
-    }
+    await (async () => {
+      if (winner === null) {
+        await this.queryMain(sqlQueries.updateDuelDetailsDraw, [duelId]);
+      } else {
+        await this.queryMain(sqlQueries.updateDuelDetailsWin, [
+          1,
+          winner,
+          duelId,
+        ]);
+        await this.queryMain(sqlQueries.updateUserWinCounter, [winner]);
+        await this.queryMain(sqlQueries.updateUserLoseCounter, [
+          winner === userId ? opponentId : userId,
+        ]);
+      }
+    })();
     return [winner, duelId];
   }
 
@@ -280,14 +259,6 @@ class Player extends DatabaseManager {
       duelId,
       userId,
     ]);
-    await pool.query(sqlQueries.insertMaterialsIntoDuelDetail, [
-      materialId1,
-      materialId2,
-      materialId3,
-      materialId4,
-      duelId,
-      userId,
-    ]);
   }
   async getRandomMessage(stage) {
     const messages = duelMessages.duelMessages[stage];
@@ -305,174 +276,125 @@ class Player extends DatabaseManager {
     parisDraw
   ) {
     const progressMessages = ["combat", "progression", "progression"];
-
+    const updateMessage = async (content) => {
+      await message.edit({ content });
+    };
+    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     for (let i = 0; i < progressMessages.length; i++) {
-      setTimeout(async () => {
-        await message.edit({
-          content: `- __${userName} :__ *${await this.getRandomMessage(
-            progressMessages[i]
-          )}*\n- __${membre.username} :__ *${await this.getRandomMessage(
-            progressMessages[i]
-          )}*`,
-        });
-        if (i === progressMessages.length - 1) {
-          setTimeout(async () => {
-            if (winner !== null) {
-              if (winner === userId) {
-                await message.edit({
-                  content: `- <@${winner}> :*${await this.getRandomMessage(
-                    "finV"
-                  )}*\n- <@${membre.id}> : *${await this.getRandomMessage(
-                    "finL"
-                  )}*`,
-                });
-              } else if (winner === membre.id) {
-                await message.edit({
-                  content: `- <@${winner}> :*${await this.getRandomMessage(
-                    "finV"
-                  )}*\n- <@${userId}> : *${await this.getRandomMessage(
-                    "finL"
-                  )}*`,
-                });
-              }
-            } else {
-              await message.edit({
-                content: `- <@${membre.id}> :*${await this.getRandomMessage(
-                  "finDJ1"
-                )}*\n- <@${userId}> : *${await this.getRandomMessage(
-                  "finDJ2"
-                )}*`,
-              });
-            }
-            setTimeout(async () => {
-              if (winner) {
-                await message.edit(
-                  `Vous avez gagné <@${winner}> bravo ! ID du duel: ${duelId} Gain : ${parisWin}`
-                );
-                /// Ajouter les détails des requêtes ici
-              } else {
-                await message.edit(
-                  `Le duel s'est terminé par une égalité, ça arrive ! Récompense : ${parisDraw}`
-                );
-              }
-            }, 6500);
-          }, 6500);
-        }
-      }, i * 6500);
+      const content = `- __${userName} :__ *${await this.getRandomMessage(
+        progressMessages[i]
+      )}*\n- __${membre.username} :__ *${await this.getRandomMessage(
+        progressMessages[i]
+      )}*`;
+      await updateMessage(content);
+      await delay(6500);
     }
-  }
+    let finalMessage;
+    if (winner !== null) {
+      const winnerMessage = `- <@${winner}> :*${await this.getRandomMessage(
+        "finV"
+      )}*`;
+      const loserMessage = `- <@${
+        winner === userId ? membre.id : userId
+      }> : *${await this.getRandomMessage("finL")}*`;
+      finalMessage = `${winnerMessage}\n${loserMessage}`;
+    } else {
+      finalMessage = `- <@${membre.id}> :*${await this.getRandomMessage(
+        "finDJ1"
+      )}*\n- <@${userId}> : *${await this.getRandomMessage("finDJ2")}*`;
+    }
 
-  async rarete(rarete) {
-    if (rarete === "Commun") {
-      return "⚪";
-    } else if (rarete === "Rare") {
-      return "🔵";
-    } else if (rarete === "Très Rare") {
-      return "🟠";
-    } else if (rarete === "Épique") {
-      return "🟣";
-    } else if (rarete === "Legendaire") {
-      return "🟡";
-    }
+    await delay(6500);
+    await updateMessage(finalMessage);
+    await delay(6500);
+    const resultMessage = winner
+      ? `Vous avez gagné <@${winner}> bravo ! ID du duel: ${duelId} Gain : ${parisWin}`
+      : `Le duel s'est terminé par une égalité, ça arrive ! Récompense : ${parisDraw}`;
+
+    await updateMessage(resultMessage);
   }
 
   async randomBox() {
-    const material = await this.getMateriau();
-    let numberOfMaterials;
+    const materials = await this.getMateriau();
     const randomValue = Math.random();
-    if (randomValue < 0.6) {
-      numberOfMaterials = 1; // 60% de chance
-    } else if (randomValue < 0.9) {
-      numberOfMaterials = 2; // 30% de chance
-    } else {
-      numberOfMaterials = 3; // 10% de chance
-    }
-    const selectedMaterials = [];
-    for (let i = 0; i < numberOfMaterials; i++) {
-      const randomIndex = Math.floor(Math.random() * material.length);
-      selectedMaterials.push(material[randomIndex]);
-    }
+    const numberOfMaterials = randomValue < 0.6 ? 1 : randomValue < 0.9 ? 2 : 3;
+
+    const selectedMaterials = Array.from(
+      { length: numberOfMaterials },
+      () => materials[Math.floor(Math.random() * materials.length)]
+    );
 
     return selectedMaterials;
   }
+
   async dayliBox() {
-    const material = await this.getMateriau();
-    const selectedMaterial = await this.selectRandomMaterial(material, "dayli");
-    let dayPower = await this.generateRandomPower();
-    Math.floor((dayPower = dayPower / 3));
+    const materials = await this.getMateriau();
+    const selectedMaterial = await this.selectRandomMaterial(
+      materials,
+      "dayli"
+    );
+    const dayPower = Math.floor((await this.generateRandomPower()) / 3);
     return { dayMaterial: selectedMaterial, dayPower };
   }
   async freeDayliBox(userId) {
-    const material = await this.getMateriau();
+    const materials = await this.getMateriau();
     const selectedMaterial = await this.selectRandomMaterial(
-      material,
+      materials,
       "freeDayli"
     );
-    let power = await this.generateRandomPower();
-    power = Math.floor(power / 6);
+    const power = Math.floor((await this.generateRandomPower()) / 6);
     return { userId, material: selectedMaterial, power };
   }
 
   async selectRandomMaterial(materials, boxType) {
-    let rarityWeights;
-
     const probabilities = {
-      freeDayli: 0.85, // 85% de chances de ne pas obtenir de matériau
-      freeDayli: 0.85, // 85% de chances de ne pas obtenir de matériau
-      random: 0, // 0% de chances de ne pas obtenir de matériau
-      dayli: 0.4, // 40% de chances de ne pas obtenir de matériau
-      dayli: 0.4, // 40% de chances de ne pas obtenir de matériau
+      freeDayli: 0.5,
+      random: 0,
+      dayli: 0.2,
     };
 
-    const randomValue = Math.random();
-    if (randomValue < probabilities[boxType]) {
+    if (Math.random() < probabilities[boxType]) {
       return null;
     }
 
-    switch (boxType) {
-      case "randomBox":
-        rarityWeights = {
-          Legendaire: 5,
-          Épique: 10,
-          "Très Rare": 15,
-          Rare: 30,
-          Commun: 40,
-        };
-        break;
-      case "dayliBox":
-        rarityWeights = {
-          Legendaire: 3,
-          Épique: 7,
-          "Très Rare": 15,
-          Rare: 25,
-          Commun: 50,
-        };
-        break;
-      case "freeDayli":
-        rarityWeights = {
-          Legendaire: 1,
-          Épique: 5,
-          "Très Rare": 10,
-          Rare: 20,
-          Commun: 64,
-        };
-        break;
-      default:
-        rarityWeights = {
-          Legendaire: 5,
-          Épique: 10,
-          "Très Rare": 15,
-          Rare: 30,
-          Commun: 40,
-        };
-    }
+    const rarityWeights = {
+      randomBox: {
+        Legendaire: 10,
+        Épique: 15,
+        "Très Rare": 17,
+        Rare: 23,
+        Commun: 35,
+      },
+      dayliBox: {
+        Legendaire: 10,
+        Épique: 15,
+        "Très Rare": 17,
+        Rare: 20,
+        Commun: 38,
+      },
+      freeDayli: {
+        Legendaire: 10,
+        Épique: 13,
+        "Très Rare": 20,
+        Rare: 25,
+        Commun: 40,
+      },
+    }[boxType] || {
+      Legendaire: 5,
+      Épique: 10,
+      "Très Rare": 15,
+      Rare: 30,
+      Commun: 40,
+    };
 
     const weightedMaterials = materials.flatMap((material) =>
-      Array(rarityWeights[material.rarete]).fill(material)
+      Array(rarityWeights[material.rarete] || 0).fill(material)
     );
 
-    const randomIndex = Math.floor(Math.random() * weightedMaterials.length);
-    return weightedMaterials[randomIndex];
+    return (
+      weightedMaterials[Math.floor(Math.random() * weightedMaterials.length)] ||
+      null
+    );
   }
   async getPotionByEtat(userId) {
     const [result] = await pool.query(sqlQueries.getPotionByEtat, [userId, 1]);

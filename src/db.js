@@ -8,6 +8,8 @@ const {
   db_campagne,
   db_user_bo,
   db_user_campagne,
+  db_user_date,
+  db_date,
 } = require("./jsons/config.json");
 
 const pool = mysql.createPool({
@@ -18,9 +20,6 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
 });
 
 const poolBo = mysql.createPool({
@@ -28,9 +27,6 @@ const poolBo = mysql.createPool({
   user: db_user_bo,
   password: db_password,
   database: db_bo,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -46,4 +42,13 @@ const poolCampagne = mysql.createPool({
   queueLimit: 0,
 });
 
-module.exports = { pool, poolBo, poolCampagne };
+const poolDate = mysql.createPool({
+  host: db_host,
+  user: db_user_date,
+  password: db_password,
+  database: db_date,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+});
+module.exports = { pool, poolBo, poolCampagne, poolDate };

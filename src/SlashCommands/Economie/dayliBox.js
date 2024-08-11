@@ -68,7 +68,7 @@ module.exports = {
     embed
       .addFields({
         name: "Fragment de protection",
-        value: `${power} ${emoji(emo.power)}`,
+        value: `**${power}** ${emoji(emo.power)}`,
         inline: true,
       })
       .setTimestamp()

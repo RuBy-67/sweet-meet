@@ -21,7 +21,7 @@ module.exports = {
       });
 
     try {
-      const result = await dbManager.getUserData(member.id);
+      const result = await dbManager.getStats(member.id);
 
       if (result.length === 0) {
         console.log(

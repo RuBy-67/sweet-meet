@@ -1,4 +1,4 @@
-const { pool, poolBo, poolCampagne } = require("../db");
+const { pool, poolBo, poolCampagne, poolDate } = require("../db");
 const SQL_QUERIES = require("./sqlQueriesDb");
 
 class DatabaseManager {
@@ -6,6 +6,7 @@ class DatabaseManager {
     this.pool = pool;
     this.poolBo = poolBo;
     this.poolCampagne = poolCampagne;
+    this.poolDate = poolDate;
   }
 
   async query(pool, sql, params) {
@@ -29,7 +30,11 @@ class DatabaseManager {
   async queryCampagne(sql, params) {
     return this.query(this.poolCampagne, sql, params);
   }
-
+  /************ */
+  async queryDate(sql, params) {
+    return this.query(this.poolDate, sql, params);
+  }
+  /************* */
   async insertBackupUserData(userData) {
     const { discordId, power, winCounter, loseCounter } = userData;
     return this.queryBo(SQL_QUERIES.INSERT_BACKUP_USER, [
@@ -41,18 +46,11 @@ class DatabaseManager {
   }
   async getColor(userId) {
     const userStats = await this.getStats(userId);
-
-    if (userStats.guildId !== null) {
-      const result = await this.queryMain(SQL_QUERIES.GET_COLOR, [userId]);
-      if (result && result[0] && result[0].bannière) {
-        const color = result[0].bannière;
-        return color;
-      } else {
-        return "#e08dac";
-      }
-    } else {
+    if (userStats.guildId === null) {
       return "#e08dac";
     }
+    const [result] = await this.queryMain(SQL_QUERIES.GET_COLOR, [userId]);
+    return result?.bannière ?? "#e08dac";
   }
   async createGuild(guildColor, guildName, guildDescription, tag, userId) {
     this.queryMain(SQL_QUERIES.CREATE_GUILD, [
@@ -106,7 +104,6 @@ class DatabaseManager {
       userId,
     ]);
   }
-
   async createInvitation(userId, guildId, type) {
     await this.queryMain(SQL_QUERIES.DELETE_INVITATION, [
       guildId,
@@ -146,7 +143,7 @@ class DatabaseManager {
     const guildMembers = await this.queryMain(SQL_QUERIES.GET_GUILD_MEMBERS, [
       guildId,
     ]);
-    // Parcourir tous les membres et ajouter le pouvoir
+    // Parcourir tous les membres et ajouter fragment de puissance
     for (const member of guildMembers) {
       await this.queryMain(SQL_QUERIES.ADD_MEMBER_POWER, [
         amount,
@@ -165,7 +162,6 @@ class DatabaseManager {
     return option;
   }
 
-  // Fonction pour rejoindre une guilde
   async joinGuild(userId, guildId) {
     await this.queryMain(SQL_QUERIES.UPDATE_USER_GUILD, [guildId, userId]);
     await this.queryMain(SQL_QUERIES.ADD_CLASS_TO_USER, [userId, guildId, 5]);
@@ -243,7 +239,6 @@ class DatabaseManager {
       userGuildResult,
     ]);
     if (guildInfo.marchand == userId) {
-      /// A verifier FONCTIONNELLE ?
       await this.updateMarchand(NULL, guildInfo.id);
     }
     await this.queryMain(SQL_QUERIES.LEAVE_GUILD, [userId]);
@@ -251,7 +246,6 @@ class DatabaseManager {
     return "Vous avez quitté la guilde avec succès";
   }
 
-  // A revoire
   async acceptInvitation(userId, guildId) {
     // Vérifiez si l'utilisateur est un administrateur de la guilde
     const isAdmin = await this.isGuildAdmin(userId, guildId);
@@ -300,14 +294,10 @@ class DatabaseManager {
     if (guild.empreur === userId) {
       return true;
     }
-
-    // Vérifier si l'utilisateur possède l'un des rôles spécifiés
     const userRoles = await this.getUserClass(userId, guildId);
     if (userRoles.includes(1) || userRoles.includes(2)) {
       return true;
     }
-
-    // Si aucune des conditions n'est remplie, renvoyer false
     return false;
   }
   async getUserClass(userId, guildId) {
@@ -315,7 +305,7 @@ class DatabaseManager {
   }
 
   async generateSecret() {
-    const length = 20; // Longueur du code secret
+    const length = Math.floor(Math.random() * (30 - 20 + 1)) + 20;
     const characters =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let secretCode = "";
@@ -379,25 +369,20 @@ class DatabaseManager {
 
   async deleteUserData(discordId) {
     await this.queryMain(SQL_QUERIES.DELETE_USER, [discordId]);
-
     const guild = await this.getGuildByOwnerId(discordId);
     if (guild) {
-      // Récupération des membres de la guilde
       const guildMembers = await this.getGuildMembers(guild.id);
 
       if (guildMembers.length > 0) {
-        // Sélection aléatoire d'un membre
-        const randomIndex = Math.floor(Math.random() * guildMembers.length);
-        const newEmperor = guildMembers[randomIndex];
-
-        // Attribution du rôle d'Empereur au membre sélectionné
+        const newEmperor =
+          guildMembers[Math.floor(Math.random() * guildMembers.length)];
         await this.addRoleToUser(newEmperor.id, 1246944929675087914);
       } else {
-        // Suppression de la guilde si elle ne contient plus de membres
         await this.deleteGuildByOwnerId(discordId);
       }
     }
   }
+
   async removeMaterialFromUser(idUnique) {
     await this.queryMain(SQL_QUERIES.DELETE_MATERIAU_USER, [idUnique]);
   }
@@ -412,12 +397,9 @@ class DatabaseManager {
   async getUserDataBo(userId) {
     return this.queryBo(SQL_QUERIES.GET_USER_DATA_BO, [userId]);
   }
-  async getUserData(userId) {
-    return this.queryMain(SQL_QUERIES.GET_USER_DATA, [userId]);
-  }
 
   async insertUserData(userData) {
-    return this.queryMain(SQL_QUERIES.INSERT_USER_DATA, [
+    await this.queryMain(SQL_QUERIES.INSERT_USER_DATA, [
       userData.discordId,
       userData.power,
       userData.winCounter,
@@ -429,23 +411,22 @@ class DatabaseManager {
     return this.queryBo(SQL_QUERIES.GET_MATERIAU_DATA, [userId]);
   }
   async insertMateriauData(userId, materiauId, level = 1) {
-    return this.queryMain(SQL_QUERIES.INSERT_MATERIAU_DATA, [
+    await this.queryMain(SQL_QUERIES.INSERT_MATERIAU_DATA, [
       userId,
       materiauId,
       level,
     ]);
   }
   async getBadgeData(userId) {
-    return this.queryBo(SQL_QUERIES.GET_BADGE_DATA, [userId]);
+    await this.queryBo(SQL_QUERIES.GET_BADGE_DATA, [userId]);
   }
   async insertBadgeData(userId, badgeId) {
-    return this.queryMain(SQL_QUERIES.INSERT_BADGE_DATA, [userId, badgeId]);
+    await this.queryMain(SQL_QUERIES.INSERT_BADGE_DATA, [userId, badgeId]);
   }
   async deleteBackupData(userId) {
     await this.queryBo(SQL_QUERIES.DELETE_BACKUP_USER, [userId]);
     await this.queryBo(SQL_QUERIES.DELETE_BACKUP_MAT, [userId]);
     await this.queryBo(SQL_QUERIES.DELETE_BACKUP_BADGE, [userId]);
-    return true;
   }
 
   async getDuelDetails(duelId, userId) {
@@ -587,12 +568,6 @@ class DatabaseManager {
       nomBadge,
     ]);
 
-    if (badgeResult.length === 0) {
-      throw new Error(
-        `Le badge "${nomBadge}" n'existe pas dans la base de données.`
-      );
-    }
-
     const badgeId = badgeResult[0].id;
     await this.queryMain(SQL_QUERIES.INSERT_BADGE_USER, [userId, badgeId]);
   }
@@ -613,40 +588,34 @@ class DatabaseManager {
     }
   }
 
-  async setPowerById(userId, newPower) {
-    const user = await this.queryMain(SQL_QUERIES.GET_STATS, [userId]);
-
-    if (user.length === 0) {
-      console.error("User not found.");
-      return;
-    }
-
-    const currentPower = user[0].power;
-    const updatedPower = currentPower + newPower;
-    await this.queryMain(SQL_QUERIES.UPDATE_USER_POWER, [updatedPower, userId]);
-  }
-
   async generateRandomPower() {
     const random = Math.random() * 100;
-    let power;
+    let min, range;
+
     if (random < 10) {
-      power = Math.floor(Math.random() * 10000) + 5000;
+      min = 5000;
+      range = 10000;
     } else if (random < 35) {
-      power = Math.floor(Math.random() * 15000) + 15001;
+      min = 15001;
+      range = 15000;
     } else if (random < 60) {
-      power = Math.floor(Math.random() * 30000) + 30001;
+      min = 30001;
+      range = 30000;
     } else if (random < 80) {
-      power = Math.floor(Math.random() * 30000) + 60001;
+      min = 60001;
+      range = 30000;
     } else if (random < 95) {
-      power = Math.floor(Math.random() * 30000) + 90001;
+      min = 90001;
+      range = 30000;
     } else {
-      power = Math.floor(Math.random() * 30000) + 120001;
+      min = 120001;
+      range = 30000;
     }
-    return power;
+    return Math.floor(Math.random() * range) + min;
   }
 
   async getMateriauxByRarity(rarity) {
-    return this.queryMain(SQL_QUERIES.GENERATE_RANDOM_POWER, [rarity]);
+    return this.queryMain(SQL_QUERIES.SELECT_MATERIAUX_BY_RARITY, [rarity]);
   }
 
   async addMaterialToUser(userId, materialId, level) {

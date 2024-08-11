@@ -24,7 +24,7 @@ module.exports = {
 
     try {
       // Check if the user exists in the main database
-      const [userExists] = await player.getUserData(member.id);
+      const [userExists] = await player.getStats(member.id);
 
       if (!userExists) {
         const [backupUserData] = await dbManager.getUserDataBo(member.id);
