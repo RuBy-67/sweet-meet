@@ -14,6 +14,7 @@ const player = new Player();
 const Cooldown = require("../../class/cooldown");
 const cooldown = new Cooldown();
 const config = require("../../jsons/config.json");
+const e = require("express");
 
 module.exports = {
   name: "duel",
@@ -72,46 +73,47 @@ module.exports = {
     const colors = await dbManager.getColor(userId);
     const userPower = await dbManager.getStats(userId);
     const adversaryPower = await dbManager.getStats(membre.id);
-    if (userPower.power < paris) {
-      const embed = new EmbedBuilder()
-        .setTitle("Erreur")
-        .setDescription(
-          `Vous n'avez pas assez de Fragments pour initier ce duel avec une mise de ${paris}.`
-        )
+    function createErrorEmbed(title, description) {
+      return new EmbedBuilder()
+        .setTitle(title)
+        .setDescription(description)
         .setColor(color.error);
-
-      return interaction.reply({ embeds: [embed] });
     }
-
-    if (adversaryPower.power < paris) {
-      const embed = new EmbedBuilder()
-        .setTitle("Erreur")
-        .setDescription(
-          `${membre.username} n'a pas assez de Fragments pour accepter ce duel avec une mise de ${paris}.`
-        )
-        .setColor(color.error);
-
-      return interaction.reply({ embeds: [embed] });
-    }
-    if (membre === interaction.user) {
-      const embed = new EmbedBuilder()
-        .setTitle("Erreur")
-        .setDescription(
-          `Vous ne pouvez pas initier un duel avec vous-même. (Bien essayé)`
-        )
-        .setColor(color.error);
-
-      return interaction.reply({ embeds: [embed] });
-    }
-    if (paris < 0) {
-      const embed = new EmbedBuilder()
-        .setTitle("Erreur")
-        .setDescription(
-          `Vous ne pouvez pas initier un duel avec une mise de ${paris} inférieur à 0 (hé oui).`
-        )
-        .setColor(color.error);
-
-      return interaction.reply({ embeds: [embed] });
+    const checks = [
+      {
+        condition: userPower.power < paris,
+        message: `Vous n'avez pas assez de Fragments pour initier ce duel avec une mise de **${paris}** ${emoji(
+          emo.power
+        )}.\n\n> Votre solde actuel est de **${userPower.power}** ${emoji(
+          emo.power
+        )}.`,
+      },
+      {
+        condition: adversaryPower.power < paris,
+        message: `${
+          membre.username
+        } n'a pas assez de Fragments pour accepter ce duel avec une mise de **${paris}** ${emoji(
+          emo.power
+        )}.\n\n> Son solde actuel est de **${userPower.power}** ${emoji(
+          emo.power
+        )}.`,
+      },
+      {
+        condition: membre === interaction.user,
+        message: `Vous ne pouvez pas initier un duel avec vous-même. (Bien essayé)`,
+      },
+      {
+        condition: paris < 0,
+        message: `Vous ne pouvez pas initier un duel avec une mise de ${paris} inférieur à 0 ${emoji(
+          emo.power
+        )}. (hé oui).`,
+      },
+    ];
+    for (const check of checks) {
+      if (check.condition) {
+        const embed = createErrorEmbed("Erreur", check.message);
+        return interaction.reply({ embeds: [embed], ephemeral: true });
+      }
     }
 
     const [userMaterials, adversaryMaterials] = await Promise.all([
@@ -200,34 +202,50 @@ module.exports = {
     collector.on("collect", async (buttonInteraction) => {
       if (buttonInteraction.customId === "accept_duel") {
         row.components.forEach((component) => component.setDisabled(true));
-        message.edit({ components: [row] });
+        await message.edit({ components: [row] });
         const [winner, duelId] = await player.fightBattle(userId, membre.id);
-        await player.updatePower(membre.id, -paris);
-        await player.updatePower(userId, -paris);
-        paris = paris * 2;
-        parisWin = Math.floor(paris * (75 / 100));
-        parisLose = Math.floor(paris * (25 / 100));
-        parisDraw = Math.floor((paris / 2) * 1.02);
-        let addGuildBank = Math.round(parisWin / 2);
+        const powerChange = -paris;
+        await Promise.all([
+          player.updatePower(userId, powerChange),
+          player.updatePower(membre.id, powerChange),
+        ]);
+
+        const parisMultiplier = 2;
+        const parisWin = Math.floor(paris * 0.75 * parisMultiplier);
+        const parisLose = Math.floor(paris * 0.25 * parisMultiplier);
+        const parisDraw = Math.floor((paris / 2) * 1.02);
+        const addGuildBank = Math.round(parisWin / 1.5);
+
+        // Gestion de la banque de guilde
+        let guildMessage = "";
         const stat = await dbManager.getStats(winner);
-        let stringGuild = " ";
         if (stat.guildId) {
           await dbManager.addGuildBank(stat.guildId, addGuildBank);
-          stringGuild = `**${addGuildBank}** ${emoji(
+          const guildInfo = await dbManager.getGuildInfo(stat.guildId);
+          guildMessage = `**${addGuildBank}** ${emoji(
             emo.power
-          )} ont été ajoutés à la banque de guilde de <@&${winner}>`;
+          )} ont été ajoutés à la banque de guilde de ${guildInfo.nom} **[${
+            guildInfo.tag
+          }]**`;
+        }
+        const powerUpdates = {
+          [userId]: winner === userId ? parisWin : parisDraw,
+          [membre.id]: winner === membre.id ? parisWin : parisDraw,
+        };
+        if (winner) {
+          if (winner === userId || winner === membre.id) {
+            powerUpdates[winner] = parisWin;
+            powerUpdates[winner === userId ? membre.id : userId] = parisLose;
+          }
+        } else {
+          powerUpdates[userId] = parisDraw;
+          powerUpdates[membre.id] = parisDraw;
         }
 
-        if (winner === userId) {
-          await player.updatePower(userId, parisWin);
-          await player.updatePower(membre.id, parisLose);
-        } else if (winner === membre.id) {
-          await player.updatePower(membre.id, parisWin);
-          await player.updatePower(membre.id, parisLose);
-        } else {
-          await player.updatePower(userId, parisDraw);
-          await player.updatePower(membre.id, parisDraw);
-        }
+        await Promise.all([
+          player.updatePower(userId, powerUpdates[userId]),
+          player.updatePower(membre.id, powerUpdates[membre.id]),
+        ]);
 
         buttonInteraction
           .reply(
@@ -252,34 +270,45 @@ module.exports = {
               parisDraw
             );
             await new Promise((resolve) => setTimeout(resolve, 29000)); // Attendre 30 secondes supplémentaires après duelProgress
-            const [duelDetail] = await dbManager.getDuelDetails(duelId, userId);
-            const [duelDetail2] = await dbManager.getDuelDetails(
-              duelId,
-              membre.id
-            );
-            let gainUserId, gainMembreId;
+            const [[duelDetail], [duelDetail2]] = await Promise.all([
+              dbManager.getDuelDetails(duelId, userId),
+              dbManager.getDuelDetails(duelId, membre.id),
+            ]);
 
-            if (winner === userId) {
-              gainUserId = parisWin;
-              gainMembreId = -parisLose;
-            } else if (winner === membre.id) {
-              gainUserId = -parisLose;
-              gainMembreId = parisWin;
-            } else if (winner === null) {
-              gainUserId = parisDraw;
-              gainMembreId = parisDraw;
-            } else {
-              gainUserId = parisDraw;
-              gainMembreId = parisDraw;
-            }
+            const gainUserId =
+              winner === userId
+                ? parisWin
+                : winner === membre.id
+                ? -parisLose
+                : parisDraw;
+
+            const gainMembreId =
+              winner === membre.id
+                ? parisWin
+                : winner === userId
+                ? -parisLose
+                : parisDraw;
+            const [getStatOpponent, getStati] = await Promise.all([
+              dbManager.getStats(membre.id),
+              dbManager.getStats(userId),
+            ]);
+
+            const [getGuildi, getGuildOpponent] = await Promise.all([
+              getStati.guildId
+                ? dbManager.getGuildInfo(getStati.guildId)
+                : Promise.resolve({ tag: "*pas de guilde*" }),
+              getStatOpponent.guildId
+                ? dbManager.getGuildInfo(getStatOpponent.guildId)
+                : Promise.resolve({ tag: "*pas de guilde*" }),
+            ]);
             const duelEmbed = new EmbedBuilder()
               .setTitle("Duel terminé")
               .setDescription(
-                `Le duel entre <@${userId}> et <@${membre.id}> est terminé.\n- ${stringGuild}`
+                `Le duel entre <@${userId}> et <@${membre.id}> est terminé.\n- ${guildMessage}`
               )
               .addFields(
                 {
-                  name: `Détails de ${userName}`,
+                  name: `Détails de ${userName} **[${getGuildi.tag}]** `,
                   value:
                     `> Fragments de Protection: **${
                       duelDetail.powerUser1
@@ -322,7 +351,7 @@ module.exports = {
                     }`,
                 },
                 {
-                  name: `Détails de ${membre.username}`,
+                  name: `Détails de ${membre.username} **[${getGuildOpponent.tag}]** `,
                   value:
                     `> Fragments de Protection: **${
                       duelDetail2.powerUser1

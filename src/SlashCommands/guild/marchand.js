@@ -13,11 +13,6 @@ const config = require("../../jsons/config.json");
 const params = require("../../jsons/param.json");
 const color = require("../../jsons/color.json");
 const Player = require("../../class/player");
-const { description, name, options } = require("./guild");
-const {
-  getMaterialsById,
-  getMateriaux,
-} = require("../../class/sqlQueriesPlayer");
 const player = new Player();
 
 module.exports = {

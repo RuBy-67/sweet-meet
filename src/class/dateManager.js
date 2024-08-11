@@ -2,16 +2,9 @@ const param = require("../jsons/param.json");
 const { EmbedBuilder } = require("discord.js");
 const DatabaseManager = require("./dbManager");
 const sqlQueriesDate = require("./sqlQueriesDate");
-const { pool, poolBo, poolCampagne, poolDate } = require("../db");
 const emo = require(`../jsons/emoji.json`);
 
 class Dating extends DatabaseManager {
-  constructor() {
-    super(pool, poolBo, poolCampagne, poolDate);
-    this.userId = null;
-    this.stats = null;
-    this.materiaux = null;
-  }
   async getAllDateProfil() {
     const [rows] = await this.queryDate(sqlQueriesDate.GET_ALL_DATE);
     return rows;
@@ -33,7 +26,7 @@ class Dating extends DatabaseManager {
       age,
     ]);
   }
-  async insertIntoLIke(id1, id2) {
+  async insertIntoLike(id1, id2) {
     await this.queryDate(sqlQueriesDate.INSERT_INTO_LIKE, [id1, id2]);
   }
   async getLikerId(id1, id2) {

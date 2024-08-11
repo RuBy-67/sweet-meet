@@ -583,7 +583,7 @@ module.exports = {
               newLevel
             );
             if (upgrade) {
-              await dbManager.setPowerById(userId, -upgradePrice);
+              await dbManager.updatePower(userId, -upgradePrice);
               return it.update({
                 content: `Le matériau ${emoji(emo[material.nom])} **${
                   material.nom
