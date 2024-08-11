@@ -10,12 +10,12 @@ module.exports = {
     const userId = newState.id;
     const currentTime = Date.now();
     if (param.maintenance) return;
-    // Handle user joining a voice channel
+    // User à rejoins un salon vocal
     if (!oldState.channelId && newState.channelId) {
       userVoiceTimes.set(userId, { joinTime: currentTime, totalTime: 0 });
     }
 
-    // Handle user leaving a voice channel
+    // User à quitté un salon vocal
     if (oldState.channelId && !newState.channelId) {
       const userVoiceData = userVoiceTimes.get(userId);
       if (userVoiceData) {
@@ -60,5 +60,4 @@ async function handleVoiceReward(userId, totalTime, channel) {
       );
     }
   }
-  //}
 }

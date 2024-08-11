@@ -151,7 +151,7 @@ class DatabaseManager {
     const guildMembers = await this.queryMain(SQL_QUERIES.GET_GUILD_MEMBERS, [
       guildId,
     ]);
-    // Parcourir tous les membres et ajouter le pouvoir
+    // Parcourir tous les membres et ajouter fragment de puissance
     for (const member of guildMembers) {
       await this.queryMain(SQL_QUERIES.ADD_MEMBER_POWER, [
         amount,
@@ -248,7 +248,6 @@ class DatabaseManager {
       userGuildResult,
     ]);
     if (guildInfo.marchand == userId) {
-      /// A verifier FONCTIONNELLE ?
       await this.updateMarchand(NULL, guildInfo.id);
     }
     await this.queryMain(SQL_QUERIES.LEAVE_GUILD, [userId]);
@@ -256,7 +255,6 @@ class DatabaseManager {
     return "Vous avez quitté la guilde avec succès";
   }
 
-  // A revoire
   async acceptInvitation(userId, guildId) {
     // Vérifiez si l'utilisateur est un administrateur de la guilde
     const isAdmin = await this.isGuildAdmin(userId, guildId);

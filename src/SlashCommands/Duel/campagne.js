@@ -300,7 +300,7 @@ module.exports = {
           const filter = (i) =>
             i.customId.startsWith(`start_duel_${interaction.id}`) ||
             i.customId.startsWith(`cancel_duel_${interaction.id}`);
-
+          ///revoir le filter avec duel.js (plus précis)
           const collector = interaction.channel.createMessageComponentCollector(
             {
               filter,
@@ -367,8 +367,6 @@ module.exports = {
                 return;
               }
 
-              // Vérifiez enfin le cooldown général de l'entraînement
-
               if (cooldownInfosTrain.remainingTime > 0) {
                 const remainingTime =
                   cooldownInfosTrain.remainingTime.toFixed(1);
@@ -382,7 +380,7 @@ module.exports = {
                 return;
               }
 
-              // Si aucun cooldown n'est actif, configurez les nouveaux cooldowns
+              // Si aucun cooldown n'est actif, mettre en place les nouveaux cooldowns
               await cooldown.setCooldown(
                 i.user.id,
                 commandNameBoss,

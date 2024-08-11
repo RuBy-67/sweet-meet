@@ -3,7 +3,7 @@ const { loadEvents } = require("./src/handlers/loadEvents");
 const { loadSlashCommands } = require("./src/handlers/loadSlashCommands");
 const { botToken, botToken2Test, auth } = require("./src/jsons/config.json");
 
-// Declaring our Discord Client
+// Déclaration du client
 const client = new Client({
   allowedMentions: { parse: ["users", "roles"] },
   intents: [
@@ -19,11 +19,10 @@ const client = new Client({
   ],
 });
 
-// Stuff that will be very useful in our project
 client.slash = new Collection();
 client.auth = auth;
 
-// Declaring Slash Command and Events
+// Load Events & Slash Commands
 loadEvents(client);
 loadSlashCommands(client);
 
