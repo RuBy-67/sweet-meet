@@ -1,4 +1,4 @@
-const { pool, poolBo, poolCampagne } = require("../db");
+const { pool, poolBo, poolCampagne, poolDate } = require("../db");
 const SQL_QUERIES = require("./sqlQueriesDb");
 
 class DatabaseManager {
@@ -6,6 +6,7 @@ class DatabaseManager {
     this.pool = pool;
     this.poolBo = poolBo;
     this.poolCampagne = poolCampagne;
+    this.poolDate = poolDate;
   }
 
   async query(pool, sql, params) {
@@ -29,7 +30,11 @@ class DatabaseManager {
   async queryCampagne(sql, params) {
     return this.query(this.poolCampagne, sql, params);
   }
-
+  /************ */
+  async queryDate(sql, params) {
+    return this.query(this.poolDate, sql, params);
+  }
+  /************* */
   async insertBackupUserData(userData) {
     const { discordId, power, winCounter, loseCounter } = userData;
     return this.queryBo(SQL_QUERIES.INSERT_BACKUP_USER, [

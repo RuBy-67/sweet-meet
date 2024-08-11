@@ -45,7 +45,7 @@ module.exports = {
     const timestamp = Math.floor((Date.now() + 20 * 60 * 1000) / 1000);
     $code = await dbManager.generateSecretCode(userId);
     const embed = new EmbedBuilder()
-      .setTitle("Social Queen Link")
+      .setTitle("Code Secret")
       .setColor(colors)
       .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
       .setDescription(
