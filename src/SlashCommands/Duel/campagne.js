@@ -147,19 +147,19 @@ module.exports = {
             label: "Facile 👼",
           },
           2: {
-            factor: 0.75,
-            rewardMultiplierVictory: 0.75,
-            rewardMultiplierDefeat: 0.5,
+            factor: 1.75,
+            rewardMultiplierVictory: 1,
+            rewardMultiplierDefeat: 0.8,
             label: "Moyen 🧒",
           },
           3: {
-            factor: 1.88,
+            factor: 2.88,
             rewardMultiplierVictory: 1.25,
             rewardMultiplierDefeat: 1,
             label: "Difficile 💪",
           },
           4: {
-            factor: 2.88,
+            factor: 9.75,
             rewardMultiplierVictory: 2,
             rewardMultiplierDefeat: 1.25,
             label: "Légendaire 👑",
@@ -177,11 +177,11 @@ module.exports = {
         const attaque = Math.round(bossInfo.attaque * factor);
         const defense = Math.round(bossInfo.defense * factor);
         const sante = Math.round(bossInfo.sante * factor);
-        const recompenseV = Math.round(8000 * rewardMultiplierVictory);
-        const recompenseD = Math.round(8000 * rewardMultiplierDefeat);
+        const recompenseV = Math.round(7000 * rewardMultiplierVictory);
+        const recompenseD = Math.round(7000 * rewardMultiplierDefeat);
         const cooldownDurationTrain =
-          (params.cooldownEntrainement * difficulty + 550) * 1000;
-        const cooldownDurationBoss = 72000 * 1000; // 20h en secondes
+          (params.cooldownEntrainement * (difficulty + 1) + 750) * 1000;
+        const cooldownDurationBoss = 86400 * 1000; // 24h en secondes
         const commandNameBoss = `entrainement_${bossInfo.nom}`;
         const commandNameTrain = `entrainement`;
         const getDiscordTimestamp = (secondsRemaining) => {
@@ -323,8 +323,9 @@ module.exports = {
 
             if (i.customId === `start_duel_${interaction.id}`) {
               const powerCosts = [
-                { minAttack: 560, cost: 200, validDifficulties: [0, 1, 2] },
-                { minAttack: 100, cost: 100, validDifficulties: [0, 1] },
+                { minAttack: 960, cost: 400, validDifficulties: [0, 1, 2] },
+                { minAttack: 560, cost: 200, validDifficulties: [0, 1] },
+                { minAttack: 200, cost: 100, validDifficulties: [0] },
               ];
               const stats = await player.getStatsById(interaction.user.id);
 
@@ -374,7 +375,8 @@ module.exports = {
                 recompenseD,
                 recompenseV,
                 Embedcolors,
-                client
+                client,
+                factor
               );
             } else if (i.customId === `cancel_duel_${interaction.id}`) {
               // Logique pour annuler le duel
