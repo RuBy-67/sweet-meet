@@ -375,7 +375,8 @@ module.exports = {
                 recompenseD,
                 recompenseV,
                 Embedcolors,
-                client
+                client,
+                factor
               );
             } else if (i.customId === `cancel_duel_${interaction.id}`) {
               // Logique pour annuler le duel
