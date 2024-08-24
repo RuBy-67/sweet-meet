@@ -32,35 +32,14 @@ class Boss extends DatabaseManager {
     recompenseD,
     recompenseV,
     Embedcolors,
-    client
+    client,
+    factor
   ) {
     const playerStats = await playerManager.getStatsById(userId); //playerStats.power playerStats.defense playerStats.attaque playerStats.sante
-    let attaque = bossInfo.attaque;
-    let defense = bossInfo.defense;
-    let sante = bossInfo.sante;
+    let attaque = bossInfo.attaque * factor;
+    let defense = bossInfo.defense * factor;
+    let sante = bossInfo.sante * factor;
     const multiplicateur = Math.random() * (15 - 1.5) + 1.5;
-
-    if (difficulty === "1") {
-      attaque = attaque * 0.3;
-      defense = defense * 0.3;
-      sante = sante * 0.3;
-    } else if (difficulty === "2") {
-      attaque = attaque * 0.75;
-      defense = defense * 0.75;
-      sante = sante * 0.75;
-    } else if (difficulty === "3") {
-      attaque = attaque * 1.88;
-      defense = defense * 1.88;
-      sante = sante * 1.88;
-    } else if (difficulty === "4") {
-      attaque = attaque * 2.88;
-      defense = defense * 2.88;
-      sante = sante * 2.97;
-    } else if (difficulty === "0") {
-      attaque = Math.round(attaque * 0.1);
-      defense = Math.round(defense * 0.12);
-      sante = Math.round(sante * 0.16);
-    }
     let power = Math.round((attaque + defense + sante) * multiplicateur); // inconue du joueurs
     const playerScore = await this.getFightScore(
       playerStats.attaque,
