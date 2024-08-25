@@ -14,7 +14,6 @@ const player = new Player();
 const Cooldown = require("../../class/cooldown");
 const cooldown = new Cooldown();
 const config = require("../../jsons/config.json");
-const e = require("express");
 
 module.exports = {
   name: "duel",
