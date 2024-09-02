@@ -102,7 +102,7 @@ module.exports = {
     },
   ],
   run: async (client, interaction, args) => {
-    /*if (config.maintenance) {
+    if (config.maintenance) {
       const embed = new EmbedBuilder()
         .setTitle("⚒️ Maintenance ⚒️")
         .setColor(color.error)
@@ -111,7 +111,7 @@ module.exports = {
         )
         .setColor(color.error);
       return interaction.reply({ embeds: [embed] });
-    }*/
+    }
     const colors = await dbManager.getColor(interaction.user.id);
     const userId = interaction.user.id;
 
@@ -461,8 +461,8 @@ module.exports = {
           )
           .addFields(
             {
-              name: "📚 V 1.5.0",
-              value: `>>> - Ajout d'une campagne solo -> Entrainement\n- Ajout des Guilde (Empereur)\nRéduction de la FreeDayliBox\n- Ajout de l'utilité des role 🟢 \n- Marchand, chevalier, Noble au rapport\n- 👽 Correction de beug mineur\n__~~**----------------------------------------**~~__`,
+              name: "📚 V 1.5.2",
+              value: `>>> - Ajout DATE by TATSU '/createdateprofil', '/date'\n- 👽 Correction de bug mineur & esthétique\n\nModification Importante Campagne de boss (puissance attaque défense) + logique, Nerf des récompense Modification des stats de boss ,division par 2 de la possibilité de faire une Égalité \n\n__~~**----------------------------------------**~~__`,
             },
             {
               name: "📚 V 1.5.X -->",
