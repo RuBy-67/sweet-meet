@@ -2,7 +2,7 @@ const param = require("../jsons/param.json");
 const { EmbedBuilder } = require("discord.js");
 const DatabaseManager = require("./dbManager");
 const sqlQueriesBoss = require("./sqlQueriesBoss");
-const { pool, poolBo, poolCampagne } = require("../db");
+const { pool, poolCampagne } = require("../db");
 const duelMessages = require(`../jsons/gif.json`);
 const emo = require(`../jsons/emoji.json`);
 const dialog = require(`../jsons/dialogueBoss.json`);
@@ -13,7 +13,7 @@ const dbManager = new DatabaseManager();
 
 class Boss extends DatabaseManager {
   constructor() {
-    super(pool, poolBo, poolCampagne);
+    super(pool, poolCampagne);
     this.userId = null;
     this.stats = null;
     this.materiaux = null;

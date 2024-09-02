@@ -1,10 +1,9 @@
-const { pool, poolBo, poolCampagne, poolDate } = require("../db");
+const { pool, poolCampagne, poolDate } = require("../db");
 const SQL_QUERIES = require("./sqlQueriesDb");
 
 class DatabaseManager {
   constructor() {
     this.pool = pool;
-    this.poolBo = poolBo;
     this.poolCampagne = poolCampagne;
     this.poolDate = poolDate;
   }
@@ -23,26 +22,12 @@ class DatabaseManager {
     return this.query(this.pool, sql, params);
   }
 
-  async queryBo(sql, params) {
-    return this.query(this.poolBo, sql, params);
-  }
-
   async queryCampagne(sql, params) {
     return this.query(this.poolCampagne, sql, params);
   }
   /************ */
   async queryDate(sql, params) {
     return this.query(this.poolDate, sql, params);
-  }
-  /************* */
-  async insertBackupUserData(userData) {
-    const { discordId, power, winCounter, loseCounter } = userData;
-    return this.queryBo(SQL_QUERIES.INSERT_BACKUP_USER, [
-      discordId,
-      power,
-      winCounter,
-      loseCounter,
-    ]);
   }
   async getColor(userId) {
     const userStats = await this.getStats(userId);
@@ -66,6 +51,11 @@ class DatabaseManager {
     return this.queryMain(SQL_QUERIES.GET_GUILD);
   }
 
+  async createAccount(userId) {
+    return this.queryMain(SQL_QUERIES.ADD_USER, [userId]);
+    //ajouter l'ajout de boss (choix du boss)
+  }
+
   async getGuildByTag(tag) {
     return this.queryMain(SQL_QUERIES.GET_GUILD_BY_TAG, [tag]);
   }
@@ -77,14 +67,6 @@ class DatabaseManager {
     return this.queryMain(SQL_QUERIES.SELECT_MATERIAU_USER, [userId]);
   }
 
-  async insertBackupMateriauData(materiau) {
-    const { idUser, idMateriau, lvl } = materiau;
-    return this.queryBo(SQL_QUERIES.INSERT_BACKUP_MATERIAU_USER, [
-      idUser,
-      idMateriau,
-      lvl,
-    ]);
-  }
   async getGuildInvitations(guildId) {
     return this.queryMain(SQL_QUERIES.GET_GUILD_INVITATION, [guildId]);
   }
@@ -145,10 +127,9 @@ class DatabaseManager {
     ]);
     // Parcourir tous les membres et ajouter fragment de puissance
     for (const member of guildMembers) {
-      await this.queryMain(SQL_QUERIES.ADD_MEMBER_POWER, [
+      await this.queryMain(SQL_QUERIES.ADD_MEMBER_FRAGMENT, [
         amount,
         member.discordId,
-        guildId,
       ]);
     }
   }
@@ -355,18 +336,6 @@ class DatabaseManager {
     }
   }
 
-  async getBadgeData(userId) {
-    return this.queryMain(SQL_QUERIES.SELECT_BADGE_USER, [userId]);
-  }
-
-  async insertBackupBadgeData(badge) {
-    const { idUser, idBadge } = badge;
-    return this.queryBo(SQL_QUERIES.INSERT_BACKUP_BADGE_USER, [
-      idUser,
-      idBadge,
-    ]);
-  }
-
   async deleteUserData(discordId) {
     await this.queryMain(SQL_QUERIES.DELETE_USER, [discordId]);
     const guild = await this.getGuildByOwnerId(discordId);
@@ -392,41 +361,6 @@ class DatabaseManager {
   }
   async materiauById(id) {
     return this.queryMain(SQL_QUERIES.GET_MATERIAU_BY_ID, [id]);
-  }
-
-  async getUserDataBo(userId) {
-    return this.queryBo(SQL_QUERIES.GET_USER_DATA_BO, [userId]);
-  }
-
-  async insertUserData(userData) {
-    await this.queryMain(SQL_QUERIES.INSERT_USER_DATA, [
-      userData.discordId,
-      userData.power,
-      userData.winCounter,
-      userData.loseCounter,
-    ]);
-  }
-
-  async getMateriauData(userId) {
-    return this.queryBo(SQL_QUERIES.GET_MATERIAU_DATA, [userId]);
-  }
-  async insertMateriauData(userId, materiauId, level = 1) {
-    await this.queryMain(SQL_QUERIES.INSERT_MATERIAU_DATA, [
-      userId,
-      materiauId,
-      level,
-    ]);
-  }
-  async getBadgeData(userId) {
-    await this.queryBo(SQL_QUERIES.GET_BADGE_DATA, [userId]);
-  }
-  async insertBadgeData(userId, badgeId) {
-    await this.queryMain(SQL_QUERIES.INSERT_BADGE_DATA, [userId, badgeId]);
-  }
-  async deleteBackupData(userId) {
-    await this.queryBo(SQL_QUERIES.DELETE_BACKUP_USER, [userId]);
-    await this.queryBo(SQL_QUERIES.DELETE_BACKUP_MAT, [userId]);
-    await this.queryBo(SQL_QUERIES.DELETE_BACKUP_BADGE, [userId]);
   }
 
   async getDuelDetails(duelId, userId) {
@@ -513,7 +447,59 @@ class DatabaseManager {
 
   async getStats(userId) {
     const result = await this.queryMain(SQL_QUERIES.GET_STATS, [userId]);
-    return result[0];
+    const powerResult = await this.getPower(userId);
+
+    return { ...result[0], power: powerResult };
+  }
+
+  async getPower(userId) {
+    const [detailBatimentLvl] = await this.queryMain(
+      SQL_QUERIES.GET_DETAILS_BATIMENT,
+      [userId]
+    );
+    const [detailTroops] = await this.queryMain(
+      SQL_QUERIES.GET_DETAILS_TROOPS,
+      [userId]
+    );
+    const [detailBoss] = await this.queryMain(SQL_QUERIES.GET_DETAILS_BOSS, [
+      userId,
+    ]);
+    let totalPower = 0;
+    totalPower += 3250 * detailBatimentLvl.caserneLevel || 0;
+    totalPower += 2800 * detailBatimentLvl.hospitalLevel || 0;
+    totalPower += 1925 * detailBatimentLvl.forgeLevel || 0;
+    const troopWeights = {
+      archer: [1, 2, 3, 4, 5],
+      chevalier: [1, 2, 3, 4, 5],
+      infanterie: [1, 2, 3, 4, 5],
+      machine: [1, 2, 3, 4, 5],
+    };
+    // Helper function to calculate power for a given troop type
+    const calculateTroopPower = (troopDetail, troopType) => {
+      return troopWeights[troopType].reduce((total, weight, index) => {
+        const levelKey = `${troopType}Lvl${index + 1}`;
+        const troopCount = troopDetail[levelKey] || 0;
+        return total + weight * troopCount;
+      }, 0);
+    };
+
+    totalPower += calculateTroopPower(detailTroops, "archer");
+    totalPower += calculateTroopPower(detailTroops, "chevalier");
+    totalPower += calculateTroopPower(detailTroops, "infanterie");
+    totalPower += calculateTroopPower(detailTroops, "machine");
+
+    // Calcul de la puissance des boss
+    const typeMultipliers = {
+      1: 1, // Commun
+      2: 2, // Épique
+      3: 3, // Rare
+      4: 4, // Légendaire
+    };
+
+    const bossMultiplier = typeMultipliers[detailBoss.type] || 1;
+    totalPower += detailBoss.level * bossMultiplier * 800 || 0;
+
+    return totalPower;
   }
   async countDuel() {
     const result = await this.queryMain(SQL_QUERIES.COUNT_DUEL);
@@ -557,7 +543,7 @@ class DatabaseManager {
   }
 
   async updatePower(userId, amount) {
-    return this.queryMain(SQL_QUERIES.UPDATE_POWER, [amount, userId]);
+    return this.queryMain(SQL_QUERIES.UPDATE_FRAGMENT, [amount, userId]);
   }
   async getAllPower() {
     return this.queryMain(SQL_QUERIES.GET_ALL_POWER);

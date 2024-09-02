@@ -42,9 +42,9 @@ const SQL_QUERIES = {
   SET_MARRIAGE: `
     INSERT INTO mariage (userId, userId2, date) 
     VALUES (?, ?, NOW())`,
-  UPDATE_POWER: `
+  UPDATE_FRAGMENT: `
     UPDATE user 
-    SET power = power + ? 
+    SET fragment = fragment + ? 
     WHERE discordId = ?`,
   GET_BADGE_ID_BY_NAME: `
     SELECT id 
@@ -73,7 +73,6 @@ FROM role_user
 INNER JOIN role ON role_user.IdRole = role.id
 WHERE role_user.idUser = ?`,
   UPDATE_MATERIAL_STATE: `UPDATE materiau_user SET etat= ? WHERE id = ? AND idUser = ?`,
-  GET_ALL_POWER: "SELECT SUM(power) as power FROM user",
   COUNT_DUEL: "SELECT COUNT(*) AS count FROM duel",
   DELETE_MARIAGE: `DELETE FROM mariage WHERE userId = ? OR userId2 = ?`,
   GET_TOTAL_MATERIAU_BY_RARITY: `SELECT 
@@ -84,29 +83,17 @@ WHERE role_user.idUser = ?`,
   SUM(CASE WHEN m.rarete = 'Très Rare' THEN 1 ELSE 0 END) AS veryRare
 FROM materiau_user mu
 JOIN materiau m ON mu.IdMateriau = m.id`,
-  GET_AVERAGE_POWER: `SELECT AVG(power) AS avgPower FROM user`,
   GET_ALL_PLAYER: `SELECT COUNT(*) as count FROM user`,
   UPDATE_MATERIAL_LEVEL: `UPDATE materiau_user SET lvl = ? WHERE id = ? AND idUser = ?`,
   GET_MATERIAL_BY_ID: ` SELECT mu.id AS mid, mu.*, m.*
     FROM materiau_user mu 
     JOIN materiau m ON mu.IdMateriau = m.id 
     WHERE mu.id = ?`,
-  GET_USER_DATA_BO: `SELECT * FROM backup_user  WHERE discordId = ?`,
-  INSERT_USER_DATA: `INSERT INTO user (discordId, power, winCounter, loseCounter) VALUES (?, ?, ?, ?)`,
-  GET_MATERIAU_DATA: `SELECT * FROM backup_materiau_user WHERE idUser = ?`,
-  INSERT_MATERIAU_DATA: `INSERT INTO materiau_user (idUser, idMateriau, lvl) VALUES (?, ?, ?)`,
-  GET_BADGE_DATA: `SELECT * FROM backup_badge_user WHERE idUser = ?`,
-  INSERT_BADGE_DATA: `INSERT INTO badge_user (idUser, idBadge) VALUES (?, ?)`,
-  DELETE_BACKUP_USER: `DELETE FROM backup_user WHERE discordId = ?`,
-  DELETE_BACKUP_MAT: `DELETE FROM backup_materiau_user WHERE idUser = ?`,
-  DELETE_BACKUP_BADGE: `DELETE FROM backup_badge_user WHERE idUser = ?`,
+  ADD_USER: `INSERT INTO user (discordId) VALUES (?)`,
   GET_ALL_BADGE: `SELECT * FROM badge`,
   GET_DATA_MATERIAL_BY_ID: `SELECT * FROM materiau WHERE id = ?`,
-  INSERT_BACKUP_USER: `INSERT INTO backup_user (discordId, power, winCounter, loseCounter, date) VALUES (?, ?, ?, ?, NOW())`,
   SELECT_MATERIAU_USER: `SELECT * FROM materiau_user WHERE idUser = ?`,
-  INSERT_BACKUP_MATERIAU_USER: `INSERT INTO backup_materiau_user (idUser, idMateriau, lvl, date) VALUES (?, ?, ?, NOW())`,
   SELECT_BADGE_USER: `SELECT * FROM badge_user WHERE idUser = ?`,
-  INSERT_BACKUP_BADGE_USER: `INSERT INTO backup_badge_user (idUser, idBadge, date) VALUES (?, ?, NOW())`,
   DELETE_USER: `DELETE FROM user WHERE discordId = ?`,
   GET_ROLES: `SELECT * FROM role ORDER BY role.idRole ASC`,
   GET_RANDOM_MATERIAL: `SELECT * FROM materiau ORDER BY RAND() LIMIT 3`,
@@ -155,7 +142,7 @@ WHERE u.discordId = ?`,
   UPDATE_GUILD_DESCRIPTION: `UPDATE guild SET description = ? WHERE id = ?`,
   UPDATE_GUILD_BANNER: `UPDATE guild SET bannière = ? WHERE id = ?`,
   UPDATE_GUILD_INVITATION_STATUS: `UPDATE guild SET statutInvit = ? WHERE id = ?`,
-  ADD_MEMBER_POWER: `UPDATE user SET power = power + ? WHERE discordId = ?`,
+  ADD_MEMBER_FRAGMENT: `UPDATE user SET fragment = fragment + ? WHERE discordId = ?`,
   UPDATE_GUILD_XP: `UPDATE guild SET xp = xp + ? WHERE id = ?`,
   GET_CLASS_NAME: `SELECT Nom FROM guild_classe WHERE idClass = ?`,
   GET_MATERIAU_BY_ID: `SELECT * FROM materiau WHERE id = ?`,
@@ -173,6 +160,10 @@ WHERE u.discordId = ?`,
   GET_POTION_DATA_BY_ETAT: `SELECT * FROM potion_user WHERE idUser = ? AND etat = 0`,
   GET_MID_MATERIAUX_BY_ID_LVL5: `SELECT * FROM materiau_user WHERE IdMateriau = ? AND lvl = 5 AND idUser = ?`,
   DELETE_CLASS_BY_GUILD_ID: `DELETE FROM class_user WHERE idGuild = ?`,
+  GET_DETAILS_BATIMENT:
+    "SELECT  h.lvl AS hospitalLevel, f.lvl AS forgeLevel, c.lvl AS caserneLevel FROM  hospital h LEFT JOIN forge f ON h.discordId = f.discordId LEFT JOIN  caserne c ON h.discordId = c.discordId WHERE h.discordId = ?",
+  GET_DETAILS_TROOPS: "SELECT * FROM troops WHERE discordId = ?",
+  GET_DETAILS_BOSS: "SELECT * FROM user_boss WHERE discordId = ?",
 };
 
 module.exports = SQL_QUERIES;

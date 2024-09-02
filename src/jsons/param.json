@@ -22,6 +22,29 @@
     "Esclave": 1
   },
 
+  "troops": {
+    "archer": {
+      "sante": "75",
+      "defense": "5",
+      "attaque": "15"
+    },
+    "cavalier": {
+      "sante": "125",
+      "defense": "10",
+      "attaque": "15"
+    },
+    "infanterie": {
+      "sante": "150",
+      "defense": "15",
+      "attaque": "20"
+    },
+    "machine": {
+      "sante": "170",
+      "defense": "30",
+      "attaque": "5"
+    }
+  },
+
   "xp": {
     "1": "200000",
     "2": "405000",

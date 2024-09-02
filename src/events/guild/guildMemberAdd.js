@@ -16,61 +16,12 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setTitle("Bienvenue sur notre serveur !")
       .setColor(color.pink)
-      .setDescription(`Nous sommes ravis de t'accueillir, <@${member.id}> !`)
+      .setDescription(
+        `Nous sommes ravis de t'accueillir, **${member.username}** !`
+      )
       .setFooter({
         text: `Nombre de membres : ${member.guild.memberCount}`,
         iconURL: member.guild.iconURL({ dynamic: true }),
       });
-
-    try {
-      // Check if the user exists in the main database
-      const [userExists] = await player.getStats(member.id);
-
-      if (!userExists) {
-        const [backupUserData] = await dbManager.getUserDataBo(member.id);
-        if (backupUserData) {
-          await dbManager.insertUserData(backupUserData);
-          const materiauData = await dbManager.getMateriauData(
-            backupUserData.discordId
-          );
-          for (const materiau of materiauData) {
-            await dbManager.insertMateriauData(
-              backupUserData.discordId,
-              materiau.idMateriau,
-              materiau.lvl
-            );
-            console.log(`Matière réimportée pour l'utilisateur ${member.id}`);
-          }
-
-          // Import badge data
-          const badgeData = await dbManager.getBadgeData(
-            backupUserData.discordId
-          );
-          for (const badge of badgeData) {
-            await dbManager.insertBadgeData(
-              backupUserData.discordId,
-              badge.idBadge
-            );
-            console.log(`Badge réimporté pour l'utilisateur ${member.id}`);
-          }
-
-          // Delete backup data
-          await dbManager.deleteBackupData(backupUserData.discordId);
-        } else {
-          // User doesn't exist in backup database either, insert into main database
-          await dbManager.insertUserData({ discordId: member.id });
-        }
-      }
-
-      // Send welcome message
-      if (welcomeChannel) {
-        welcomeChannel.send({ embeds: [embed] });
-        console.log(`Welcome message sent`);
-      } else {
-        console.log(`No Welcome Room Find`);
-      }
-    } catch (error) {
-      console.error("Error during guildMemberAdd execution:", error);
-    }
   },
 };

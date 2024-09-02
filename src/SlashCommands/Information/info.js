@@ -35,15 +35,10 @@ module.exports = {
     },
     {
       type: 1,
-      name: "lore",
-      description: "Information sur le lore de Valoria",
-    },
-    {
-      type: 1,
       name: "bot",
       description: "info sur le bot",
     },
-    {
+    /*{
       type: 1,
       name: "generale",
       description: "informations sur les Objets Roles et Badges disponible",
@@ -69,7 +64,7 @@ module.exports = {
           ],
         },
       ],
-    },
+    },*/
     {
       type: 1,
       name: "classement",
@@ -424,17 +419,6 @@ module.exports = {
           message.edit({ components: [row] });
         });
 
-      case "lore":
-        const embed = new EmbedBuilder()
-          .setTitle("InfoLore - Valoria")
-          .setColor(colors)
-          .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-          .setDescription("description")
-          .setFooter({
-            text: `Demandé(e) par ${interaction.user.tag}`,
-            iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
-          });
-        return interaction.reply({ embeds: [embed] });
       case "bot":
         const botPing = Math.round(client.ws.ping);
         function emoji(id) {
@@ -475,7 +459,7 @@ module.exports = {
           });
 
         return interaction.reply({ embeds: [embedBot] });
-      case "generale":
+      /*case "generale":
         const choice = interaction.options.getString("categorie");
         let result = null;
         let title = "";
@@ -630,7 +614,7 @@ module.exports = {
         Gcollector.on("end", () => {
           NewRow.components.forEach((component) => component.setDisabled(true));
           NewMessage.edit({ components: [NewRow] });
-        });
+        });*/
       case "classement":
         const embedClassement = new EmbedBuilder()
           .setTitle(`Classement des utilisateurs`)
