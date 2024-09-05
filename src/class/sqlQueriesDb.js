@@ -89,7 +89,7 @@ JOIN materiau m ON mu.IdMateriau = m.id`,
     FROM materiau_user mu 
     JOIN materiau m ON mu.IdMateriau = m.id 
     WHERE mu.id = ?`,
-  ADD_USER: `INSERT INTO user (discordId) VALUES (?)`,
+  ADD_USER: `INSERT INTO user (discordId, civilisation) VALUES (?,?)`,
   GET_ALL_BADGE: `SELECT * FROM badge`,
   GET_DATA_MATERIAL_BY_ID: `SELECT * FROM materiau WHERE id = ?`,
   SELECT_MATERIAU_USER: `SELECT * FROM materiau_user WHERE idUser = ?`,
@@ -164,6 +164,16 @@ WHERE u.discordId = ?`,
     "SELECT  h.lvl AS hospitalLevel, f.lvl AS forgeLevel, c.lvl AS caserneLevel FROM  hospital h LEFT JOIN forge f ON h.discordId = f.discordId LEFT JOIN  caserne c ON h.discordId = c.discordId WHERE h.discordId = ?",
   GET_DETAILS_TROOPS: "SELECT * FROM troops WHERE discordId = ?",
   GET_DETAILS_BOSS: "SELECT * FROM user_boss WHERE discordId = ?",
+  GET_ALL_CIVILISATION: `SELECT * FROM civilisation`,
+  GET_CIVILISATION_BY_NAME: `SELECT * FROM civilisation WHERE nom = ?`,
+  ADD_USER_HOSPITAL: `INSERT INTO hospital (discordId, lvl) VALUES (?, 1)`,
+  ADD_USER_CASERNE: `INSERT INTO caserne (discordId, lvl) VALUES (?, 1)`,
+  ADD_USER_FORGE: `INSERT INTO forge (discordId, lvl) VALUES (?, 1)`,
+  GET_BOSS_INFO: `SELECT * FROM bosses WHERE id = ?`,
+  ADD_BOSS_ID: `INSERT INTO user_boss (discordId, bossId,level) VALUES (?, ?,?)`,
+  GET_BOSS_BY_USER: `SELECT * FROM user_boss WHERE discordId = ?`,
+  UPGRADE_BOSS: `UPDATE user_boss SET level = level + 1 WHERE discordId = ? AND bossId = ?`,
+  GET_BOSS_BY_USER_BY_BOSS_ID: `SELECT * FROM user_boss WHERE discordId = ? AND bossId = ?`,
 };
 
 module.exports = SQL_QUERIES;

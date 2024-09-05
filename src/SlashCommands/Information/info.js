@@ -18,7 +18,7 @@ const player = new Player();
 
 module.exports = {
   name: "infos",
-  description: "Informations sur generale",
+  description: "Informations",
   options: [
     {
       type: 1,
@@ -119,70 +119,165 @@ module.exports = {
     const subCommand = interaction.options.getSubcommand();
     switch (subCommand) {
       case "profil":
+        async function createBossEmbed(
+          boss,
+          bossInfo,
+          statsResult,
+          params,
+          targetUser,
+          EmbedColor,
+          emo
+        ) {
+          let EquippedMateriaux = "";
+          const materiauId1 = boss.materiauId1;
+          const materiauId2 = boss.materiauId2;
+
+          // Récupération des matériaux
+          const [materiau1] = (await dbManager.getDataMateriauById(
+            materiauId1
+          )) || [null];
+          const [materiau2] = (await dbManager.getDataMateriauById(
+            materiauId2
+          )) || [null];
+
+          // Création des descriptions des matériaux si définis
+          const material1Info = materiau1
+            ? `**${emoji(emo[materiau1.nom] || "default")} ${
+                materiau1.nom
+              }**\n**${materiau1.rarete}**\n> ⚔️ Attaque: ${
+                materiau1.attaqueBoost
+              }%\n> 🛡️ Défense: ${materiau1.defenseBoost}%\n> 💚 Santé : ${
+                materiau1.santeBoost
+              }%`
+            : null;
+
+          const material2Info = materiau2
+            ? `**${emoji(emo[materiau2.nom] || "default")} ${
+                materiau2.nom
+              }**\n**${materiau2.rarete}**\n> ⚔️ Attaque: ${
+                materiau2.attaqueBoost
+              }%\n> 🛡️ Défense: ${materiau2.defenseBoost}%\n> 💚 Santé : ${
+                materiau2.santeBoost
+              }%`
+            : null;
+
+          if (material1Info || material2Info) {
+            EquippedMateriaux = [material1Info, material2Info]
+              .filter((info) => info !== null)
+              .join("\n\n");
+          }
+
+          const boostSante =
+            ((materiau1?.santeBoost || 0) + (materiau2?.santeBoost || 0)) /
+              100 +
+            1;
+          const boostAttaque =
+            ((materiau1?.attaqueBoost || 0) + (materiau2?.attaqueBoost || 0)) /
+              100 +
+            1;
+          const boostDefense =
+            ((materiau1?.defenseBoost || 0) + (materiau2?.defenseBoost || 0)) /
+              100 +
+            1;
+
+          // Calcul du multiplicateur de base du boss
+          const baseMultiplier = 1 + (boss.level / 10) * 0.1;
+          const extraBoost = (boss.level / 10) * 0.1;
+          const multiplier = baseMultiplier + extraBoost;
+
+          // Calcul des boosts totaux
+          const boostedSante = Math.round(
+            bossInfo.santeBoost * multiplier * boostSante
+          );
+          const boostedAttaque = Math.round(
+            bossInfo.attaqueBoost * multiplier * boostAttaque
+          );
+          const boostedDefense = Math.round(
+            bossInfo.defenseBoost * multiplier * boostDefense
+          );
+
+          const raretes = {
+            "Commune 🟢": "poussiereCommune",
+            "Rare 🟠": "poussiereRare",
+            "Épique 🟣": "poussiereEpique",
+            "Légendaire 🟡": "poussiereLegendaire",
+          };
+
+          const rareteKey = bossInfo.type;
+          const rarete = Object.keys(raretes)[rareteKey - 1] || "Inconnue";
+
+          const colonnePoussiere = raretes[rarete] || "0";
+          const quantitePoussiere = statsResult[colonnePoussiere] || 0;
+
+          const bossStats = `💚 Santé: **${boostedSante}%**\n ⚔️ Attaque: **${boostedAttaque}%**\n 🛡️ Défense: **${boostedDefense}%**`;
+          const currentBossLevel = boss.level;
+          const roundedLevel = Math.ceil((currentBossLevel + 1) * 0.1) * 10;
+          const requiredPoussière = (currentBossLevel + 1) * 10;
+          const requiredCard =
+            params.troops.bosses.type[bossInfo.type].carte[roundedLevel] || "0";
+
+          const embed = new EmbedBuilder()
+            .setAuthor({
+              name: `Bosses`,
+              iconURL: targetUser.displayAvatarURL({ dynamic: true }),
+            })
+            .setTitle(`${bossInfo.nom} (Niveau ${boss.level})`)
+            .setThumbnail(bossInfo.image)
+            .setColor(EmbedColor)
+            .addFields(
+              {
+                name: "Rareté",
+                value: rarete,
+              },
+              {
+                name: "Boosts",
+                value: bossStats,
+              },
+              {
+                name: "Matériaux équipés",
+                value:
+                  "*Les Bonus sont Appliquées au boss qui l'applique aux troupes*\n" +
+                  EquippedMateriaux,
+              },
+              ...(boss.level < 60
+                ? [
+                    {
+                      name: `${emoji(
+                        emo["Poussière de terre"]
+                      )} Poussière (${rarete}) - pour niveau ${boss.level + 1}`,
+                      value: `${quantitePoussiere}/${requiredPoussière}`,
+                      inline: true,
+                    },
+                    {
+                      name: `🃏 Carte pour niveau ${roundedLevel}`,
+                      value: `${boss.carte || 0}/${requiredCard}`,
+                      inline: true,
+                    },
+                  ]
+                : []),
+              {
+                name: "Niveau",
+                value: `${boss.level}/60`,
+              }
+            )
+            .setFooter({
+              text: `Page ${pages.length + 1}/${bossResult1.length + 1}`,
+              iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+            });
+
+          return embed;
+        }
+
         const target =
           interaction.options.getMember("membre") || interaction.member;
         const targetUser = await client.users.fetch(target.user.id);
-        const materiauResult = await dbManager.getMateriauByUserId(
-          targetUser.id
-        );
 
-        let materiaux = "Aucun";
-        if (materiauResult.length > 0) {
-          const materiauxMap = new Map();
-          materiauResult.forEach((materiau) => {
-            const materiauKey = `${materiau.nom}-${materiau.lvl}`;
-            if (!materiauxMap.has(materiauKey)) {
-              materiauxMap.set(materiauKey, {
-                nom: materiau.nom,
-                lvl: materiau.lvl,
-                quantite: 0,
-              });
-            }
-            materiauxMap.get(materiauKey).quantite++;
-          });
+        // Récupérer les boss possédés par l'utilisateur
+        const bossResult1 = await dbManager.getBossByUser(targetUser.id);
 
-          materiaux = [...materiauxMap.values()]
-            .map(
-              (materiau) =>
-                `${emoji(emo[materiau.nom])} \`${materiau.nom}\` *=>* lvl: ${
-                  materiau.lvl
-                }, **x${materiau.quantite}**`
-            )
-            .join(" \n");
-        }
+        const pages = [];
 
-        //-------------------------------------//
-        let materiauxDetails = [];
-        if (materiauResult.length > 0) {
-          const materiauxMap2 = new Map();
-          materiauResult.forEach((materiau) => {
-            const materiauKey = `${materiau.nom}-${materiau.rarete}-${materiau.type}-${materiau.defenseBoost}-${materiau.attaqueBoost}-${materiau.santeBoost}-${materiau.lore}`;
-            if (!materiauxMap2.has(materiauKey)) {
-              materiauxMap2.set(materiauKey, {
-                nom: materiau.nom,
-                rarete: materiau.rarete,
-                type: materiau.type,
-                defense: materiau.defenseBoost,
-                attaque: materiau.attaqueBoost,
-                sante: materiau.santeBoost,
-                lore: materiau.lore,
-                quantite: 0,
-              });
-            }
-            materiauxMap2.get(materiauKey).quantite++;
-          });
-
-          materiauxDetails = [...materiauxMap2.values()].map((materiau) => {
-            const materiauEmoji = emoji(emo[materiau.nom]);
-            const description = `**Rareté:** ${materiau.rarete}\n**Type:** ${materiau.type}\n**Boost:** 💚 ${materiau.sante}% - ⚔️ ${materiau.attaque}% - 🛡️ ${materiau.defense}%\n> *${materiau.lore}*\n**Quantité:** ${materiau.quantite}\n__~~**----------------------------------**~~__`;
-
-            return {
-              name: `${materiauEmoji} ${materiau.nom}`,
-              value: description,
-            };
-          });
-        }
-
+        // Profil principal
         const badgeResult = await dbManager.getBadge(targetUser.id);
         let badges = "Aucun";
         if (badgeResult.length > 0) {
@@ -190,7 +285,6 @@ module.exports = {
         }
 
         const marriageResult = await dbManager.getMarriage(targetUser.id);
-
         let marriageStatus;
         if (marriageResult.length === 0) {
           marriageStatus = "Célibataire";
@@ -205,19 +299,17 @@ module.exports = {
               marriageResult[0].userId2
             );
           }
-
           const mariage = marriageResult[0].date;
           const mariageTimestamp = Math.floor(mariage.getTime() / 1000);
-          marriageStatus = `Marié(e) avec <@${spouse.user.id}> \n Depuis le: <t:${mariageTimestamp}:D>`;
+          marriageStatus = `Marié(e) avec <@${spouse.user.id}> \nDepuis le: <t:${mariageTimestamp}:D>`;
         }
 
         const statsResult = await dbManager.getStats(targetUser.id);
         const win = statsResult.winCounter;
-        const lose = statsResult.loseCounter;
+        const dead = statsResult.deadCounter;
         const power = statsResult.power;
-        const rate = win / (win + lose) || 0;
-        const stats = await player.getStatsById(targetUser.id);
         const roleInfo = await dbManager.getRoleByUserId(targetUser.id);
+
         let role = "Aucun";
         if (roleInfo.length > 0) {
           role = roleInfo.map((role1) => `<@&${role1.id}>`).join(" ");
@@ -227,7 +319,6 @@ module.exports = {
 
         if (statsResult.guildId != null) {
           const guildInfo = await dbManager.getGuildById(statsResult.guildId);
-
           if (guildInfo[0].empreur == targetUser.id) {
             guildTag = `${emoji(emo.King)} Empereur de **${
               guildInfo[0].nom
@@ -238,11 +329,9 @@ module.exports = {
               targetUser.id,
               statsResult.guildId
             );
-
             const guildInfoClassName = await dbManager.getClassName(
               guildInfoClassId[0].idClasse
             );
-
             guildTag = `${emoji(emo[`class${guildInfoClassId[0].idClasse}`])} ${
               guildInfoClassName[0].Nom
             } de **${guildInfo[0].nom}** - ***[${guildInfo[0].tag}]***`;
@@ -251,9 +340,15 @@ module.exports = {
         } else {
           guildTag = "Aucune guilde associée";
         }
-        const pages = [
-          new EmbedBuilder()
 
+        pages.push(
+          new EmbedBuilder()
+            .setAuthor({
+              name:
+                "Puissance : " +
+                power.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "),
+              iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+            })
             .setTitle(`Profil de ${targetUser.username}`)
             .setColor(EmbedColor)
             .setThumbnail(targetUser.displayAvatarURL({ dynamic: true }))
@@ -269,11 +364,11 @@ module.exports = {
               },
               {
                 name: "Information :",
-                value: `Fragments : ${power
+                value: `Fragments : ${statsResult.fragment
                   .toString()
                   .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}${emoji(
                   emo.power
-                )}\nBadges : ${badges}\n `,
+                )}\nBadges : ${badges}\n`,
                 inline: true,
               },
               {
@@ -282,93 +377,69 @@ module.exports = {
                 inline: true,
               },
               {
-                name: "Matériaux :",
-                value: materiaux || "Aucun",
-                inline: false,
-              },
-              {
                 name: "Performance",
-                value: `🏆 Win : **${win}**\n❌ Lose : **${lose}**\n📊 Rate : **${(
-                  rate * 100
-                ).toFixed(2)}%**`,
+                value: `🏆 Win : **${win}**\n☠️ Dead : **${dead}**`,
                 inline: false,
-              },
-              {
-                name: "Statistique de combat",
-                value: `💚 Santé : **${stats.sante}** \n🛡️ Défense : **${stats.defense}** \n⚔️ Attaque : **${stats.attaque}**`,
               }
             )
             .setFooter({
-              text: `demandé(e) par ${interaction.user.tag} - Page 1/2`,
+              text: `demandé(e) par ${interaction.user.tag} - Page 1/${
+                bossResult1.length + 1
+              }`,
               iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
-            }),
-
-          new EmbedBuilder()
-            .setTitle("Mes Matériaux")
-            .setColor(colors)
-            .setDescription(
-              "*Dans le royaume ancien de Valoria, la magie et les éléments se mélangent pour créer des matériaux d'une puissance incommensurable. Ces matériaux sont les reliques de l'harmonie entre les forces naturelles et la magie ancestrale, et leur possession confère à leurs détenteurs des capacités extraordinaires. On raconte que ces artefacts sont les vestiges d'une époque où les dieux eux-mêmes foulaient la terre de Valoria, infusant la nature de leur puissance divine.*\n\n***Le level (des materiaux) Influe sur les Boost***"
-            )
-            .addFields(materiauxDetails)
-            .setFooter({
-              text: `Demandé(e) par ${interaction.user.tag} - Page 2/2`,
-              iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
-            }),
-        ];
-        const legendaryMaterials = await dbManager.getMateriauxByRarity(
-          "Legendaire"
+            })
         );
 
-        const legendaryMaterialsDescription = legendaryMaterials
-          .map((mat) => `${emoji(emo[mat.nom])} : ${mat.nom}`)
-          .join("\n");
-        const hiddenPage = new EmbedBuilder()
-          .setTitle("Secret Page")
-          .setColor(colors)
-          .setDescription(
-            "Ho t'a trouvé la page secrète ! claim ton cadeau 🧧 c'est une chance sur 1000 de tomber sur cette page, et te permet de claim entre 5000 et 15000 Fragments de Protection !\nAinsi que d'obtenir un matériaux legendaire parmis la liste suivante !"
-          )
-          .addFields({
-            name: "Matériaux Légendaires Disponibles",
-            value: legendaryMaterialsDescription,
-          })
-          .setFooter({
-            text: `Demandé(e) par ${interaction.user.tag}`,
-            iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
-          });
+        for (const boss of bossResult1) {
+          const bossInfo = await dbManager.getBossInfo(boss.bossId);
+          const embed = await createBossEmbed(
+            boss,
+            bossInfo[0],
+            statsResult,
+            params,
+            targetUser,
+            EmbedColor,
+            emo
+          );
+          pages.push(embed);
+        }
 
         let currentPage = 0;
 
-        // Determine if the rare button should appear
-        const showRareButton = Math.random() < 0.001; // 1 in 1000 chance
-
-        const row = new ActionRowBuilder().addComponents(
+        let row = new ActionRowBuilder().addComponents(
           new ButtonBuilder()
             .setCustomId("previous")
             .setLabel("⬅️")
-            .setStyle(ButtonStyle.Primary),
+            .setStyle(ButtonStyle.Primary)
+            .setDisabled(targetUser.id !== interaction.user.id), // Désactiver si pas le propriétaire
           new ButtonBuilder()
             .setCustomId("next")
             .setLabel("➡️")
             .setStyle(ButtonStyle.Primary)
+            .setDisabled(targetUser.id !== interaction.user.id) // Désactiver si pas le propriétaire
         );
 
-        if (showRareButton) {
-          row.addComponents(
-            new ButtonBuilder()
-              .setCustomId("secret")
-              .setLabel("🎁")
-              .setStyle(ButtonStyle.Success)
-          );
-        }
+        let row2 = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId("upgrade")
+            .setLabel("Upgrade")
+            .setStyle(ButtonStyle.Success)
+        );
+
+        // Envoyer le message avec les composants appropriés
+        const components =
+          currentPage === 0
+            ? [row] // Pas besoin d'Upgrade sur la première page
+            : [row, row2]; // Ajouter row2 si non-null
+
         const message = await interaction.reply({
           embeds: [pages[currentPage]],
-          components: [row],
+          components: components,
           fetchReply: true,
         });
 
         const filter = (i) =>
-          ["previous", "next", "secret", "claim"].includes(i.customId) &&
+          ["previous", "next", "upgrade"].includes(i.customId) &&
           i.user.id === interaction.user.id;
 
         const collector = message.createMessageComponentCollector({
@@ -379,44 +450,104 @@ module.exports = {
         collector.on("collect", async (i) => {
           if (i.customId === "next") {
             currentPage = (currentPage + 1) % pages.length;
-            await i.update({ embeds: [pages[currentPage]], components: [row] });
           } else if (i.customId === "previous") {
             currentPage = (currentPage - 1 + pages.length) % pages.length;
-            await i.update({ embeds: [pages[currentPage]], components: [row] });
-          } else if (i.customId === "secret") {
-            row.addComponents(
-              new ButtonBuilder()
-                .setCustomId("claim")
-                .setLabel("🧧 Claim !!!!")
-                .setStyle(ButtonStyle.Success)
-            );
-            await i.update({ embeds: [hiddenPage], components: [row] });
-          } else if (i.customId === "claim") {
-            const power = await dbManager.generateRandomPower();
-            await dbManager.updatePower(interaction.user.id, power);
-            const randomMaterial =
-              legendaryMaterials[
-                Math.floor(Math.random() * legendaryMaterials.length)
-              ];
-            await dbManager.addMaterialToUser(
-              interaction.user.id,
-              randomMaterial.id
-            );
-            await i.update({
-              content: `Claimed! You received ${power} ${emoji(
-                emo.power
-              )} and a legendary material: ${emoji(emo[randomMaterial.nom])} ${
-                randomMaterial.nom
-              }.`,
-              embeds: [],
-              components: [],
-            });
+          } else if (i.customId === "upgrade") {
+            const bossIndex = currentPage - 1;
+            if (bossIndex >= 0 && bossIndex < bossResult1.length) {
+              const boss = bossResult1[bossIndex];
+
+              // Vérifiez si l'utilisateur a assez de poussière et de cartes
+              // si boss pas au dessus de 60
+              if (boss.level >= 60) {
+                return i.reply({
+                  content: "Le boss est déjà au niveau maximum.",
+                  ephemeral: true,
+                });
+              }
+              if (quantitePoussiere < requiredPoussière) {
+                return i.reply({
+                  content: `Vous n'avez pas assez de poussière pour améliorer ce boss.`,
+                  ephemeral: true,
+                });
+              }
+
+              if (boss.carte < requiredCard && boss.level % 10 == 0) {
+                return i.reply({
+                  content: `Vous n'avez pas assez de cartes pour améliorer ce boss.`,
+                  ephemeral: true,
+                });
+              }
+
+              // Effectuer l'upgrade
+              await dbManager.upgradeBoss(targetUser.id, boss.bossId);
+              const updatedBossInfo = await dbManager.getBossInfo(boss.bossId);
+              console.log(updatedBossInfo);
+              const boss1 = await dbManager.getBossByUserByBossId(
+                targetUser.id,
+                boss.bossId
+              );
+              console.log(boss1);
+
+              // Mettre à jour l'embed de la page actuelle
+              pages[currentPage] = await createBossEmbed(
+                boss1[0],
+                updatedBossInfo[0],
+                statsResult,
+                params,
+                targetUser,
+                EmbedColor,
+                emo
+              );
+
+              // Mettre à jour les composants du message
+              let updatedRow2 = null;
+              if (targetUser.id === interaction.user.id && currentPage > 0) {
+                updatedRow2 = new ActionRowBuilder().addComponents(
+                  new ButtonBuilder()
+                    .setCustomId("upgrade")
+                    .setLabel("Upgrade")
+                    .setStyle(ButtonStyle.Success)
+                );
+              }
+
+              const updatedComponents = updatedRow2
+                ? [row, updatedRow2]
+                : [row]; // Définir les composants mis à jour
+
+              // Mettre à jour le message avec le nouvel embed et les composants mis à jour
+              await i.update({
+                content: "Upgrade effectué !",
+                embeds: [pages[currentPage]], // Mise à jour de l'embed actuel uniquement
+                components: updatedComponents, // Mise à jour des composants
+              });
+            }
           }
+
+          const updatedRow2 =
+            currentPage > 0
+              ? new ActionRowBuilder().addComponents(
+                  new ButtonBuilder()
+                    .setCustomId("upgrade")
+                    .setLabel("Upgrade")
+                    .setStyle(ButtonStyle.Success)
+                )
+              : null;
+
+          const updatedComponents = updatedRow2 ? [row, updatedRow2] : [row];
+
+          await i.update({
+            embeds: [pages[currentPage]],
+            components: updatedComponents,
+          });
         });
 
         collector.on("end", () => {
           row.components.forEach((component) => component.setDisabled(true));
-          message.edit({ components: [row] });
+          if (row2) {
+            row2.components.forEach((component) => component.setDisabled(true));
+          }
+          message.edit({ components: [row, row2].filter(Boolean) }); // Filtrer les null dans les composants
         });
 
       case "bot":

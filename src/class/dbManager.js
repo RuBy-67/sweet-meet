@@ -37,6 +37,11 @@ class DatabaseManager {
     const [result] = await this.queryMain(SQL_QUERIES.GET_COLOR, [userId]);
     return result?.bannière ?? "#e08dac";
   }
+
+  async getBossInfo(id) {
+    return this.queryCampagne(SQL_QUERIES.GET_BOSS_INFO, [id]);
+  }
+
   async createGuild(guildColor, guildName, guildDescription, tag, userId) {
     this.queryMain(SQL_QUERIES.CREATE_GUILD, [
       guildName,
@@ -46,14 +51,68 @@ class DatabaseManager {
       userId,
     ]);
   }
+  async upgradeBoss(userId, bossId) {
+    this.queryMain(SQL_QUERIES.UPGRADE_BOSS, [userId, bossId]);
+  }
+  async getBossByUserByBossId(userId, bossId) {
+    return this.queryMain(SQL_QUERIES.GET_BOSS_BY_USER_BY_BOSS_ID, [
+      userId,
+      bossId,
+    ]);
+  }
 
   async getGuild() {
     return this.queryMain(SQL_QUERIES.GET_GUILD);
   }
+  async addBossId(userId, bossId, lvl) {
+    this.queryMain(SQL_QUERIES.ADD_BOSS_ID, [userId, bossId, lvl]);
+  }
 
-  async createAccount(userId) {
-    return this.queryMain(SQL_QUERIES.ADD_USER, [userId]);
-    //ajouter l'ajout de boss (choix du boss)
+  async createAccount(userId, civilisation, type) {
+    this.queryMain(SQL_QUERIES.ADD_USER, [userId, civilisation]);
+    this.queryMain(SQL_QUERIES.ADD_USER_HOSPITAL, [userId]);
+    this.queryMain(SQL_QUERIES.ADD_USER_CASERNE, [userId]);
+    this.queryMain(SQL_QUERIES.ADD_USER_FORGE, [userId]);
+    let troops;
+    switch (type) {
+      case 1: // Infanterie
+        troops = [{ type: "infanterieLvl1", amount: 10000 }];
+        break;
+      case 2: // Archer
+        troops = [{ type: "archerLvl1", amount: 10000 }];
+        break;
+      case 3: // Cavalier
+        troops = [{ type: "chevalierLvl1", amount: 10000 }];
+        break;
+      case 4: // Machine
+        troops = [{ type: "machineLvl1", amount: 10000 }];
+        break;
+      default:
+        throw new Error("Type de troupe inconnu.");
+    }
+
+    // Construire dynamiquement la partie de la requête SQL
+    const columns = troops.map((t) => t.type).join(", ");
+    const values = troops.map((t) => `(${userId}, ${t.amount})`).join(", ");
+
+    const query = `
+        INSERT INTO troops (discordId, ${columns})
+        VALUES ${values}
+        ON DUPLICATE KEY UPDATE
+            ${troops.map((t) => `${t.type} = VALUES(${t.type})`).join(", ")}
+    `;
+
+    // Exécuter la requête SQL
+    await this.queryMain(query);
+  }
+  async getAllCivilisation() {
+    return this.queryMain(SQL_QUERIES.GET_ALL_CIVILISATION);
+  }
+  async getCivilisationByName(name) {
+    return this.queryMain(SQL_QUERIES.GET_CIVILISATION_BY_NAME, [name]);
+  }
+  async getBossByUser(userId) {
+    return this.queryMain(SQL_QUERIES.GET_BOSS_BY_USER, [userId]);
   }
 
   async getGuildByTag(tag) {
@@ -447,8 +506,10 @@ class DatabaseManager {
 
   async getStats(userId) {
     const result = await this.queryMain(SQL_QUERIES.GET_STATS, [userId]);
+    if (!result.length) {
+      return null;
+    }
     const powerResult = await this.getPower(userId);
-
     return { ...result[0], power: powerResult };
   }
 
@@ -461,9 +522,10 @@ class DatabaseManager {
       SQL_QUERIES.GET_DETAILS_TROOPS,
       [userId]
     );
-    const [detailBoss] = await this.queryMain(SQL_QUERIES.GET_DETAILS_BOSS, [
+    const [detailBossLvl] = await this.queryMain(SQL_QUERIES.GET_DETAILS_BOSS, [
       userId,
     ]);
+    const [detailBoss] = await this.getBossInfo(detailBossLvl.bossId);
     let totalPower = 0;
     totalPower += 3250 * detailBatimentLvl.caserneLevel || 0;
     totalPower += 2800 * detailBatimentLvl.hospitalLevel || 0;
@@ -491,13 +553,13 @@ class DatabaseManager {
     // Calcul de la puissance des boss
     const typeMultipliers = {
       1: 1, // Commun
-      2: 2, // Épique
-      3: 3, // Rare
+      2: 2, // Rare
+      3: 3, // Épique
       4: 4, // Légendaire
     };
 
     const bossMultiplier = typeMultipliers[detailBoss.type] || 1;
-    totalPower += detailBoss.level * bossMultiplier * 800 || 0;
+    totalPower += detailBossLvl.level * bossMultiplier * 800 || 0;
 
     return totalPower;
   }
