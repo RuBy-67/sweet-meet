@@ -445,6 +445,9 @@ class DatabaseManager {
   async addRoleToUser(userId, roleId) {
     return this.queryMain(SQL_QUERIES.ADD_ROLE_TO_USER, [userId, roleId]);
   }
+  async getIdMateriauByIdUnique(id) {
+    return this.queryMain(SQL_QUERIES.GET_ID_MATERIAL_BY_ID_UNIQUE, [id]);
+  }
   async getRoleByUserIdRoleId(userId, roleId) {
     return this.queryMain(SQL_QUERIES.GET_ROLE_BY_USER_ID_ROLE_ID, [
       roleId,
@@ -591,6 +594,42 @@ class DatabaseManager {
   async getAllUser() {
     return this.queryMain(SQL_QUERIES.GET_ALL_PLAYER);
   }
+  async calculatePowerForAllUsers() {
+    const userIdsArray = await this.getAllUserIds();
+    const userIds = userIdsArray.map((user) => user.discordId);
+
+    console.log(userIds);
+    const results = [];
+    for (const userId of userIds) {
+      try {
+        console.log(`Calcul de la puissance pour l'utilisateur ${userId}...`);
+        const power = await this.getPower(userId);
+        results.push({ userId, power });
+      } catch (error) {
+        console.error(
+          `Erreur lors du calcul de la puissance pour l'utilisateur ${userId}:`,
+          error
+        );
+      }
+    }
+
+    const totalPower = results.reduce((sum, result) => sum + result.power, 0);
+    results.sort((a, b) => b.power - a.power);
+    console.log(`Puissance totale pour tous les joueurs: ${totalPower}`);
+    console.log("Tableau trié des utilisateurs par puissance décroissante:");
+    results.forEach((result) => {
+      console.log(`Utilisateur ${result.userId}: ${result.power}`);
+    });
+    return {
+      totalPower,
+      sortedResults: results,
+    };
+  }
+
+  async getAllUserIds() {
+    const users = await this.queryMain(SQL_QUERIES.GET_ALL_USER_IDS);
+    return users;
+  }
 
   async getTopUsers(field, limit) {
     return this.queryMain(SQL_QUERIES.GET_TOP_USERS, [field, limit]);
@@ -691,10 +730,9 @@ class DatabaseManager {
     ]);
   }
 
-  async updateMaterialLevel(userId, materialId, newLevel) {
+  async updateMaterialLevel(userId, idUnique) {
     return this.queryMain(SQL_QUERIES.UPDATE_MATERIAL_LEVEL, [
-      newLevel,
-      materialId,
+      idUnique,
       userId,
     ]);
   }

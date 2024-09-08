@@ -8,10 +8,13 @@
   "cooldownSecret": "1200",
   "guildPrice": "50000",
   "guildlvlMax": "5",
+  "maxLvlBoss": "60",
+  "maxLevel": "5",
   "changeGuildName": "20000",
   "changeGuildStatut": "5000",
   "changeGuildBanner": "10000",
   "changeGuildDescription": "30000",
+  "topClassement": 5,
 
   "promote": {
     "Ministre": 15000,
@@ -140,16 +143,14 @@
     "id2": "462695102876352523",
     "id3": "389426909634625551"
   },
-
-  "maxLevel": "5",
   "updatePrice": {
-    "commun": "10",
-    "rare": "20",
-    "tresRare": "30",
-    "epic": "40",
-    "legendaire": "50",
-    "levels": "0.5",
-    "multiplicateur": "71",
+    "commun": "250",
+    "rare": "470",
+    "tresRare": "630",
+    "epic": "820",
+    "legendaire": "950",
+    "levels": "0.8",
+    "multiplicateur": "73",
     "feu": "1.15",
     "terre": "1.07",
     "eau": "1.097",

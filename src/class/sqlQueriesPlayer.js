@@ -17,11 +17,7 @@ const sqlQueries = {
       AND mu.etat = 1
   `,
   getMaterialsByIdEtat0: `
-    SELECT m.nom AS nom, m.rarete AS rarete, mu.lvl AS materiauLevel, m.type AS materiauType, mu.id AS idMateriau
-    FROM materiau m
-    JOIN materiau_user mu ON m.id = mu.IdMateriau 
-    WHERE mu.idUser = ? AND
-      (mu.etat = 0 OR mu.etat IS NULL)
+    SELECT m.nom AS nom, m.rarete AS rarete, mu.level AS materiauLevel, m.type AS materiauType, mu.materiauId AS idMateriau FROM materiau m JOIN materiau_user mu ON m.id = mu.materiauId WHERE mu.discordId = ? AND (mu.etat = 0 OR mu.etat IS NULL);
   `,
   insertMaterialsIntoDuelDetail: `
     UPDATE dueldetails SET idMateriau1 = ?, idMateriau2 = ?, idMateriau3 = ?, idMateriau4 = ?

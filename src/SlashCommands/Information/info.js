@@ -15,6 +15,8 @@ const color = require("../../jsons/color.json");
 const Player = require("../../class/player");
 const info = require("../../jsons/info.json");
 const player = new Player();
+const Boss = require("../../class/bossManager");
+const bossManager = new Boss();
 
 module.exports = {
   name: "infos",
@@ -38,7 +40,7 @@ module.exports = {
       name: "bot",
       description: "info sur le bot",
     },
-    /*{
+    {
       type: 1,
       name: "generale",
       description: "informations sur les Objets Roles et Badges disponible",
@@ -61,10 +63,14 @@ module.exports = {
               name: "Badges",
               value: "badges",
             },
+            {
+              name: "Boss",
+              value: "boss",
+            },
           ],
         },
       ],
-    },*/
+    },
     {
       type: 1,
       name: "classement",
@@ -119,6 +125,43 @@ module.exports = {
     const subCommand = interaction.options.getSubcommand();
     switch (subCommand) {
       case "profil":
+        async function calculateUpgradePrice(
+          materialId,
+          materiauIdData,
+          userId
+        ) {
+          const ownedMaterials = await dbManager.getMateriauById(userId);
+
+          const rarityMap = {
+            Commun: params.updatePrice.commun,
+            Rare: params.updatePrice.rare,
+            "Très Rare": params.updatePrice.tresRare,
+            Épique: params.updatePrice.epic,
+            Legendaire: params.updatePrice.legendaire,
+          };
+
+          const typeMultiplierMap = {
+            feu: params.updatePrice.feu,
+            eau: params.updatePrice.eau,
+            terre: params.updatePrice.terre,
+            vent: params.updatePrice.vent,
+          };
+
+          const typeMultiplier = typeMultiplierMap[materialId.type] || 1;
+          const baseRarity = rarityMap[materialId.rarete] || 1;
+          const rarity = baseRarity * typeMultiplier;
+
+          const calculLevelPrice = Math.round(
+            params.updatePrice.levels *
+              (materiauIdData.level + 1) * // Le niveau suivant
+              (ownedMaterials.length * 0.57) *
+              rarity *
+              params.updatePrice.multiplicateur
+          );
+
+          return calculLevelPrice;
+        }
+
         async function createBossEmbed(
           boss,
           bossInfo,
@@ -128,100 +171,181 @@ module.exports = {
           EmbedColor,
           emo
         ) {
-          let EquippedMateriaux = "";
-          const materiauId1 = boss.materiauId1;
-          const materiauId2 = boss.materiauId2;
+          const bossBoosts = await bossManager.calculateBossBoosts(
+            boss,
+            dbManager,
+            targetUser,
+            bossInfo
+          );
 
-          // Récupération des matériaux
-          const [materiau1] = (await dbManager.getDataMateriauById(
-            materiauId1
-          )) || [null];
-          const [materiau2] = (await dbManager.getDataMateriauById(
-            materiauId2
-          )) || [null];
+          let materiau1 = false;
+          let materiau2 = false;
+          let materiau1Data = false;
+          let materiau2Data = false;
+          if (boss.muId1 != 0) {
+            const [materiauId1Data] = await dbManager.getIdMateriauByIdUnique(
+              boss.muId1
+            );
+            const [materiauData] = await dbManager.getDataMateriauById(
+              materiauId1Data.id
+            );
+            materiau1 = materiauData;
+            materiau1Data = materiauId1Data;
+          }
+          if (boss.muId2 != 0) {
+            const [materiauId2Data] = await dbManager.getIdMateriauByIdUnique(
+              boss.muId2
+            );
+            const [materiauData] = await dbManager.getDataMateriauById(
+              materiauId2Data.id
+            );
+            materiau2 = materiauData;
+            materiau2Data = materiauId2Data;
+          }
+          const calculateRealBoost = (baseBoost, level) => {
+            return Math.round(baseBoost * (1 + level * 0.2));
+          };
 
-          // Création des descriptions des matériaux si définis
-          const material1Info = materiau1
-            ? `**${emoji(emo[materiau1.nom] || "default")} ${
-                materiau1.nom
-              }**\n**${materiau1.rarete}**\n> ⚔️ Attaque: ${
-                materiau1.attaqueBoost
-              }%\n> 🛡️ Défense: ${materiau1.defenseBoost}%\n> 💚 Santé : ${
-                materiau1.santeBoost
-              }%`
-            : null;
+          // Fonction pour formater l'affichage des matériaux
+          async function materialInfo(materiau, materiauData, targetUser) {
+            if (!materiau) return null;
 
-          const material2Info = materiau2
-            ? `**${emoji(emo[materiau2.nom] || "default")} ${
-                materiau2.nom
-              }**\n**${materiau2.rarete}**\n> ⚔️ Attaque: ${
-                materiau2.attaqueBoost
-              }%\n> 🛡️ Défense: ${materiau2.defenseBoost}%\n> 💚 Santé : ${
-                materiau2.santeBoost
-              }%`
-            : null;
+            const santeBoostReel = calculateRealBoost(
+              materiau.santeBoost,
+              materiauData.level
+            );
+            const attaqueBoostReel = calculateRealBoost(
+              materiau.attaqueBoost,
+              materiauData.level
+            );
+            const defenseBoostReel = calculateRealBoost(
+              materiau.defenseBoost,
+              materiauData.level
+            );
 
-          if (material1Info || material2Info) {
-            EquippedMateriaux = [material1Info, material2Info]
-              .filter((info) => info !== null)
-              .join("\n\n");
+            const defenseBoostUpgrade = calculateRealBoost(
+              materiau.defenseBoost,
+              materiauData.level + 1
+            );
+            const attaqueBoostUpgrade = calculateRealBoost(
+              materiau.attaqueBoost,
+              materiauData.level + 1
+            );
+            const santeBoostUpgrade = calculateRealBoost(
+              materiau.santeBoost,
+              materiauData.level + 1
+            );
+
+            const diffSante = santeBoostUpgrade - santeBoostReel;
+            const diffAttaque = attaqueBoostUpgrade - attaqueBoostReel;
+            const diffDefense = defenseBoostUpgrade - defenseBoostReel;
+
+            const priceUpgrade = await calculateUpgradePrice(
+              materiau,
+              materiauData,
+              targetUser.id
+            );
+
+            const formattedPrice = priceUpgrade.toLocaleString("fr-FR");
+
+            let materialString = `**${emoji(emo[materiau.nom])} ${
+              materiau.nom
+            }**\n**(${materiau.rarete})**, lvl : **${materiauData.level}/${
+              params.maxLevel
+            }**`;
+            if (santeBoostReel != 0) {
+              materialString += `\n💚 Santé: **+${santeBoostReel}%**`;
+              if (materiauData.level < params.maxLevel) {
+                materialString += ` ${emoji(emo.up)}(+ ${diffSante}%)`;
+              }
+            }
+            if (attaqueBoostReel != 0) {
+              materialString += `\n⚔️ Attaque: **+${attaqueBoostReel}%**`;
+              if (materiauData.level < params.maxLevel) {
+                materialString += ` ${emoji(emo.up)}(+ ${diffAttaque}%)`;
+              }
+            }
+            if (defenseBoostReel != 0) {
+              materialString += `\n🛡️ Défense: **+${defenseBoostReel}%**`;
+              if (materiauData.level < params.maxLevel) {
+                materialString += ` ${emoji(emo.up)}(+ ${diffDefense}%)`;
+              }
+            }
+            if (materiauData.level < params.maxLevel) {
+              materialString += `\n\n- Upgrade : **${formattedPrice}** ${emoji(
+                emo.power
+              )}`;
+            }
+
+            return materialString;
           }
 
-          const boostSante =
-            ((materiau1?.santeBoost || 0) + (materiau2?.santeBoost || 0)) /
-              100 +
-            1;
-          const boostAttaque =
-            ((materiau1?.attaqueBoost || 0) + (materiau2?.attaqueBoost || 0)) /
-              100 +
-            1;
-          const boostDefense =
-            ((materiau1?.defenseBoost || 0) + (materiau2?.defenseBoost || 0)) /
-              100 +
-            1;
+          // Construction des informations des matériaux équipés
+          const EquippedMateriaux = [
+            await materialInfo(materiau1, materiau1Data, targetUser),
+            await materialInfo(materiau2, materiau2Data, targetUser),
+          ]
+            .filter((info) => info !== null)
+            .join("\n\n");
 
-          // Calcul du multiplicateur de base du boss
-          const baseMultiplier = 1 + (boss.level / 10) * 0.1;
-          const extraBoost = (boss.level / 10) * 0.1;
-          const multiplier = baseMultiplier + extraBoost;
-
-          // Calcul des boosts totaux
-          const boostedSante = Math.round(
-            bossInfo.santeBoost * multiplier * boostSante
-          );
-          const boostedAttaque = Math.round(
-            bossInfo.attaqueBoost * multiplier * boostAttaque
-          );
-          const boostedDefense = Math.round(
-            bossInfo.defenseBoost * multiplier * boostDefense
-          );
-
+          // Gestion des raretés et poussières
           const raretes = {
             "Commune 🟢": "poussiereCommune",
             "Rare 🟠": "poussiereRare",
             "Épique 🟣": "poussiereEpique",
             "Légendaire 🟡": "poussiereLegendaire",
           };
-
           const rareteKey = bossInfo.type;
           const rarete = Object.keys(raretes)[rareteKey - 1] || "Inconnue";
-
           const colonnePoussiere = raretes[rarete] || "0";
           const quantitePoussiere = statsResult[colonnePoussiere] || 0;
 
-          const bossStats = `💚 Santé: **${boostedSante}%**\n ⚔️ Attaque: **${boostedAttaque}%**\n 🛡️ Défense: **${boostedDefense}%**`;
+          const diffSanteBoss = bossBoosts.santeBoost1 - bossBoosts.santeBoss;
+          const diffAttaqueBoss =
+            bossBoosts.attaqueBoost1 - bossBoosts.attaqueBoss;
+          const diffDefenseBoss =
+            bossBoosts.defenseBoost1 - bossBoosts.defenseBoss;
+
+          // Utilisation des boosts calculés pour le boss
+          let bossStats = `💚 Santé: **${Math.round(bossBoosts.santeBoss)}%**`;
+          if (boss.level < params.maxLvlBoss) {
+            bossStats += ` ${emoji(emo.up)} (+${diffSanteBoss}%)`;
+          }
+
+          bossStats += `\n⚔️ Attaque: **${Math.round(
+            bossBoosts.attaqueBoss
+          )}%**`;
+
+          if (boss.level < params.maxLvlBoss) {
+            bossStats += ` ${emoji(emo.up)} (+${diffAttaqueBoss}%)`;
+          }
+
+          bossStats += `\n🛡️ Défense: **${Math.round(
+            bossBoosts.defenseBoss
+          )}%**`;
+          if (boss.level < params.maxLvlBoss) {
+            bossStats += ` ${emoji(emo.up)} (+${diffDefenseBoss}%)`;
+          }
+
+          // Ligne de séparation pour l'esthétique
+          bossStats += `\n__-------------------------__`;
+
+          // Gestion des niveaux et autres éléments pour l'embed
           const currentBossLevel = boss.level;
           const roundedLevel = Math.ceil((currentBossLevel + 1) * 0.1) * 10;
           const requiredPoussière = (currentBossLevel + 1) * 10;
           const requiredCard =
             params.troops.bosses.type[bossInfo.type].carte[roundedLevel] || "0";
 
+          // Création de l'embed
           const embed = new EmbedBuilder()
             .setAuthor({
               name: `Bosses`,
               iconURL: targetUser.displayAvatarURL({ dynamic: true }),
             })
-            .setTitle(`${bossInfo.nom} (Niveau ${boss.level})`)
+            .setTitle(
+              `${bossInfo.nom} - (Niveau : ${boss.level}/${params.maxLvlBoss})`
+            )
             .setThumbnail(bossInfo.image)
             .setColor(EmbedColor)
             .addFields(
@@ -232,12 +356,6 @@ module.exports = {
               {
                 name: "Boosts",
                 value: bossStats,
-              },
-              {
-                name: "Matériaux équipés",
-                value:
-                  "*Les Bonus sont Appliquées au boss qui l'applique aux troupes*\n" +
-                  EquippedMateriaux,
               },
               ...(boss.level < 60
                 ? [
@@ -256,8 +374,10 @@ module.exports = {
                   ]
                 : []),
               {
-                name: "Niveau",
-                value: `${boss.level}/60`,
+                name: "Matériaux équipés",
+                value:
+                  "*Les Bonus sont Appliquées au boss qui l'applique aux troupes*\n\n" +
+                  EquippedMateriaux,
               }
             )
             .setFooter({
@@ -340,6 +460,9 @@ module.exports = {
         } else {
           guildTag = "Aucune guilde associée";
         }
+        const civilisation = statsResult.civilisation;
+        const capitalizedCivilisation =
+          civilisation.charAt(0).toUpperCase() + civilisation.slice(1);
 
         pages.push(
           new EmbedBuilder()
@@ -361,6 +484,12 @@ module.exports = {
               {
                 name: "Guilde :",
                 value: guildTag,
+              },
+              {
+                name: "Civilisation :",
+                value: `${emoji(
+                  emo[statsResult.civilisation]
+                )} **${capitalizedCivilisation}**`,
               },
               {
                 name: "Information :",
@@ -422,15 +551,23 @@ module.exports = {
         let row2 = new ActionRowBuilder().addComponents(
           new ButtonBuilder()
             .setCustomId("upgrade")
-            .setLabel("Upgrade")
+            .setLabel("Upgrade Boss")
             .setStyle(ButtonStyle.Success)
+            .setEmoji(emo.up),
+          new ButtonBuilder()
+            .setCustomId("upgrade_mat1")
+            .setLabel("Upgrade Matériaux 1")
+            .setEmoji(emo.up)
+            .setStyle(ButtonStyle.Secondary),
+          new ButtonBuilder()
+            .setCustomId("upgrade_mat2")
+            .setLabel("Upgrade Matériaux 2")
+            .setEmoji(emo.up)
+            .setStyle(ButtonStyle.Secondary)
         );
 
         // Envoyer le message avec les composants appropriés
-        const components =
-          currentPage === 0
-            ? [row] // Pas besoin d'Upgrade sur la première page
-            : [row, row2]; // Ajouter row2 si non-null
+        const components = currentPage === 0 ? [row] : [row, row2];
 
         const message = await interaction.reply({
           embeds: [pages[currentPage]],
@@ -439,8 +576,13 @@ module.exports = {
         });
 
         const filter = (i) =>
-          ["previous", "next", "upgrade"].includes(i.customId) &&
-          i.user.id === interaction.user.id;
+          [
+            "previous",
+            "next",
+            "upgrade",
+            "upgrade_mat1",
+            "upgrade_mat2",
+          ].includes(i.customId) && i.user.id === interaction.user.id;
 
         const collector = message.createMessageComponentCollector({
           filter,
@@ -457,14 +599,31 @@ module.exports = {
             if (bossIndex >= 0 && bossIndex < bossResult1.length) {
               const boss = bossResult1[bossIndex];
 
-              // Vérifiez si l'utilisateur a assez de poussière et de cartes
-              // si boss pas au dessus de 60
               if (boss.level >= 60) {
                 return i.reply({
                   content: "Le boss est déjà au niveau maximum.",
                   ephemeral: true,
                 });
               }
+
+              const raretes = {
+                "Commune 🟢": "poussiereCommune",
+                "Rare 🟠": "poussiereRare",
+                "Épique 🟣": "poussiereEpique",
+                "Légendaire 🟡": "poussiereLegendaire",
+              };
+              const bossInfo = await dbManager.getBossInfo(boss.bossId);
+              const statsResult2 = await dbManager.getStats(targetUser.id);
+              const rareteKey = bossInfo[0].type;
+              const rarete = Object.keys(raretes)[rareteKey - 1] || "Inconnue";
+              const colonnePoussiere = raretes[rarete] || "0";
+              const quantitePoussiere = statsResult2[colonnePoussiere] || 0;
+              const currentBossLevel = boss.level;
+              const roundedLevel = Math.ceil((currentBossLevel + 1) * 0.1) * 10;
+              const requiredPoussière = (currentBossLevel + 1) * 10;
+              const requiredCard =
+                params.troops.bosses.type[rareteKey].carte[roundedLevel] || "0";
+
               if (quantitePoussiere < requiredPoussière) {
                 return i.reply({
                   content: `Vous n'avez pas assez de poussière pour améliorer ce boss.`,
@@ -478,18 +637,15 @@ module.exports = {
                   ephemeral: true,
                 });
               }
-
               // Effectuer l'upgrade
               await dbManager.upgradeBoss(targetUser.id, boss.bossId);
               const updatedBossInfo = await dbManager.getBossInfo(boss.bossId);
-              console.log(updatedBossInfo);
+
               const boss1 = await dbManager.getBossByUserByBossId(
                 targetUser.id,
                 boss.bossId
               );
-              console.log(boss1);
 
-              // Mettre à jour l'embed de la page actuelle
               pages[currentPage] = await createBossEmbed(
                 boss1[0],
                 updatedBossInfo[0],
@@ -500,37 +656,209 @@ module.exports = {
                 emo
               );
 
-              // Mettre à jour les composants du message
               let updatedRow2 = null;
               if (targetUser.id === interaction.user.id && currentPage > 0) {
                 updatedRow2 = new ActionRowBuilder().addComponents(
                   new ButtonBuilder()
                     .setCustomId("upgrade")
-                    .setLabel("Upgrade")
+                    .setLabel("Upgrade Boss")
                     .setStyle(ButtonStyle.Success)
+                    .setEmoji(emo.up),
+                  new ButtonBuilder()
+                    .setCustomId("upgrade_mat1")
+                    .setLabel("Upgrade Matériaux 1")
+                    .setEmoji(emo.up)
+                    .setStyle(ButtonStyle.Secondary),
+                  new ButtonBuilder()
+                    .setCustomId("upgrade_mat2")
+                    .setLabel("Upgrade Matériaux 2")
+                    .setEmoji(emo.up)
+                    .setStyle(ButtonStyle.Secondary)
                 );
               }
 
               const updatedComponents = updatedRow2
                 ? [row, updatedRow2]
-                : [row]; // Définir les composants mis à jour
-
-              // Mettre à jour le message avec le nouvel embed et les composants mis à jour
+                : [row];
               await i.update({
                 content: "Upgrade effectué !",
-                embeds: [pages[currentPage]], // Mise à jour de l'embed actuel uniquement
-                components: updatedComponents, // Mise à jour des composants
+                embeds: [pages[currentPage]],
+                components: updatedComponents,
               });
             }
-          }
+          } else if (i.customId === "upgrade_mat1") {
+            const statsResult2 = await dbManager.getStats(targetUser.id);
+            const bossIndex = currentPage - 1;
 
+            if (bossIndex >= 0 && bossIndex < bossResult1.length) {
+              const boss = bossResult1[bossIndex];
+              if (boss.muId1 != 0) {
+                const idUnique = boss.muId1;
+
+                const bossInfo = await dbManager.getBossInfo(boss.bossId);
+                const boss1 = await dbManager.getBossByUserByBossId(
+                  targetUser.id,
+                  boss.bossId
+                );
+                const materialData = await dbManager.getIdMateriauByIdUnique(
+                  idUnique
+                );
+                const dataMaterial = await dbManager.getDataMateriauById(
+                  materialData[0].id
+                );
+
+                const priceUpgrade = await calculateUpgradePrice(
+                  materialData[0],
+                  boss1[0],
+                  targetUser.id
+                );
+                if (materialData[0].level >= params.maxLevel) {
+                  return i.reply({
+                    content: `Le matériel **${emoji(
+                      emo[dataMaterial[0].nom]
+                    )} ${
+                      dataMaterial[0].nom
+                    }** est déjà au niveau maximum (lvl **${
+                      materialData[0].level
+                    })**.`,
+                    ephemeral: true,
+                  });
+                }
+
+                if (statsResult2.fragment < priceUpgrade) {
+                  return i.reply({
+                    content: `Vous n'avez pas assez de fragment ${emoji(
+                      emo.power
+                    )} pour améliorer *${emoji(emo[dataMaterial[0].nom])} ${
+                      dataMaterial[0].nom
+                    }** au level ${
+                      materialData[0].level + 1
+                    }(nécessaire: ${priceUpgrade}  ${emoji(emo.power)})`,
+                    ephemeral: true,
+                  });
+                }
+                await dbManager.updateMaterialLevel(targetUser.id, idUnique);
+                await dbManager.updatePower(targetUser.id, -priceUpgrade);
+                pages[currentPage] = await createBossEmbed(
+                  boss1[0],
+                  bossInfo[0],
+                  statsResult,
+                  params,
+                  targetUser,
+                  EmbedColor,
+                  emo
+                );
+
+                await i.update({
+                  content: `${emoji(emo[dataMaterial[0].nom])} ${
+                    dataMaterial[0].nom
+                  } amélioré ! au niveau  ${
+                    materialData[0].level + 1
+                  } (-${priceUpgrade} ${emoji(emo.power)})`,
+                  embeds: [pages[currentPage]],
+                });
+              } else {
+                i.reply({
+                  content: "Aucun 'matériau 1' à améliorer.",
+                  ephemeral: true,
+                });
+              }
+            }
+          } else if (i.customId === "upgrade_mat2") {
+            // Gestion de l'upgrade du matériel 2
+            const statsResult2 = await dbManager.getStats(targetUser.id);
+            const bossIndex = currentPage - 1;
+            if (bossIndex >= 0 && bossIndex < bossResult1.length) {
+              const boss = bossResult1[bossIndex];
+              if (boss.muId2 != 0) {
+                const idUnique = boss.muId2;
+
+                const bossInfo = await dbManager.getBossInfo(boss.bossId);
+                const boss1 = await dbManager.getBossByUserByBossId(
+                  targetUser.id,
+                  boss.bossId
+                );
+                const materialData = await dbManager.getIdMateriauByIdUnique(
+                  idUnique
+                );
+                const dataMaterial = await dbManager.getDataMateriauById(
+                  materialData[0].id
+                );
+                const priceUpgrade = await calculateUpgradePrice(
+                  materialData[0],
+                  boss1[0],
+                  targetUser.id
+                );
+                if (materialData[0].level >= params.maxLevel) {
+                  return i.reply({
+                    content: `Le matériel **${emoji(
+                      emo[dataMaterial[0].nom]
+                    )} ${
+                      dataMaterial[0].nom
+                    }** est déjà au niveau maximum (lvl **${
+                      materialData[0].level
+                    }**).`,
+                    ephemeral: true,
+                  });
+                }
+                if (statsResult2.fragment < priceUpgrade) {
+                  return i.reply({
+                    content: `Vous n'avez pas assez de fragment ${emoji(
+                      emo.power
+                    )} pour améliorer **${emoji(emo[dataMaterial[0].nom])} ${
+                      dataMaterial[0].nom
+                    }** au level ${
+                      materialData[0].level + 1
+                    }(nécessaire: ${priceUpgrade}  ${emoji(emo.power)})`,
+                    ephemeral: true,
+                  });
+                }
+
+                await dbManager.updateMaterialLevel(targetUser.id, idUnique);
+                await dbManager.updatePower(targetUser.id, -priceUpgrade);
+                pages[currentPage] = await createBossEmbed(
+                  boss1[0],
+                  bossInfo[0],
+                  statsResult,
+                  params,
+                  targetUser,
+                  EmbedColor,
+                  emo
+                );
+                await i.update({
+                  content: `${emoji(emo[dataMaterial[0].nom])} ${
+                    dataMaterial[0].nom
+                  } amélioré ! au niveau  ${
+                    materialData[0].level + 1
+                  } (-${priceUpgrade} ${emoji(emo.power)})`,
+                  embeds: [pages[currentPage]],
+                });
+              } else {
+                i.reply({
+                  content: "Aucun 'matériau 2' à améliorer.",
+                  ephemeral: true,
+                });
+              }
+            }
+          }
           const updatedRow2 =
             currentPage > 0
               ? new ActionRowBuilder().addComponents(
                   new ButtonBuilder()
                     .setCustomId("upgrade")
-                    .setLabel("Upgrade")
+                    .setLabel("Upgrade Boss")
                     .setStyle(ButtonStyle.Success)
+                    .setEmoji(emo.up),
+                  new ButtonBuilder()
+                    .setCustomId("upgrade_mat1")
+                    .setLabel("Upgrade Matériaux 1")
+                    .setEmoji(emo.up)
+                    .setStyle(ButtonStyle.Secondary),
+                  new ButtonBuilder()
+                    .setCustomId("upgrade_mat2")
+                    .setLabel("Upgrade Matériaux 2")
+                    .setEmoji(emo.up)
+                    .setStyle(ButtonStyle.Secondary)
                 )
               : null;
 
@@ -549,7 +877,6 @@ module.exports = {
           }
           message.edit({ components: [row, row2].filter(Boolean) }); // Filtrer les null dans les composants
         });
-
       case "bot":
         const botPing = Math.round(client.ws.ping);
         function emoji(id) {
@@ -590,12 +917,13 @@ module.exports = {
           });
 
         return interaction.reply({ embeds: [embedBot] });
-      /*case "generale":
+      case "generale":
         const choice = interaction.options.getString("categorie");
         let result = null;
         let title = "";
         let description = "";
         let category = "";
+        const userStats = await dbManager.getStats(userId);
 
         if (choice === "materiaux") {
           result = await dbManager.getMateriau();
@@ -607,7 +935,7 @@ module.exports = {
           result = await dbManager.getRolesFromDB();
           title = "Infos - Roles";
           description =
-            "***Dans le royaume de Valoria, chaque individu peut choisir un rôle spécifique qui détermine son chemin et ses capacités au sein de la société. Ces rôles ne sont pas simplement des titres, mais des vocations imprégnées de pouvoir et de responsabilité. Chaque rôle confère des compétences uniques et des statuts particuliers.***\n ⚠️ Compétence des badges NON implèmentés\nLes rôles de Valoria, ils sont achetables dans la boutique\n\n**Liste de tous les rôles :**";
+            "***Dans le royaume de Valoria, chaque individu peut choisir un rôle spécifique qui détermine son chemin et ses capacités au sein de la société. Ces rôles ne sont pas simplement des titres, mais des vocations imprégnées de pouvoir et de responsabilité. Chaque rôle confère des compétences uniques et des statuts particuliers.***\nLes rôles de Valoria, sont achetables dans la boutique\n\n**Liste de tous les rôles :**";
           category = "Roles";
         } else if (choice === "badges") {
           result = await dbManager.getAllBadge();
@@ -615,6 +943,12 @@ module.exports = {
           description =
             "***Dans le royaume de Valoria, les badges sont bien plus que de simples insignes. Ils représentent des statuts, Portés fièrement par leurs détenteurs, chaque badge raconte une histoire et confère des privilèges uniques ou des responsabilités spécifiques.***\n ⚠️ Compétence des badges NON implèmentés\n\n**Liste de tous les badges de Valoria :**";
           category = "Badges";
+        } else if (choice === "boss") {
+          result = await bossManager.getBosses();
+          title = "Infos - Boss";
+          description =
+            "***Dans le royaume de Valoria, les Boss sont des créatures puissantes et redoutables qui règnent sur des territoires sauvages et hostiles. Chaque Boss est unique et possède des compétences et des capacités qui lui sont propres. Ils sont les gardiens des trésors et des secrets de Valoria, et leur défaite est le gage de richesses et de gloire.***\n\nIls sont également recrutable afin de mener à bien vos combat\n**Liste de tous les Boss de Valoria :**";
+          category = "Boss";
         } else {
           interaction.reply({ content: "Choix invalide", ephemeral: true });
           return;
@@ -622,6 +956,10 @@ module.exports = {
 
         const embeds = [];
         let currentEmbed = new EmbedBuilder()
+          .setAuthor({
+            name: `Puissance : ${userStats.power.toLocaleString("fr-FR")}`,
+            iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+          })
           .setTitle(title)
           .setColor(colors)
           .setFooter({
@@ -644,7 +982,6 @@ module.exports = {
                 ? `<@&${item.id}>`
                 : item.nom
             }`,
-
             value: description,
           });
 
@@ -661,8 +998,6 @@ module.exports = {
         });
 
         embeds.push(currentEmbed);
-        // Determine if the rare button should appear
-        const NewShowRareButton = Math.random() < 0.01; // 1 in 100 chance
 
         const NewRow = new ActionRowBuilder().addComponents(
           new ButtonBuilder()
@@ -675,14 +1010,6 @@ module.exports = {
             .setStyle(ButtonStyle.Primary)
         );
 
-        if (NewShowRareButton) {
-          NewRow.addComponents(
-            new ButtonBuilder()
-              .setCustomId("secret")
-              .setLabel("🎁")
-              .setStyle(ButtonStyle.Success)
-          );
-        }
         let NewCurrentPage = 0;
         const NewMessage = await interaction.reply({
           embeds: [embeds[NewCurrentPage]],
@@ -692,13 +1019,14 @@ module.exports = {
         });
 
         const gfilter = (i) =>
-          ["previous", "next", "secret", "claim"].includes(i.customId) &&
+          ["previous", "next"].includes(i.customId) &&
           i.user.id === interaction.user.id;
 
         const Gcollector = NewMessage.createMessageComponentCollector({
           gfilter,
           time: 80000,
         });
+
         Gcollector.on("collect", async (i) => {
           if (i.customId === "next") {
             NewCurrentPage = (NewCurrentPage + 1) % embeds.length;
@@ -713,65 +1041,71 @@ module.exports = {
               embeds: [embeds[NewCurrentPage]],
               components: [NewRow],
             });
-          } else if (i.customId === "secret") {
-            NewRow.addComponents(
-              new ButtonBuilder()
-                .setCustomId("claim")
-                .setLabel("🧧 Claim !!!!")
-                .setStyle(ButtonStyle.Success)
-            );
-            await i.update({ embeds: [hiddenPage], components: [NewRow] });
-          } else if (i.customId === "claim") {
-            const power = await dbManager.generateRandomPower();
-            await dbManager.updatePower(interaction.user.id, power);
-            const randomMaterial =
-              legendaryMaterials[
-                Math.floor(Math.random() * legendaryMaterials.length)
-              ];
-            await dbManager.addMaterialToUser(
-              interaction.user.id,
-              randomMaterial.id
-            );
-            await i.update({
-              content: `Claimed! reçu ${power} power et un matériel légendaire ${emoji(
-                emo[randomMaterial.nom]
-              )} ${randomMaterial.nom}.`,
-              embeds: [],
-              components: [],
-            });
           }
         });
 
         Gcollector.on("end", () => {
           NewRow.components.forEach((component) => component.setDisabled(true));
           NewMessage.edit({ components: [NewRow] });
-        });*/
+        });
       case "classement":
         const embedClassement = new EmbedBuilder()
           .setTitle(`Classement des utilisateurs`)
           .setColor(colors);
 
-        const top = 5;
-
-        // Rank par fragment
-        const powerResult = await dbManager.getTopUsers("power", top);
+        const top = params.topClassement;
+        ///rank par puissance
+        const { sortedResults } = await dbManager.calculatePowerForAllUsers();
+        const userId = interaction.user.id;
         let powerDescription = "";
-        for (let i = 0; i < powerResult.length; i++) {
-          const user = `${powerResult[i].discordId}`;
-          if (user === undefined) {
-            powerDescription += `${i + 1}. Utilisateur inconnu : ${powerResult[
-              i
-            ].power.toLocaleString()}\n`;
+        let userRank = null;
+        for (let i = 0; i < sortedResults.length; i++) {
+          const user = sortedResults[i];
+          const userDiscordId = user.userId;
+
+          if (userDiscordId === undefined) {
+            powerDescription += `${
+              i + 1
+            }. Utilisateur inconnu : ${user.power.toLocaleString()}\n`;
           } else {
-            powerDescription += `${i + 1}. <@${user}> : ${powerResult[
-              i
-            ].power.toLocaleString()} ${emoji(emo.power)}\n`;
+            if (userDiscordId === userId) {
+              userRank = i + 1;
+            }
+            if (i < top) {
+              powerDescription += `${
+                i + 1
+              }. <@${userDiscordId}> : ${user.power.toLocaleString()} \n`;
+            }
+          }
+        }
+        if (userRank && userRank > top) {
+          powerDescription += `\n${userRank} : <@${userId}> : ${sortedResults[
+            userRank - 1
+          ].power.toLocaleString()} ${emoji(emo.power)}`;
+        }
+        embedClassement.addFields({
+          name: "🔥 - Puissance",
+          value: powerDescription,
+        });
+
+        //rank par dead
+        const DeadResult = await dbManager.getTopUsers("deadCounter", top);
+        let DeadDescription = "";
+        for (let i = 0; i < DeadResult.length; i++) {
+          const user = `${DeadResult[i].discordId}`;
+          if (user === undefined) {
+            DeadDescription += `${i + 1}. Utilisateur inconnu : ${
+              DeadResult[i].winCounter
+            }\n`;
+          } else {
+            DeadDescription += `${i + 1}. <@${user}> : ${
+              DeadResult[i].winCounter
+            }\n`;
           }
         }
         embedClassement.addFields({
-          name: `${emoji(emo.power)} - Top Players `,
-          value: powerDescription,
-          inline: true,
+          name: "☠️ - Dead",
+          value: DeadDescription,
         });
 
         // Rank par victoire
@@ -793,7 +1127,6 @@ module.exports = {
         embedClassement.addFields({
           name: "👑 - Victoires",
           value: winDescription,
-          inline: true,
         });
 
         // Rank par puissance de Guild
@@ -810,28 +1143,6 @@ module.exports = {
         embedClassement.addFields({
           name: `${emoji(emo.power)} - Guildes`,
           value: topGuildsDescription || "Aucune guilde disponible",
-          inline: true,
-        });
-
-        // Rank par Win Rate
-        const rateResult = await dbManager.getTopUsersByRate(top);
-        let rateDescription = "";
-        for (let i = 0; i < rateResult.length; i++) {
-          const user = await `${rateResult[i].discordId}`;
-          if (user === undefined) {
-            rateDescription += `${i + 1}. Utilisateur inconnu : ${(
-              rateResult[i].rate * 100
-            ).toFixed(2)}%\n`;
-          } else {
-            rateDescription += `${i + 1}. <@${user}> : ${(
-              rateResult[i].rate * 100
-            ).toFixed(2)}%\n`;
-          }
-        }
-        embedClassement.addFields({
-          name: "👑 - Taux de victoire",
-          value: rateDescription,
-          inline: true,
         });
 
         return interaction.reply({ embeds: [embedClassement] });
@@ -936,7 +1247,7 @@ module.exports = {
           .setTitle("Infos - Campagne Entrainement")
           .setColor(colors)
           .setDescription(
-            "*La campagne d'entraînement est une série de défis conçus pour tester les compétences et la détermination des aventuriers de Valoria. Les participants doivent affronter des bosses redoutables,*\n\n- `/campagne entrainement`"
+            "*La campagne d'entraînement est une série de défis conçus pour tester les compétences et la détermination des aventuriers de Valoria. Les participants doivent affronter des bosses redoutables afin d'obtenir des récompense,*\n\n- `/campagne entrainement`"
           )
           .setFooter({
             text: `Demandé(e) par ${interaction.user.tag}`,

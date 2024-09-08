@@ -84,17 +84,19 @@ WHERE role_user.idUser = ?`,
 FROM materiau_user mu
 JOIN materiau m ON mu.IdMateriau = m.id`,
   GET_ALL_PLAYER: `SELECT COUNT(*) as count FROM user`,
-  UPDATE_MATERIAL_LEVEL: `UPDATE materiau_user SET lvl = ? WHERE id = ? AND idUser = ?`,
+  GET_ALL_USER_IDS: `SELECT discordId FROM user`,
+  UPDATE_MATERIAL_LEVEL: `UPDATE materiau_user SET level = level + 1  WHERE id = ? AND discordId = ?;`,
   GET_MATERIAL_BY_ID: ` SELECT mu.id AS mid, mu.*, m.*
     FROM materiau_user mu 
-    JOIN materiau m ON mu.IdMateriau = m.id 
-    WHERE mu.id = ?`,
+    JOIN materiau m ON mu.materiauId = m.id 
+    WHERE mu.discordId = ?`,
   ADD_USER: `INSERT INTO user (discordId, civilisation) VALUES (?,?)`,
   GET_ALL_BADGE: `SELECT * FROM badge`,
   GET_DATA_MATERIAL_BY_ID: `SELECT * FROM materiau WHERE id = ?`,
   SELECT_MATERIAU_USER: `SELECT * FROM materiau_user WHERE idUser = ?`,
   SELECT_BADGE_USER: `SELECT * FROM badge_user WHERE idUser = ?`,
   DELETE_USER: `DELETE FROM user WHERE discordId = ?`,
+  GET_ID_MATERIAL_BY_ID_UNIQUE: `SELECT * FROM materiau_user WHERE id = ?`,
   GET_ROLES: `SELECT * FROM role ORDER BY role.idRole ASC`,
   GET_RANDOM_MATERIAL: `SELECT * FROM materiau ORDER BY RAND() LIMIT 3`,
   GET_DUEL_DETAILS: `SELECT dd.id, dd.idDuel, dd.idUser, dd.idMateriau1, m1.nom AS nomMateriau1, m1.type AS typeMateriau1, dd.idMateriau2, m2.nom AS nomMateriau2, m2.type AS typeMateriau2, dd.idMateriau3, m3.nom AS nomMateriau3, m3.type AS typeMateriau3, dd.idMateriau4, m4.nom AS nomMateriau4, m4.type AS typeMateriau4, dd.win,u1.power AS powerUser1 FROM  dueldetails dd LEFT JOIN  materiau m1 ON dd.idMateriau1 = m1.id LEFT JOIN  materiau m2 ON dd.idMateriau2 = m2.id LEFT JOIN materiau m3 ON dd.idMateriau3 = m3.id LEFT JOIN  materiau m4 ON dd.idMateriau4 = m4.id LEFT JOIN  user u1 ON dd.idUser = u1.discordId WHERE dd.idDuel = ? AND dd.idUser = ?`,

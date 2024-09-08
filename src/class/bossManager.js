@@ -24,6 +24,11 @@ class Boss extends DatabaseManager {
     ]);
     return result[0];
   }
+
+  async getBosses() {
+    const result = await this.queryCampagne(sqlQueriesBoss.getBosses);
+    return result;
+  }
   async startDuel(
     userId,
     bossInfo,
@@ -248,6 +253,103 @@ class Boss extends DatabaseManager {
       });
     }
     simulateDuel();
+  }
+  async calculateBossBoosts(boss, dbManager, targetUser, bossInfo) {
+    // Fonction utilitaire pour obtenir les données du matériau
+    const getMateriauData = async (muId) => {
+      if (muId === 0)
+        return { level: 1, santeBoost: 0, attaqueBoost: 0, defenseBoost: 0 };
+
+      const [materiauIdData] = (await dbManager.getIdMateriauByIdUnique(
+        muId
+      )) || [{}];
+      const [materiauData] = (await dbManager.getDataMateriauById(
+        materiauIdData.id
+      )) || [{}];
+      return {
+        level: materiauIdData.level || 1,
+        santeBoost: materiauData.santeBoost || 0,
+        attaqueBoost: materiauData.attaqueBoost || 0,
+        defenseBoost: materiauData.defenseBoost || 0,
+      };
+    };
+
+    // Obtenir les données des matériaux
+    const [materiau1Data, materiau2Data] = await Promise.all([
+      getMateriauData(boss.muId1),
+      getMateriauData(boss.muId2),
+    ]);
+
+    // Fonction utilitaire pour calculer les boosts totaux
+    const calculateBoosts = (materiauData) => {
+      const { santeBoost, attaqueBoost, defenseBoost, level } = materiauData;
+      const factor = 1 + level * 0.2;
+
+      return {
+        santeBoost: santeBoost * factor,
+        attaqueBoost: attaqueBoost * factor,
+        defenseBoost: defenseBoost * factor,
+      };
+    };
+
+    // Calcul des boosts pour chaque matériau
+    const boostMat1 = calculateBoosts(materiau1Data);
+    const boostMat2 = calculateBoosts(materiau2Data);
+    const calculateMultiplier = (level) => {
+      let multiplier = 1 + (level / 10) * 0.2;
+
+      const bonusPer10Levels = Math.floor(level / 10) * 0.1;
+
+      multiplier += bonusPer10Levels;
+
+      return multiplier;
+    };
+
+    // Calcul du multiplicateur du boss basé sur son niveau
+    const multiplier = calculateMultiplier(boss.level);
+    const multiplier1 = calculateMultiplier(boss.level + 1);
+
+    // Calcul des boosts totaux pour le boss avec le multiplicateur
+    const boostedSanteBoss = Math.round(
+      bossInfo.santeBoost * multiplier +
+        boostMat1.santeBoost +
+        boostMat2.santeBoost
+    );
+    const boostedAttaqueBoss = Math.round(
+      bossInfo.attaqueBoost * (multiplier + 0.1) +
+        boostMat1.attaqueBoost +
+        boostMat2.attaqueBoost
+    );
+    const boostedDefenseBoss = Math.round(
+      bossInfo.defenseBoost * multiplier +
+        boostMat1.defenseBoost +
+        boostMat2.defenseBoost
+    );
+    const boostedSanteBoss1 = Math.round(
+      bossInfo.santeBoost * multiplier1 +
+        boostMat1.santeBoost +
+        boostMat2.santeBoost
+    );
+    const boostedAttaqueBoss1 = Math.round(
+      bossInfo.attaqueBoost * (multiplier + 0.1) +
+        boostMat1.attaqueBoost +
+        boostMat2.attaqueBoost
+    );
+    const boostedDefenseBoss1 = Math.round(
+      bossInfo.defenseBoost * multiplier1 +
+        boostMat1.defenseBoost +
+        boostMat2.defenseBoost
+    );
+
+    return {
+      santeBoss: boostedSanteBoss,
+      attaqueBoss: boostedAttaqueBoss,
+      defenseBoss: boostedDefenseBoss,
+      ///santeBoost + 1 lvl;
+      santeBoost1: boostedSanteBoss1,
+      attaqueBoost1: boostedAttaqueBoss1,
+      defenseBoost1: boostedDefenseBoss1,
+    };
   }
 }
 module.exports = Boss;
