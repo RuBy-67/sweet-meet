@@ -25,27 +25,29 @@
     "Esclave": 1
   },
 
+  "batiment": {
+    "bonus2": "10",
+    "bonus3": "22",
+    "prix": {
+      "forge": {
+        "1-9": "2500",
+        "10-21": "5500",
+        "22-25": "8500"
+      },
+      "caserne": {
+        "1-9": "2250",
+        "10-21": "4700",
+        "22-25": "6500"
+      },
+      "hopital": {
+        "1-9": "2750",
+        "10-21": "6000",
+        "22-25": "9000"
+      }
+    }
+  },
+
   "troops": {
-    "archer": {
-      "sante": "75",
-      "defense": "5",
-      "attaque": "25"
-    },
-    "cavalier": {
-      "sante": "125",
-      "defense": "13",
-      "attaque": "18"
-    },
-    "infanterie": {
-      "sante": "150",
-      "defense": "20",
-      "attaque": "20"
-    },
-    "machine": {
-      "sante": "190",
-      "defense": "30",
-      "attaque": "5"
-    },
     "baseBonusType": "3",
     "bosses": {
       "type": {
@@ -234,11 +236,11 @@
     "vente": {
       "prix": {
         "materiaux": {
-          "Commun": "1500",
-          "Rare": "7500",
-          "Très Rare": "10000",
-          "Épique": "15000",
-          "Legendaire": "30000"
+          "Commun": "9000",
+          "Rare": "15000",
+          "Très Rare": "30000",
+          "Épique": "45000",
+          "Legendaire": "55000"
         }
       }
     }

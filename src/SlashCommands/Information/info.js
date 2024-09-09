@@ -125,43 +125,6 @@ module.exports = {
     const subCommand = interaction.options.getSubcommand();
     switch (subCommand) {
       case "profil":
-        async function calculateUpgradePrice(
-          materialId,
-          materiauIdData,
-          userId
-        ) {
-          const ownedMaterials = await dbManager.getMateriauById(userId);
-
-          const rarityMap = {
-            Commun: params.updatePrice.commun,
-            Rare: params.updatePrice.rare,
-            "Très Rare": params.updatePrice.tresRare,
-            Épique: params.updatePrice.epic,
-            Legendaire: params.updatePrice.legendaire,
-          };
-
-          const typeMultiplierMap = {
-            feu: params.updatePrice.feu,
-            eau: params.updatePrice.eau,
-            terre: params.updatePrice.terre,
-            vent: params.updatePrice.vent,
-          };
-
-          const typeMultiplier = typeMultiplierMap[materialId.type] || 1;
-          const baseRarity = rarityMap[materialId.rarete] || 1;
-          const rarity = baseRarity * typeMultiplier;
-
-          const calculLevelPrice = Math.round(
-            params.updatePrice.levels *
-              (materiauIdData.level + 1) * // Le niveau suivant
-              (ownedMaterials.length * 0.57) *
-              rarity *
-              params.updatePrice.multiplicateur
-          );
-
-          return calculLevelPrice;
-        }
-
         async function createBossEmbed(
           boss,
           bossInfo,
@@ -187,7 +150,7 @@ module.exports = {
               boss.muId1
             );
             const [materiauData] = await dbManager.getDataMateriauById(
-              materiauId1Data.id
+              materiauId1Data.materiauId
             );
             materiau1 = materiauData;
             materiau1Data = materiauId1Data;
@@ -197,7 +160,7 @@ module.exports = {
               boss.muId2
             );
             const [materiauData] = await dbManager.getDataMateriauById(
-              materiauId2Data.id
+              materiauId2Data.materiauId
             );
             materiau2 = materiauData;
             materiau2Data = materiauId2Data;
@@ -240,7 +203,7 @@ module.exports = {
             const diffAttaque = attaqueBoostUpgrade - attaqueBoostReel;
             const diffDefense = defenseBoostUpgrade - defenseBoostReel;
 
-            const priceUpgrade = await calculateUpgradePrice(
+            const priceUpgrade = await dbManager.calculateUpgradePrice(
               materiau,
               materiauData,
               targetUser.id
@@ -1259,6 +1222,7 @@ module.exports = {
         });
       case "help":
         const helpEmbed = new EmbedBuilder()
+
           .setTitle("Infos - Commandes")
           .setColor(colors)
           .setDescription(

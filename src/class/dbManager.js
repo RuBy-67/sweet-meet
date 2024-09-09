@@ -1,5 +1,6 @@
 const { pool, poolCampagne, poolDate } = require("../db");
 const SQL_QUERIES = require("./sqlQueriesDb");
+const params = require("../jsons/param.json");
 
 class DatabaseManager {
   constructor() {
@@ -416,7 +417,7 @@ class DatabaseManager {
   }
 
   async getMateriauByUserId(userId) {
-    return this.queryMain(SQL_QUERIES.GET_MATERIAU_BY_USER_ID, [userId]);
+    return this.queryMain(SQL_QUERIES.GET_MATERIAL_BY_ID, [userId]);
   }
   async materiauById(id) {
     return this.queryMain(SQL_QUERIES.GET_MATERIAU_BY_ID, [id]);
@@ -453,6 +454,22 @@ class DatabaseManager {
       roleId,
       userId,
     ]);
+  }
+  async getTroopType(troopType) {
+    const [result] = await this.queryMain(SQL_QUERIES.GET_TROOP_TYPE, [
+      troopType,
+    ]);
+
+    const formattedResult = {
+      sante: result.bonus1,
+      defense: result.bonus2,
+      attaque: result.bonus3,
+    };
+    return formattedResult;
+  }
+  async getBonus(type) {
+    const [result] = await this.queryMain(SQL_QUERIES.GET_TROOP_TYPE, [type]);
+    return result;
   }
   async getRoleByUserId(userId) {
     return this.queryMain(SQL_QUERIES.GET_ROLE_BY_USER_ID, [userId]);
@@ -795,6 +812,43 @@ class DatabaseManager {
   }
   async deletePotionById(idPotion) {
     return this.queryMain(SQL_QUERIES.DELETE_POTION, [idPotion]);
+  }
+  async calculateUpgradePrice(materialId, materiauIdData, userId) {
+    const ownedMaterials = await this.getMateriauById(userId);
+    const rarityMap = {
+      Commun: params.updatePrice.commun,
+      Rare: params.updatePrice.rare,
+      "Très Rare": params.updatePrice.tresRare,
+      Épique: params.updatePrice.epic,
+      Legendaire: params.updatePrice.legendaire,
+    };
+
+    const typeMultiplierMap = {
+      feu: params.updatePrice.feu,
+      eau: params.updatePrice.eau,
+      terre: params.updatePrice.terre,
+      vent: params.updatePrice.vent,
+    };
+
+    const typeMultiplier = typeMultiplierMap[materialId.type] || 1;
+    const baseRarity = rarityMap[materialId.rarete] || 1;
+    const rarity = baseRarity * typeMultiplier;
+
+    const calculLevelPrice = Math.round(
+      params.updatePrice.levels *
+        (materiauIdData.level + 1) * // Le niveau suivant
+        (ownedMaterials.length * 0.57) *
+        rarity *
+        params.updatePrice.multiplicateur
+    );
+
+    return calculLevelPrice;
+  }
+  async getForgeLvl(userId) {
+    return this.queryMain(SQL_QUERIES.GET_FORGE_LVL, [userId]);
+  }
+  async updateForge(userId) {
+    return this.queryMain(SQL_QUERIES.UPDATE_FORGE_LVL, [userId]);
   }
 }
 

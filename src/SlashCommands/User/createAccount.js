@@ -76,11 +76,11 @@ module.exports = {
         parts.push(`> **${bonus.machineBonusDéfense}%** Défense Machine`);
       return parts.length ? parts.join("\n ") : "Aucun bonus spécial.";
     }
-    function getTroopTypeName(type) {
+    async function getTroopTypeName(type) {
       const bonusPercentage = params.troops.baseBonusType / 100;
       switch (type) {
         case 1: // Infanterie
-          const infanterie = params.troops.infanterie;
+          const infanterie = await dbManager.getTroopType("infanterie");
           return `**Infanterie ${emoji(emo.infant)}** (+${
             params.troops.baseBonusType
           }%)\n> Attaque : **${Math.round(
@@ -92,7 +92,7 @@ module.exports = {
           )}** 💚`;
 
         case 2: // Archer
-          const archer = params.troops.archer;
+          const archer = await dbManager.getTroopType("archer");
           return `**Archer ${emoji(emo.archer)}** (+${
             params.troops.baseBonusType
           }%)\n> Attaque : **${Math.round(
@@ -104,7 +104,7 @@ module.exports = {
           )}** 💚`;
 
         case 3: // Cavalier
-          const cavalier = params.troops.cavalier;
+          const cavalier = await dbManager.getTroopType("cavalier");
           return `**Cavalier ${emoji(emo.horse)}** (+${
             params.troops.baseBonusType
           }%)\n> Attaque : **${Math.round(
@@ -116,7 +116,7 @@ module.exports = {
           )}** 💚`;
 
         case 4: // Machine
-          const machine = params.troops.machine;
+          const machine = await dbManager.getTroopType("machine");
           return `**Machine ${emoji(emo.machine)}** (+${
             params.troops.baseBonusType
           }%)\n> Attaque : **${Math.round(
@@ -155,23 +155,25 @@ module.exports = {
       civilizations.map((civ) => dbManager.getBossInfo(civ.bossId))
     );
     // Construire la description des civilisations
-    const fields = civilizations.map((civ, index) => {
-      const boss = bosses[index]; // Récupère le boss correspondant à la civilisation
-      return {
-        name: `${emoji(emo[civ.nom])} ${civ.nom}`,
-        value: `Spécialité Principale : ${getTroopTypeName(
-          civ.troopType
-        )}\n\nBonus Civilisation :\n ${buildBonusDescription(
-          civ
-        )}\n\nBonus de Départ : **+${civ.fragment} Fragment ${emoji(
-          emo.power
-        )}**\nBoss de départ : **${boss[0].nom}**\n> Santé : **${
-          boss[0].santeBoost
-        }%** 💚\n> Attaque : **${boss[0].attaqueBoost}%** ⚔️\n> Défense : **${
-          boss[0].defenseBoost
-        }%** 🛡️\n__----------------------__`,
-      };
-    });
+    const fields = await Promise.all(
+      civilizations.map(async (civ, index) => {
+        const boss = bosses[index]; // Récupère le boss correspondant à la civilisation
+        return {
+          name: `${emoji(emo[civ.nom])} ${civ.nom}`,
+          value: `Spécialité Principale : ${await getTroopTypeName(
+            civ.troopType
+          )}\n\nBonus Civilisation :\n ${buildBonusDescription(
+            civ
+          )}\n\nBonus de Départ : **+${civ.fragment} Fragment ${emoji(
+            emo.power
+          )}**\nBoss de départ : **${boss[0].nom}**\n> Santé : **${
+            boss[0].santeBoost
+          }%** 💚\n> Attaque : **${boss[0].attaqueBoost}%** ⚔️\n> Défense : **${
+            boss[0].defenseBoost
+          }%** 🛡️\n__----------------------__`,
+        };
+      })
+    );
 
     // Embed de présentation des civilisations
     const embed = new EmbedBuilder()
@@ -227,17 +229,17 @@ module.exports = {
         selectedCivilization,
         civ[0].troopType
       );
-      await dbManager.updatePower(userId, civ[0].fragment);
+      frag = civ[0].fragment;
+
       await dbManager.addBossId(userId, civ[0].bossId, 1);
       const nomBoss = await dbManager.getBossInfo(civ[0].bossId);
+      await dbManager.updatePower(userId, frag);
       // Répondre à l'utilisateur avec les détails
       const stats = await dbManager.getStats(userId);
       const power = stats.power;
       const formattedPower = power.toLocaleString("fr-FR", {
         useGrouping: true,
       });
-
-      console.log(formattedPower); // Affiche "1 000 000" en français
 
       const embedReply = new EmbedBuilder()
         .setAuthor({

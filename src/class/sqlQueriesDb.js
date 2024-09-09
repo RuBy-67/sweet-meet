@@ -1,9 +1,4 @@
 const SQL_QUERIES = {
-  GET_MATERIAU_BY_USER_ID: `
-    SELECT mu.id AS mid, mu.*, m.*
-    FROM materiau_user mu 
-    JOIN materiau m ON mu.idMateriau = m.id 
-    WHERE mu.idUser = ?`,
   GET_MATERIAU: `
     SELECT * FROM materiau
     ORDER BY 
@@ -93,6 +88,10 @@ JOIN materiau m ON mu.IdMateriau = m.id`,
   ADD_USER: `INSERT INTO user (discordId, civilisation) VALUES (?,?)`,
   GET_ALL_BADGE: `SELECT * FROM badge`,
   GET_DATA_MATERIAL_BY_ID: `SELECT * FROM materiau WHERE id = ?`,
+  GET_FORGE_LVL: `SELECT lvl FROM forge WHERE discordId = ?`,
+  GET_FORGE_INFO: `SELECT * FROM batiment WHERE nom = 'forge'`,
+  GET_TROOP_TYPE: `SELECT * FROM batiment WHERE nom = ?`,
+  UPDATE_FORGE_LVL: `UPDATE forge SET lvl = lvl + 1 WHERE discordId = ?`,
   SELECT_MATERIAU_USER: `SELECT * FROM materiau_user WHERE idUser = ?`,
   SELECT_BADGE_USER: `SELECT * FROM badge_user WHERE idUser = ?`,
   DELETE_USER: `DELETE FROM user WHERE discordId = ?`,
