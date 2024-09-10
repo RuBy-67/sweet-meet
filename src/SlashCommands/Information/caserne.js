@@ -105,6 +105,11 @@ module.exports = {
       name: "troops",
       description: "Gérer vos troupe (Améliorer)",
     },
+    {
+      type: 1,
+      name: "détails",
+      description: "Détail de votre caserne",
+    },
   ],
   run: async (client, interaction, args) => {
     if (config.maintenance) {
@@ -130,9 +135,12 @@ module.exports = {
     const subCommand = interaction.options.getSubcommand();
     switch (subCommand) {
       case "upgrade":
-        async function createCaserneEmbed(user, caserneLvl, power) {
+        async function createCaserneEmbed(user, caserneLvl) {
           const bonus = await dbManager.getBonus("caserne");
           const powerUpdate = await dbManager.getPower(userId);
+          const formattedPower = powerUpdate.toLocaleString("fr-FR", {
+            useGrouping: true,
+          });
           let priceUpgrade;
           if (caserneLvl >= 1 && caserneLvl <= 9) {
             priceUpgrade = caserneLvl * 2250;
@@ -154,7 +162,7 @@ module.exports = {
 
           return new EmbedBuilder()
             .setAuthor({
-              name: `Puissance : ${powerUpdate}`,
+              name: `Puissance : ${formattedPower}`,
               iconURL: user.displayAvatarURL({ dynamic: true }),
             })
             .setTitle("Caserne ⚔️")
@@ -475,6 +483,8 @@ module.exports = {
       case "default":
 
       case "troops":
+
+      case "détails":
 
       default:
         await interaction.reply({

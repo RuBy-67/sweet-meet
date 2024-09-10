@@ -30,6 +30,11 @@ module.exports = {
       name: "upgrade", /// ok
       description: "Améliorer votre hôpital",
     },
+    {
+      type: 1,
+      name: "détails", /// ok
+      description: "Détail de votre hôpital",
+    },
   ],
   run: async (client, interaction, args) => {
     if (config.maintenance) {
@@ -55,9 +60,12 @@ module.exports = {
     const subCommand = interaction.options.getSubcommand();
     switch (subCommand) {
       case "upgrade":
-        async function createHospitalEmbed(user, hopitalLvl, power) {
+        async function createHospitalEmbed(user, hopitalLvl) {
           const bonus = await dbManager.getBonus("hopital");
           const powerUpdate = await dbManager.getPower(userId);
+          const formattedPower = powerUpdate.toLocaleString("fr-FR", {
+            useGrouping: true,
+          });
           let priceUpgrade;
           if (hopitalLvl >= 1 && hopitalLvl <= 9) {
             priceUpgrade = hopitalLvl * 2750;
@@ -79,7 +87,7 @@ module.exports = {
 
           return new EmbedBuilder()
             .setAuthor({
-              name: `Puissance : ${powerUpdate}`,
+              name: `Puissance : ${formattedPower}`,
               iconURL: user.displayAvatarURL({ dynamic: true }),
             })
             .setTitle("Hôpital 💉")
@@ -216,6 +224,8 @@ module.exports = {
         });
 
       case "soigner":
+
+      case "détails":
 
       default:
         await interaction.reply({

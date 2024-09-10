@@ -243,7 +243,7 @@ module.exports = {
 
       const embedReply = new EmbedBuilder()
         .setAuthor({
-          name: "Puissance: " + stats.power,
+          name: "Puissance: " + formattedPower,
           iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
         })
         .setTitle(`Civilisation Choisie : **${civ[0].nom}**`)

@@ -698,9 +698,12 @@ module.exports = {
             break;
 
           case "forge":
-            async function createForgeEmbed(user, forgeLvl, power) {
+            async function createForgeEmbed(user, forgeLvl) {
               const bonus = await dbManager.getBonus("forge");
               const powerUpdate = await dbManager.getPower(userId);
+              const formattedPower = powerUpdate.toLocaleString("fr-FR", {
+                useGrouping: true,
+              });
               let priceUpgrade;
               if (forgeLvl >= 1 && forgeLvl <= 9) {
                 priceUpgrade = forgeLvl * 2500;
@@ -722,7 +725,7 @@ module.exports = {
 
               return new EmbedBuilder()
                 .setAuthor({
-                  name: `Puissance : ${powerUpdate}`,
+                  name: `Puissance : ${formattedPower}`,
                   iconURL: user.displayAvatarURL({ dynamic: true }),
                 })
                 .setTitle("Forge 🔨")
