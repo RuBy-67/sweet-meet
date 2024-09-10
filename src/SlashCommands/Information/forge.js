@@ -709,9 +709,14 @@ module.exports = {
               } else if (forgeLvl >= 22 && forgeLvl <= 25) {
                 priceUpgrade = (forgeLvl - 21) * 8500 + 12 * 5500 + 9 * 2500;
               }
-              const bonus1 = bonus.bonus1 * forgeLvl;
-              const bonus2 = forgeLvl >= 10 ? bonus.bonus2 * (forgeLvl - 5) : 0;
-              const bonus3 = forgeLvl >= 22 ? bonus.bonus3 * (forgeLvl - 5) : 0;
+              let bonus1 = bonus.bonus1 * forgeLvl;
+              let bonus2 = forgeLvl >= 10 ? bonus.bonus2 * (forgeLvl - 7) : 0;
+              let bonus3 = forgeLvl >= 22 ? bonus.bonus3 * (forgeLvl - 17) : 0;
+              if (forgeLvl === 25) {
+                bonus3 = Math.round(bonus3 * 1.8);
+                bonus1 = Math.round(bonus1 * 1.2);
+                bonus2 = Math.round(bonus2 * 1.5);
+              }
               const priceUpgradeText =
                 forgeLvl === 25 ? "Max" : `${priceUpgrade} ${emoji("power")}`;
 

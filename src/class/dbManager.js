@@ -847,8 +847,20 @@ class DatabaseManager {
   async getForgeLvl(userId) {
     return this.queryMain(SQL_QUERIES.GET_FORGE_LVL, [userId]);
   }
+  async getCaserneLvl(userId) {
+    return this.queryMain(SQL_QUERIES.GET_CASERNE_LVL, [userId]);
+  }
   async updateForge(userId) {
     return this.queryMain(SQL_QUERIES.UPDATE_FORGE_LVL, [userId]);
+  }
+  async updateCaserne(userId) {
+    return this.queryMain(SQL_QUERIES.UPDATE_CASERNE_LVL, [userId]);
+  }
+  async updateHospital(userId) {
+    return this.queryMain(SQL_QUERIES.UPDATE_HOSPITAL_LVL, [userId]);
+  }
+  async getHospitalLvl(userId) {
+    return this.queryMain(SQL_QUERIES.GET_HOSPITAL_LVL, [userId]);
   }
 }
 
