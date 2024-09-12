@@ -1,6 +1,8 @@
 const { Client, Collection, GatewayIntentBits } = require("discord.js");
 const { loadEvents } = require("./src/handlers/loadEvents");
 const { loadSlashCommands } = require("./src/handlers/loadSlashCommands");
+const createDateProfil = require('./src/SlashCommands/User/createDateprofil');
+const dateProfilCommand = require('./src/SlashCommands/User/dateProfil');
 const {
   botToken,
   botToken2Test,
@@ -51,4 +53,14 @@ client.login(botToken3Test).then(() => {
   console.log(
     ` Successfully logged in as: ${client.user.username}#${client.user.discriminator} `
   );
+});
+
+createDateProfil.registerEvent(client);
+
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isChatInputCommand()) return;
+
+  if (interaction.commandName === 'dateprofil') {
+      await dateProfilCommand.run(client, interaction);
+  }
 });

@@ -11,8 +11,10 @@ class Dating extends DatabaseManager {
   }
 
   async getProfileByUserId(user_id) {
+    console.log("Requête pour l'utilisateur ID:", user_id);
     const profile = await this.queryDate('SELECT * FROM profiles WHERE user_id = ?', [user_id]);
-    return profile;
+    console.log("Résultat de la requête du profil:", profile);
+    return (profile && profile.length > 0) ? profile : null;
   }
 
   async insertIntoProfile(
@@ -67,6 +69,17 @@ class Dating extends DatabaseManager {
       console.error('Erreur lors de la vérification du liker ID :', error);
       throw error;
     }
+  }
+
+  async deleteProfileByUserId(userId) {
+    const query = 'DELETE FROM profiles WHERE user_id = ?';
+    const result = await this.queryDate(query, [userId]);
+
+    if (result.affectedRows === 0) {
+      throw new Error('Profil non trouvé.');
+    }
+    return true;
+
   }
 }
 
