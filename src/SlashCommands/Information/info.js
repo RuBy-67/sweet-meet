@@ -379,6 +379,8 @@ module.exports = {
 
               actionRow.addComponents(selectMenu);
             }
+          } else {
+            return [];
           }
           components.push(actionRow);
           return components;
@@ -412,6 +414,8 @@ module.exports = {
 
               actionRow.addComponents(unselectMenu);
             }
+          } else {
+            return [];
           }
           components.push(actionRow);
           return components;
@@ -740,8 +744,84 @@ module.exports = {
             }
           } else if (interaction.customId.startsWith("material_unselect_")) {
             console.log("material_unselect_");
-          } else if (interaction.customId.startsWith("material_select_")) {
-            console.log("material_select_");
+            /*//!hzehoefhoeehz
+            const bossId = interaction.customId.split("_").pop();
+            const materialId = i.values[0];
+            await dbManager.updateMaterialState(
+              interaction.user.id,
+              materialId,
+              0,
+              bossId
+            );
+            let menu1 = await addSelectComponent(interaction.user.id, bossId);
+            let menu2 = await addUnselectComponent(interaction.user.id, bossId);
+            const message = await interaction.fetchReply();
+            const existingComponents = message.components || [];
+            let preservedComponents = [];
+            for (const component of existingComponents) {
+              // Conserve les composants existants sauf les menus déroulants (ou ceux qui doivent être mis à jour)
+              if (
+                !component.components.some(
+                  (c) =>
+                    c.customId.startsWith("material_select_") ||
+                    c.customId.startsWith("material_unselect_")
+                )
+              ) {
+                preservedComponents.push(component);
+              }
+            }
+            let combinedComponents = [
+              ...preservedComponents,
+              ...menu1,
+              ...menu2,
+            ];
+
+            return i.update({
+              content: "Matériel déséquipé !",
+              embeds: [pages[currentPage]],
+               components: [
+                row,
+                ...compo[componentPage],
+                ...compo1[componentPage],
+              ],
+              components: combinedComponents,
+            });*/
+          } else if (interaction.customId.startsWith("material_select")) {
+            console.log("material_select");
+            /*const bossId = interaction.customId.split("_").pop();
+            const materialId = i.values[0];
+            const statsResult = await dbManager.getStats(targetUser.id);
+            const bossInfo = await dbManager.getBossInfo(bossId);
+            const boss1 = await dbManager.getBossByUserByBossId(
+              targetUser.id,
+              bossId
+            );
+
+            pages[currentPage] = await createBossEmbed(
+              boss1[0],
+              bossInfo[0],
+              statsResult,
+              params,
+              targetUser,
+              EmbedColor,
+              emo
+            );
+
+            await dbManager.updateMaterialState(
+              interaction.user.id,
+              materialId,
+              1,
+              bossId
+            );
+            return i.update({
+              content: "Matériel équipé !",
+              embeds: [pages[currentPage]],
+              components: [
+                row,
+                ...compo[componentPage],
+                ...compo1[componentPage],
+              ],
+            });*/
           } else if (i.customId === "upgrade_mat1") {
             const statsResult2 = await dbManager.getStats(targetUser.id);
             const bossIndex = currentPage - 1;
@@ -896,7 +976,13 @@ module.exports = {
                 });
               }
             }
+          } else {
+            i.reply({
+              content: "Erreurs inconnue.",
+              ephemeral: true,
+            });
           }
+
           const updatedRow2 =
             currentPage > 0
               ? new ActionRowBuilder().addComponents(

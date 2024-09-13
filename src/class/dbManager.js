@@ -739,14 +739,55 @@ class DatabaseManager {
     ]);
   }
 
-  async updateMaterialState(userId, materialId, state) {
-    return this.queryMain(SQL_QUERIES.UPDATE_MATERIAL_STATE, [
+  async updateMaterialState(userId, materialId, state, bossId) {
+    this.queryMain(SQL_QUERIES.UPDATE_MATERIAL_STATE, [
       state,
       materialId,
       userId,
     ]);
-  }
+    // Vérifier l'état actuel des colonnes muId1 et muId2
+    const currentState = await this.queryMain(SQL_QUERIES.GET_CURRENT_STATE, [
+      userId,
+      bossId,
+    ]);
+    const { muId1, muId2 } = currentState;
 
+    if (state === 1) {
+      // Ajouter le matériau
+      if (muId1 === 0) {
+        await this.queryMain(SQL_QUERIES.UPDATE_MATERIAL_STATE_ON_BOSS, [
+          materialId,
+          "muId2",
+          userId,
+          bossId,
+        ]);
+      } else if (muId2 === 0) {
+        await this.queryMain(SQL_QUERIES.UPDATE_MATERIAL_STATE_ON_BOSS, [
+          "muId1",
+          materialId,
+          userId,
+          bossId,
+        ]);
+      }
+    } //!retrait
+    else if (state === 0) {
+      if (muId1 === materialId) {
+        await this.queryMain(SQL_QUERIES.UPDATE_MATERIAL_STATE_ON_BOSS, [
+          0,
+          "muId2",
+          userId,
+          bossId,
+        ]);
+      } else if (muId2 === materialId) {
+        await this.queryMain(SQL_QUERIES.UPDATE_MATERIAL_STATE_ON_BOSS, [
+          "muId1",
+          0,
+          userId,
+          bossId,
+        ]);
+      }
+    }
+  }
   async updateMaterialLevel(userId, idUnique) {
     return this.queryMain(SQL_QUERIES.UPDATE_MATERIAL_LEVEL, [
       idUnique,

@@ -19,7 +19,7 @@ AND ub.bossId = ?
 AND mu.etat = ?;
   `,
   getMaterialsByIdEtat0: `
-     SELECT m.nom AS nom, mu.level AS materiauLevel, mu.materiauId AS id FROM materiau m JOIN materiau_user mu ON m.id = mu.materiauId WHERE mu.discordId = ? AND (mu.etat = 0 OR mu.etat IS NULL);`,
+     SELECT m.nom AS nom, mu.level AS materiauLevel, mu.id AS id FROM materiau m JOIN materiau_user mu ON m.id = mu.materiauId WHERE mu.discordId = ? AND (mu.etat = 0 OR mu.etat IS NULL);`,
   insertMaterialsIntoDuelDetail: `
     UPDATE dueldetails SET idMateriau1 = ?, idMateriau2 = ?, idMateriau3 = ?, idMateriau4 = ?
     WHERE idDuel = ? AND idUser = ?

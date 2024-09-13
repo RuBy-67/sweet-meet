@@ -179,6 +179,8 @@ WHERE u.discordId = ?`,
   GET_BOSS_BY_USER: `SELECT * FROM user_boss WHERE discordId = ?`,
   UPGRADE_BOSS: `UPDATE user_boss SET level = level + 1 WHERE discordId = ? AND bossId = ?`,
   GET_BOSS_BY_USER_BY_BOSS_ID: `SELECT * FROM user_boss WHERE discordId = ? AND bossId = ?`,
+  GET_CURRENT_STATE: `SELECT * FROM user_boss WHERE discordId = ? AND bossId = ?`,
+  UPDATE_MATERIAL_STATE_ON_BOSS: `UPDATE user_boss SET muId1 = ?, muId2 = ?  WHERE discordId = ? AND bossId = ?`,
 };
 
 module.exports = SQL_QUERIES;
