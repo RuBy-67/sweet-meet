@@ -48,7 +48,7 @@ class Boss extends DatabaseManager {
       playerStats.power
     );
     let bossScore = await this.getFightScore(attaque, defense, sante, power);
-    bossScore = bossScore * 0.22;
+    //bossScore = bossScore * 0.22;
     const winner = await this.calculateWinner(playerScore, bossScore);
     await this.bossDialogue(
       userId,
@@ -85,7 +85,7 @@ class Boss extends DatabaseManager {
     const bossAdjustedWinChance = bossWinChance + bossRnd * param.randomFactor;
     const diff = Math.abs(playerAdjustedWinChance - bossAdjustedWinChance);
 
-    if (diff < 0.04) {
+    if (diff < 0.02) {
       return "equal";
     } else if (playerAdjustedWinChance > bossAdjustedWinChance) {
       return true;

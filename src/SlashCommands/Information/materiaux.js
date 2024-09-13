@@ -87,7 +87,6 @@ module.exports = {
         const userMaterials = await dbManager.getMateriauByUserId(
           interaction.user.id
         );
-        const colors = await dbManager.getColor(interaction.user.id);
         if (userMaterials.length === 0) {
           const noMaterialsEmbed = new EmbedBuilder()
             .setTitle("Boutique - Vente")
@@ -487,7 +486,7 @@ module.exports = {
                   const rarity = baseRarity * typeMultiplier;
                   const calculLevelPrice = Math.round(
                     params.updatePrice.levels *
-                      material.lvl *
+                      (material.lvl + 1) *
                       (ownedMaterials2.length * 0.57) *
                       rarity *
                       params.updatePrice.multiplicateur
@@ -510,10 +509,19 @@ module.exports = {
           }
           return componentMaterial;
         }
+        const upgradeEmbed = new EmbedBuilder()
+          .setTitle("Amélioration de matériaux")
+          .setColor(colors)
+          .setDescription(
+            `- **Facteurs :**\n\n> Nombre de matériaux possédés\n> Niveaux des matériaux\n> Types des matériaux\n> Raretés des matériaux\n\n*Améliorer un matériau apportera une amélioration des bonus du materiaux.*\n\n> *--> Sélectionnez un matériau à améliorer*`
+          )
+          .setFooter({
+            text: `Demandé(e) par ${interaction.user.tag}`,
+            iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+          });
 
         await interaction.reply({
-          content: `**Comment le prix est calculé ? :**\n
-🔹 **Facteurs :**\n> Nombre de matériaux possédés\n> Niveaux des matériaux\n> Types des matériaux\n> Raretés des matériaux\n\n*Améliorer un matériau apportera une amélioration des bonus du materiaux.*\n\n**Sélectionnez un matériau à améliorer**`,
+          embeds: [upgradeEmbed],
           components: await componentMaterial(),
           ephemeral: true,
           fetchReply: true,
@@ -546,48 +554,62 @@ module.exports = {
             const typeMultiplier = typeMultiplierMap[material.type] || 1;
             const rarity = baseRarity * typeMultiplier;
             const upgradePrice = Math.round(
-              params.updatePrice.levels *
-                material.lvl *
-                ownedMaterials.length *
-                rarity *
-                params.updatePrice.multiplicateur
+              params.updatePrice.levels * material.lvl +
+                1 *
+                  (ownedMaterials.length * 0.57) *
+                  rarity *
+                  params.updatePrice.multiplicateur
             );
-
-            if (power < upgradePrice) {
+            const ErrorEmbed = new EmbedBuilder();
+            ErrorEmbed.setTitle("Erreur");
+            ErrorEmbed.setColor(color.error);
+            const newLevel = material.lvl + 1;
+            if (newLevel > params.maxLevel) {
+              ErrorEmbed.setDescription(
+                `Le niveau maximal pour ${emoji(emo[material.nom])} **${
+                  material.nom
+                }** est atteint. max : **(${
+                  params.maxLevel
+                })**\n\n**Sélectionnez un matériau à améliorer**`
+              );
               return it.update({
-                content: `Vous n'avez pas assez de Fragments pour améliorer ${emoji(
+                embeds: [ErrorEmbed],
+                components: await componentMaterial(),
+              });
+            }
+            if (power < upgradePrice) {
+              ErrorEmbed.setDescription(
+                `Vous n'avez pas assez de Fragments pour améliorer ${emoji(
                   emo[material.nom]
                 )} **${material.nom}**.\n(Prix:** ${upgradePrice})** ${emoji(
                   emo.power
-                )}\n**Vous avez :** ${power} ${emoji(
-                  emo.power
-                )}**\n\n**Sélectionnez un matériau à améliorer**`,
+                )}\n**Vous avez :** ${power} ${emoji(emo.power)}`
+              );
+              return it.update({
+                embeds: [ErrorEmbed],
                 components: await componentMaterial(),
               });
             }
 
-            const newLevel = material.lvl + 1;
-            if (newLevel > params.maxLevel) {
-              return it.update({
-                content: `Le niveau maximal pour ${emoji(
-                  emo[material.nom]
-                )} **${material.nom}** est atteint. max : **(${
-                  params.maxLevel
-                })**\n\n**Sélectionnez un matériau à améliorer**`,
-                components: await componentMaterial(),
-              });
-            }
             const upgrade = await dbManager.updateMaterialLevel(
               userId,
               selectedMaterialId,
               newLevel
             );
+
             if (upgrade) {
+              const UpgradeEmbed = new EmbedBuilder();
+              UpgradeEmbed.setTitle("Amélioration de matériaux");
+              UpgradeEmbed.setColor(colors);
+              UpgradeEmbed.setDescription(
+                `Le matériau ${emoji(emo[material.nom])} **${
+                  material.nom
+                }** a été amélioré au niveau **${newLevel}**.\n**Sélectionnez le matériau à améliorer**`
+              );
+
               await dbManager.updatePower(userId, -upgradePrice);
               return it.update({
-                content: `Le matériau ${emoji(emo[material.nom])} **${
-                  material.nom
-                }** a été amélioré au niveau **${newLevel}**.\n**Sélectionnez le matériau à améliorer**`,
+                embeds: [UpgradeEmbed],
                 components: await componentMaterial(),
               });
             } else {
@@ -680,9 +702,19 @@ module.exports = {
           }
           return materiauxString;
         }
+        const embedSetMateriaux = new EmbedBuilder()
+          .setTitle("Gestion des Matériaux")
+          .setColor(colors)
+          .setDescription(
+            `**Sélectionnez un matériau à activer ou désactiver pour le combat.**\n\n**Note :**\n> Vous pouvez activer jusqu'à 4 matériaux pour le combat.\n> Les matériaux actifs augmentent vos statistiques de combat.\n> Les matériaux inactifs ne fournissent aucun bonus.\n\n__**Matériaux Actuellement Actifs :**__ \n\n${await stringMat()}`
+          )
+          .setFooter({
+            text: `Demandé(e) par ${interaction.user.tag}`,
+            iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+          });
 
         await interaction.reply({
-          content: `Matériaux Actuellement Actifs : \n${await stringMat()}`,
+          embeds: [embedSetMateriaux],
           components: await component(),
           ephemeral: true,
           fetchReply: true,
@@ -700,6 +732,22 @@ module.exports = {
           const selectedMaterials = i.values;
           const selectedMaterialId = selectedMaterials[0];
 
+          const embedS = new EmbedBuilder();
+          embedS.setTitle("Succès");
+          embedS.setColor(colors);
+          embedS.setFooter({
+            text: `Demandé(e) par ${interaction.user.tag}`,
+            iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+          });
+
+          const embedSError = new EmbedBuilder();
+          embedSError.setTitle("Erreur");
+          embedSError.setColor(color.error);
+          embedSError.setFooter({
+            text: `Demandé(e) par ${interaction.user.tag}`,
+            iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+          });
+
           if (i.customId === "material_select") {
             await dbManager.updateMaterialState(
               userId,
@@ -707,21 +755,28 @@ module.exports = {
               "1"
             );
             const materialsInUse = await player.getMaterialsById(userId);
+
             if (materialsInUse.length > 4) {
               await dbManager.updateMaterialState(
                 userId,
                 selectedMaterialId,
                 "0"
               );
+              embedSError.setDescription(
+                "Nombre maximal de matériaux atteint! Veuillez réduire vos sélections."
+              );
+
               await i.update({
-                content:
-                  "Nombre maximal de matériaux atteint! Veuillez réduire vos sélections.",
+                embeds: [embedSError],
                 components: [],
               });
               return;
             } else {
+              embedS.setDescription(
+                `Matériaux sélectionnés ajouté à votre inventaire de bataille!\n__**Matériaux Actuellement Actifs :**__ \n${await stringMat()}`
+              );
               await i.update({
-                content: `Matériaux sélectionnés ajouté à votre inventaire de bataille!\nMatériaux Actuellement Actifs : \n${await stringMat()}`,
+                embeds: [embedS],
                 components: await component(),
               });
             }
@@ -733,8 +788,11 @@ module.exports = {
               selectedMaterialId,
               "0"
             );
+            embedS.setDescription(
+              `Matériaux sélectionnés retiré de votre inventaire de bataille!\n__**Matériaux Actuellement Actifs :**__ \n${await stringMat()}`
+            );
             await i.update({
-              content: `Matériaux sélectionnés retiré de votre inventaire de bataille!\nMatériaux Actuellement Actifs : \n${await stringMat()}`,
+              embeds: [embedS],
               components: await component(),
             });
           } else {
@@ -752,13 +810,22 @@ module.exports = {
             });
           }
         });
+
       case "activatepotion":
         const userPotions = await dbManager.getAllPotionDataForUserByEtat0(
           userId
         );
+        const embedPotion = new EmbedBuilder();
+        embedPotion.setTitle("Potions - Activation");
+        embedPotion.setColor(colors);
+        embedPotion.setFooter({
+          text: `Demandé(e) par ${interaction.user.tag}`,
+          iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+        });
         if (userPotions.length === 0) {
+          embedPotion.setDescription("Aucune potion disponible.");
           return interaction.reply({
-            content: "Aucune potion disponible.",
+            embeds: [embedPotion],
             ephemeral: true,
           });
         }
@@ -774,9 +841,12 @@ module.exports = {
             })
           );
         const row = new ActionRowBuilder().addComponents(potionMenu);
+        embedPotion.setDescription(
+          "Les potions offrent des bonus temporaires.\n\nChoisissez une potion à activer pour le combat.\n\n**Potions disponibles :**"
+        );
 
         await interaction.reply({
-          content: "Sélectionnez une potion à activer",
+          embeds: [embedPotion],
           components: [row],
           ephemeral: true,
         });
@@ -794,6 +864,7 @@ module.exports = {
           if (!potion) {
             return i.update({
               content: "Potion non trouvée.",
+              emdeds: [],
               components: [],
             });
           }
@@ -803,9 +874,19 @@ module.exports = {
           const endTimestamp = Math.floor(
             Date.now() / 1000 + potion[0].duration
           );
+          const embedPotionActivated = new EmbedBuilder()
+            .setTitle("Potions - Activation")
+            .setColor(colors)
+            .setDescription(
+              `La potion **${potion[0].potionName}** a été activée avec succès.\nFin d'activation : <t:${endTimestamp}:R>`
+            )
+            .setFooter({
+              text: `Demandé(e) par ${interaction.user.tag}`,
+              iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+            });
 
           await i.update({
-            content: `La potion **${potion[0].potionName}** a été activée avec succès.\Fin d'activation: <t:${endTimestamp}:R>`,
+            embeds: [embedPotionActivated],
             components: [],
           });
 
