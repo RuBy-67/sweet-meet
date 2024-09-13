@@ -351,6 +351,72 @@ module.exports = {
           return embed;
         }
 
+        async function addSelectComponent(userId, bossId) {
+          let components = [];
+          const actionRow = new ActionRowBuilder();
+          const etat0Materials = await player.getMaterialsByIdEtat0(userId);
+
+          // Récupère les matériaux de l'état 1 pour l'utilisateur (à confirmer si c'est bien 1)
+          if (etat0Materials.length > 0) {
+            const selectOptions = (
+              await player.getMaterialsStringSelect(userId, 0, bossId, true)
+            )
+              .split("\n")
+              .map((material) => {
+                const [emo, nom, lvl, id] = material.split("_");
+                return new StringSelectMenuOptionBuilder()
+                  .setEmoji(emo)
+                  .setLabel(`${nom}(lvl: ${lvl})`)
+                  .setValue(id);
+              });
+
+            if (selectOptions.length > 0) {
+              const selectMenu = new StringSelectMenuBuilder()
+                .setCustomId(`material_select_${bossId}`)
+                .setPlaceholder("Set Materiaux")
+                .setMaxValues(1)
+                .addOptions(selectOptions);
+
+              actionRow.addComponents(selectMenu);
+            }
+          }
+          components.push(actionRow);
+          return components;
+        }
+        async function addUnselectComponent(userId, bossId) {
+          const userIdMaterials = await player.getMaterialsById(userId, bossId);
+
+          let components = [];
+          const actionRow = new ActionRowBuilder();
+
+          // Récupère les matériaux de l'état 0 pour l'utilisateur (à confirmer si c'est bien 0)
+          if (userIdMaterials.length > 0) {
+            const unselectOptions = (
+              await player.getMaterialsStringSelect(userId, 1, bossId, true)
+            )
+              .split("\n")
+              .map((material) => {
+                const [emo, nom, lvl, id] = material.split("_");
+                return new StringSelectMenuOptionBuilder()
+                  .setEmoji(emo)
+                  .setLabel(`${nom}(lvl: ${lvl})`)
+                  .setValue(id);
+              });
+
+            if (unselectOptions.length > 0) {
+              const unselectMenu = new StringSelectMenuBuilder()
+                .setCustomId(`material_unselect_${bossId}`)
+                .setPlaceholder("Unset Materiaux")
+                .setMaxValues(1)
+                .addOptions(unselectOptions);
+
+              actionRow.addComponents(unselectMenu);
+            }
+          }
+          components.push(actionRow);
+          return components;
+        }
+
         const target =
           interaction.options.getMember("membre") || interaction.member;
         const targetUser = await client.users.fetch(target.user.id);
@@ -359,6 +425,8 @@ module.exports = {
         const bossResult1 = await dbManager.getBossByUser(targetUser.id);
 
         const pages = [];
+        const compo = [];
+        const compo1 = [];
 
         // Profil principal
         const badgeResult = await dbManager.getBadge(targetUser.id);
@@ -481,6 +549,7 @@ module.exports = {
               iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
             })
         );
+        let i = 0;
 
         for (const boss of bossResult1) {
           const bossInfo = await dbManager.getBossInfo(boss.bossId);
@@ -493,10 +562,20 @@ module.exports = {
             EmbedColor,
             emo
           );
+          const pageComponents = await addUnselectComponent(
+            interaction.user.id,
+            boss.bossId
+          );
+          const pageComponentsSelect = await addSelectComponent(
+            interaction.user.id,
+            boss.bossId
+          );
           pages.push(embed);
+          compo.push(pageComponents);
+          compo1.push(pageComponentsSelect);
         }
-
         let currentPage = 0;
+        let componentPage = -1;
 
         let row = new ActionRowBuilder().addComponents(
           new ButtonBuilder()
@@ -530,11 +609,12 @@ module.exports = {
         );
 
         // Envoyer le message avec les composants appropriés
-        const components = currentPage === 0 ? [row] : [row, row2];
+        const components = currentPage === 0 ? [row] : [row2];
 
         const message = await interaction.reply({
           embeds: [pages[currentPage]],
           components: components,
+          compo,
           fetchReply: true,
         });
 
@@ -555,8 +635,10 @@ module.exports = {
         collector.on("collect", async (i) => {
           if (i.customId === "next") {
             currentPage = (currentPage + 1) % pages.length;
+            componentPage = (componentPage + 1) % compo.length;
           } else if (i.customId === "previous") {
             currentPage = (currentPage - 1 + pages.length) % pages.length;
+            componentPage = (componentPage - 1 + compo.length) % compo.length;
           } else if (i.customId === "upgrade") {
             const bossIndex = currentPage - 1;
             if (bossIndex >= 0 && bossIndex < bossResult1.length) {
@@ -640,15 +722,26 @@ module.exports = {
                 );
               }
 
-              const updatedComponents = updatedRow2
-                ? [row, updatedRow2]
-                : [row];
+              const updatedComponents =
+                currentPage == 0
+                  ? [row]
+                  : [
+                      row,
+                      updatedRow2,
+                      ...compo[componentPage],
+                      ...compo1[componentPage],
+                    ];
+
               await i.update({
                 content: "Upgrade effectué !",
                 embeds: [pages[currentPage]],
                 components: updatedComponents,
               });
             }
+          } else if (interaction.customId.startsWith("material_unselect_")) {
+            console.log("material_unselect_");
+          } else if (interaction.customId.startsWith("material_select_")) {
+            console.log("material_select_");
           } else if (i.customId === "upgrade_mat1") {
             const statsResult2 = await dbManager.getStats(targetUser.id);
             const bossIndex = currentPage - 1;
@@ -825,11 +918,20 @@ module.exports = {
                 )
               : null;
 
-          const updatedComponents = updatedRow2 ? [row, updatedRow2] : [row];
+          const components =
+            currentPage == 0
+              ? [row]
+              : [
+                  row,
+                  updatedRow2,
+                  ...compo[componentPage],
+                  ...compo1[componentPage],
+                ];
 
           await i.update({
+            content: "next",
             embeds: [pages[currentPage]],
-            components: updatedComponents,
+            components: components, // Passe uniquement les composants de la page actuelle
           });
         });
 

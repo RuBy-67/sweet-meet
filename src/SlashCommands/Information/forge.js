@@ -15,6 +15,8 @@ const color = require("../../jsons/color.json");
 const Player = require("../../class/player");
 const { options } = require("./info");
 const player = new Player();
+const Boss = require("../../class/bossManager");
+const bossManager = new Boss();
 
 module.exports = {
   name: "forge",
@@ -865,6 +867,7 @@ module.exports = {
       case "setmateriaux":
         const materials = await player.getMaterialsByIdEtat0(userId);
         const userIdMaterials = await player.getMaterialsById(userId);
+        const userBoss = await dbManager.getBossByUser(userId); // récup level (neccessaire) et les id des matèriaux set (0 si aucun)
         if (materials.length === 0 && userIdMaterials.length === 0) {
           return interaction.reply("Aucun matériau disponible.");
         }
@@ -917,8 +920,9 @@ module.exports = {
           return components;
         }
 
-        async function stringMat() {
-          const materiauxArray = await player.getMaterialsStringMessage(userId);
+        async function stringBoss() {
+          const userBoss = await dbManager.getBossByUser(userId); // récup level (neccessaire) et les id des matèriaux set (0 si aucun)
+          const bossInfo = await bossManager.getBossInfo(userBoss[0].bossId);
 
           let materiauxString = "";
           for (const materiau of materiauxArray) {

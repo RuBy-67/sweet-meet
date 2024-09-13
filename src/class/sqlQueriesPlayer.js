@@ -10,25 +10,22 @@ const sqlQueries = {
     "UPDATE user SET loseCounter = loseCounter + 1 WHERE discordId = ?",
   getMateriaux: "SELECT * FROM materiau_user WHERE idUser = ?",
   getMaterialsById: `
-    SELECT m.*, mu.lvl AS materiauLevel, mu.id AS idMateriau, m.type AS materiauType 
-    FROM materiau m 
-    JOIN materiau_user mu ON m.id = mu.IdMateriau 
-    WHERE mu.idUser = ? 
-      AND mu.etat = 1
+    SELECT m.nom, mu.level AS materiauLevel, ub.bossId, mu.id
+FROM user_boss ub
+JOIN materiau_user mu ON mu.id IN (ub.muId1, ub.muId2)
+JOIN materiau m ON m.id = mu.materiauId
+WHERE mu.discordId = ?
+AND ub.bossId = ?
+AND mu.etat = ?;
   `,
   getMaterialsByIdEtat0: `
-    SELECT m.nom AS nom, m.rarete AS rarete, mu.level AS materiauLevel, m.type AS materiauType, mu.materiauId AS idMateriau FROM materiau m JOIN materiau_user mu ON m.id = mu.materiauId WHERE mu.discordId = ? AND (mu.etat = 0 OR mu.etat IS NULL);
-  `,
+     SELECT m.nom AS nom, mu.level AS materiauLevel, mu.materiauId AS id FROM materiau m JOIN materiau_user mu ON m.id = mu.materiauId WHERE mu.discordId = ? AND (mu.etat = 0 OR mu.etat IS NULL);`,
   insertMaterialsIntoDuelDetail: `
     UPDATE dueldetails SET idMateriau1 = ?, idMateriau2 = ?, idMateriau3 = ?, idMateriau4 = ?
     WHERE idDuel = ? AND idUser = ?
   `,
   updateDuelDetailsDraw: "UPDATE dueldetails SET win = 2 WHERE idDuel = ?",
-  getMaterialsByIdEtat1: `SELECT m.nom AS nom, m.rarete AS rarete, mu.lvl AS materiauLevel, m.type AS materiauType, mu.id AS idMateriau
-    FROM materiau m
-    JOIN materiau_user mu ON m.id = mu.IdMateriau 
-    WHERE mu.idUser = ? AND
-      (mu.etat = 1 )`,
+  getMaterialsByIdEtat1: ``,
   getPotionByEtat: `SELECT * FROM potion_user WHERE idUser = ? AND etat = ?`,
 };
 

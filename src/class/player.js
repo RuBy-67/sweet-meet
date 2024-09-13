@@ -177,31 +177,37 @@ class Player extends DatabaseManager {
     }
   }
 
-  async getMaterialsById(userId, duelId) {
-    const [result] = await pool.query(sqlQueries.getMaterialsById, [userId]);
+  async getMaterialsById(userId, bossId, duelId) {
+    const [result] = await pool.query(sqlQueries.getMaterialsById, [
+      userId,
+      bossId,
+      1,
+    ]); // matos set à un boss (renvoit nom, level, id, bossID)
 
-    if (duelId !== null) {
+    /*if (duelId !== null) {
       const materialIds = result.map((material) => material.id);
       await this.insertMaterialsIntoDuelDetail(duelId, userId, materialIds);
-    }
+    }*/
     return result;
   }
 
-  async getMaterialsStringSelect(userId, etat, withId = false) {
+  async getMaterialsStringSelect(userId, etat, bossId, withId = false) {
+    // ok dans profil (ne pas toucher)
     const materials =
       etat === 1
-        ? await this.getMaterialsById(userId)
+        ? await this.getMaterialsById(userId, bossId)
         : await this.getMaterialsByIdEtat0(userId);
     const materialStrings = materials.map(
       (material) =>
         `${emo[material.nom]}_${material.nom}_${material.materiauLevel}_${
-          material.idMateriau
+          material.id
         }`
     );
+    console.log(materialStrings);
     return materialStrings.join("\n");
   }
 
-  async getMaterialsStringMessage(userId) {
+  async getBossStringMessage(userId) {
     const materiaux = await this.getMaterialsById(userId);
 
     if (materiaux.length === 0) {
