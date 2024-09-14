@@ -92,13 +92,8 @@ module.exports = {
     },
     {
       type: 1,
-      name: "setmateriaux",
-      description: "Équiper des matériau pour le combat à vos boss",
-    },
-    {
-      type: 1,
       name: "default",
-      description: "Armée par défaut",
+      description: "Armées par défaut", //! enregistré dans la db (4 par user)
     },
     {
       type: 1,
@@ -108,7 +103,7 @@ module.exports = {
     {
       type: 1,
       name: "détails",
-      description: "Détail de votre caserne",
+      description: "Détail de votre caserne", //! niveau , détails des troupes, (bonus)
     },
   ],
   run: async (client, interaction, args) => {
@@ -298,193 +293,17 @@ module.exports = {
           }
         });
 
-      case "setmateriaux":
-        const materials = await player.getMaterialsByIdEtat0(userId);
-        const userIdMaterials = await player.getMaterialsById(userId);
-        if (materials.length === 0 && userIdMaterials.length === 0) {
-          return interaction.reply("Aucun matériau disponible.");
-        }
-
-        async function component() {
-          const etat0Materials = await player.getMaterialsByIdEtat0(userId);
-          const userIdMaterials = await player.getMaterialsById(userId);
-          let components = [];
-
-          if (etat0Materials.length > 0) {
-            const selectMenu = new StringSelectMenuBuilder()
-              .setCustomId("material_select")
-              .setPlaceholder("SetMateriaux")
-              .setMaxValues(1)
-              .addOptions(
-                (await player.getMaterialsStringSelect(userId, 0, true))
-                  .split("\n")
-                  .map((material) => {
-                    const [emo, nom, lvl, id] = material.split("_");
-                    return new StringSelectMenuOptionBuilder()
-                      .setEmoji(emo)
-                      .setLabel(`${nom} (lvl: ${lvl})`)
-                      .setValue(id);
-                  })
-              );
-            const row = new ActionRowBuilder().addComponents(selectMenu);
-            components.push(row);
-          }
-          if (userIdMaterials.length > 0) {
-            const unselectMenu = new StringSelectMenuBuilder()
-              .setCustomId("material_unselect")
-              .setPlaceholder("UnsetMateriaux")
-              .setMaxValues(1)
-              .addOptions(
-                (await player.getMaterialsStringSelect(userId, 1, true))
-                  .split("\n")
-                  .map((material) => {
-                    const [emo, nom, lvl, id] = material.split("_");
-                    return new StringSelectMenuOptionBuilder()
-                      .setEmoji(emo)
-                      .setLabel(`${nom} (lvl: ${lvl}`)
-                      .setValue(id);
-                  })
-              );
-            const row2 = new ActionRowBuilder().addComponents(unselectMenu);
-
-            components.push(row2);
-          }
-
-          return components;
-        }
-
-        async function stringMat() {
-          const materiauxArray = await player.getMaterialsStringMessage(userId);
-
-          let materiauxString = "";
-          for (const materiau of materiauxArray) {
-            materiauxString += `- ${emoji(emo[materiau.nom])} \`${
-              materiau.nom
-            }\`\ (lvl: ${materiau.lvl}) \n> **Rareté:** ${
-              materiau.rarete
-            },\n> **Type:** ${materiau.type}\n> **Bonus:** 💚 ${
-              materiau.bonusSante
-            }% - ⚔️ ${materiau.bonusAttaque}% - 🛡️ ${materiau.bonusDefense}%\n`;
-          }
-          if (materiauxString === "") {
-            materiauxString = "Aucun matériau";
-          }
-          return materiauxString;
-        }
-        const embedSetMateriaux = new EmbedBuilder()
-          .setTitle("Gestion des Matériaux")
-          .setColor(colors)
-          .setDescription(
-            `**Sélectionnez un matériau à activer ou désactiver pour le combat.**\n\n**Note :**\n> Vous pouvez activer jusqu'à 4 matériaux pour le combat.\n> Les matériaux actifs augmentent vos statistiques de combat.\n> Les matériaux inactifs ne fournissent aucun bonus.\n\n__**Matériaux Actuellement Actifs :**__ \n\n${await stringMat()}`
-          )
-          .setFooter({
-            text: `Demandé(e) par ${interaction.user.tag}`,
-            iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
-          });
-
-        await interaction.reply({
-          embeds: [embedSetMateriaux],
-          components: await component(),
-          ephemeral: true,
-          fetchReply: true,
-        });
-        const collectorSet =
-          interaction.channel.createMessageComponentCollector({
-            filter: (i) =>
-              i.user.id === userId &&
-              (i.customId === "material_select" ||
-                i.customId === "material_unselect"),
-            max: 4,
-            time: 72000,
-          });
-        collectorSet.on("collect", async (i) => {
-          const selectedMaterials = i.values;
-          const selectedMaterialId = selectedMaterials[0];
-
-          const embedS = new EmbedBuilder();
-          embedS.setTitle("Succès");
-          embedS.setColor(colors);
-          embedS.setFooter({
-            text: `Demandé(e) par ${interaction.user.tag}`,
-            iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
-          });
-
-          const embedSError = new EmbedBuilder();
-          embedSError.setTitle("Erreur");
-          embedSError.setColor(color.error);
-          embedSError.setFooter({
-            text: `Demandé(e) par ${interaction.user.tag}`,
-            iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
-          });
-
-          if (i.customId === "material_select") {
-            await dbManager.updateMaterialState(
-              userId,
-              selectedMaterialId,
-              "1"
-            );
-            const materialsInUse = await player.getMaterialsById(userId);
-
-            if (materialsInUse.length > 4) {
-              await dbManager.updateMaterialState(
-                userId,
-                selectedMaterialId,
-                "0"
-              );
-              embedSError.setDescription(
-                "Nombre maximal de matériaux atteint! Veuillez réduire vos sélections."
-              );
-
-              await i.update({
-                embeds: [embedSError],
-                components: [],
-              });
-              return;
-            } else {
-              embedS.setDescription(
-                `Matériaux sélectionnés ajouté à votre inventaire de bataille!\n__**Matériaux Actuellement Actifs :**__ \n${await stringMat()}`
-              );
-              await i.update({
-                embeds: [embedS],
-                components: await component(),
-              });
-            }
-          } else if (i.customId === "material_unselect") {
-            const selectedMaterials = i.values;
-            const selectedMaterialId = selectedMaterials[0];
-            await dbManager.updateMaterialState(
-              userId,
-              selectedMaterialId,
-              "0"
-            );
-            embedS.setDescription(
-              `Matériaux sélectionnés retiré de votre inventaire de bataille!\n__**Matériaux Actuellement Actifs :**__ \n${await stringMat()}`
-            );
-            await i.update({
-              embeds: [embedS],
-              components: await component(),
-            });
-          } else {
-            await interaction.followUp({
-              content: "La selection est terminée",
-              ephemeral: true,
-            });
-          }
-        });
-        collectorSet.on("end", (collected, reason) => {
-          if (reason === "time") {
-            interaction.followUp({
-              content: "La sélection est terminée car le délai a expiré.",
-              ephemeral: true,
-            });
-          }
-        });
-
       case "default":
+      //! set un max de 4 armées par défaut par user
 
       case "troops":
+      //! géré ses troupe (améliorer)
 
       case "détails":
+      //! niveau , détails de sa carner et de ses troupes, + (bonus)
+
+      case "train":
+      //! train des troupes (avec un temps de train)
 
       default:
         await interaction.reply({

@@ -67,7 +67,7 @@ const SQL_QUERIES = {
 FROM role_user
 INNER JOIN role ON role_user.IdRole = role.id
 WHERE role_user.idUser = ?`,
-  UPDATE_MATERIAL_STATE: `UPDATE materiau_user SET etat= ? WHERE id = ? AND idUser = ?`,
+  UPDATE_MATERIAL_STATE: `UPDATE materiau_user SET etat= ? WHERE id = ? AND discordId = ?`,
   COUNT_DUEL: "SELECT COUNT(*) AS count FROM duel",
   DELETE_MARIAGE: `DELETE FROM mariage WHERE userId = ? OR userId2 = ?`,
   GET_TOTAL_MATERIAU_BY_RARITY: `SELECT 

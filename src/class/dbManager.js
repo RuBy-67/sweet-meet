@@ -614,12 +614,9 @@ class DatabaseManager {
   async calculatePowerForAllUsers() {
     const userIdsArray = await this.getAllUserIds();
     const userIds = userIdsArray.map((user) => user.discordId);
-
-    console.log(userIds);
     const results = [];
     for (const userId of userIds) {
       try {
-        console.log(`Calcul de la puissance pour l'utilisateur ${userId}...`);
         const power = await this.getPower(userId);
         results.push({ userId, power });
       } catch (error) {
@@ -632,11 +629,6 @@ class DatabaseManager {
 
     const totalPower = results.reduce((sum, result) => sum + result.power, 0);
     results.sort((a, b) => b.power - a.power);
-    console.log(`Puissance totale pour tous les joueurs: ${totalPower}`);
-    console.log("Tableau trié des utilisateurs par puissance décroissante:");
-    results.forEach((result) => {
-      console.log(`Utilisateur ${result.userId}: ${result.power}`);
-    });
     return {
       totalPower,
       sortedResults: results,
@@ -739,53 +731,74 @@ class DatabaseManager {
     ]);
   }
 
-  async updateMaterialState(userId, materialId, state, bossId) {
-    this.queryMain(SQL_QUERIES.UPDATE_MATERIAL_STATE, [
-      state,
-      materialId,
-      userId,
-    ]);
+  async updateMaterialState(userId, materialId, state, bossId, lvl) {
+    //! vérifier que boss Id à bien pas 2 matos (pour le state = 1)
     // Vérifier l'état actuel des colonnes muId1 et muId2
     const currentState = await this.queryMain(SQL_QUERIES.GET_CURRENT_STATE, [
       userId,
       bossId,
     ]);
-    const { muId1, muId2 } = currentState;
+    const muId1 = currentState[0].muId1;
+    const muId2 = currentState[0].muId2;
 
-    if (state === 1) {
+    if (state == 1) {
       // Ajouter le matériau
-      if (muId1 === 0) {
+      if (muId1 == 0) {
         await this.queryMain(SQL_QUERIES.UPDATE_MATERIAL_STATE_ON_BOSS, [
           materialId,
-          "muId2",
+          muId2,
           userId,
           bossId,
         ]);
-      } else if (muId2 === 0) {
+        await this.queryMain(SQL_QUERIES.UPDATE_MATERIAL_STATE, [
+          state,
+          materialId,
+          userId,
+        ]);
+      } else if (muId2 == 0) {
         await this.queryMain(SQL_QUERIES.UPDATE_MATERIAL_STATE_ON_BOSS, [
-          "muId1",
+          muId1,
           materialId,
           userId,
           bossId,
+        ]);
+        await this.queryMain(SQL_QUERIES.UPDATE_MATERIAL_STATE, [
+          state,
+          materialId,
+          userId,
         ]);
       }
     } //!retrait
-    else if (state === 0) {
-      if (muId1 === materialId) {
+    else if (state == 0) {
+      if (muId1 == materialId && muId2 == materialId) {
+      } else if (muId1 == materialId) {
         await this.queryMain(SQL_QUERIES.UPDATE_MATERIAL_STATE_ON_BOSS, [
           0,
-          "muId2",
+          muId2,
           userId,
           bossId,
         ]);
-      } else if (muId2 === materialId) {
+
+        await this.queryMain(SQL_QUERIES.UPDATE_MATERIAL_STATE, [
+          state,
+          materialId,
+          userId,
+        ]);
+      } else if (muId2 == materialId) {
         await this.queryMain(SQL_QUERIES.UPDATE_MATERIAL_STATE_ON_BOSS, [
-          "muId1",
+          muId1,
           0,
           userId,
           bossId,
+        ]);
+        await this.queryMain(SQL_QUERIES.UPDATE_MATERIAL_STATE, [
+          state,
+          materialId,
+          userId,
         ]);
       }
+    } else {
+      console.log("state bugged !!!!");
     }
   }
   async updateMaterialLevel(userId, idUnique) {

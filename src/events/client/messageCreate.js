@@ -42,7 +42,7 @@ module.exports = {
       return ranges[ranges.length - 1]; // Retourne la dernière plage si aucune n'est sélectionnée
     }
     const selectedRange = selectRange();
-    const powerIncrement =
+    let powerIncrement =
       Math.floor(Math.random() * (selectedRange.max - selectedRange.min + 1)) +
       selectedRange.min;
 
