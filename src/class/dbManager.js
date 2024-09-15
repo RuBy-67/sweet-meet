@@ -534,6 +534,19 @@ class DatabaseManager {
   }
 
   async getPower(userId) {
+    const troupeInTraining = await this.getCaserneInfo(userId);
+    if (troupeInTraining[0].troopAmount > 0) {
+      if (troupeInTraining[0].troopEndTime < Math.round(Date.now() / 1000)) {
+        await this.queryMain(SQL_QUERIES.UPDATE_TROOP_AMOUNT, [userId]);
+        const troopType = troupeInTraining[0].troopType;
+        const troopLevel = troupeInTraining[0].troopLevel;
+        const troopAmount = troupeInTraining[0].troopAmount;
+        const columnName = `${troopType}Lvl${troopLevel}`;
+        const sqlUpdateTroops = `UPDATE troops SET ${columnName} = ${columnName} + ? WHERE discordId = ?`;
+        await this.queryMain(sqlUpdateTroops, [troopAmount, userId]);
+      }
+    }
+
     const [detailBatimentLvl] = await this.queryMain(
       SQL_QUERIES.GET_DETAILS_BATIMENT,
       [userId]
@@ -547,9 +560,12 @@ class DatabaseManager {
     ]);
     const [detailBoss] = await this.getBossInfo(detailBossLvl.bossId);
     let totalPower = 0;
-    totalPower += 3250 * detailBatimentLvl.caserneLevel || 0;
-    totalPower += 2800 * detailBatimentLvl.hospitalLevel || 0;
-    totalPower += 1925 * detailBatimentLvl.forgeLevel || 0;
+    totalPower +=
+      params.batiment.basePower.caserne * detailBatimentLvl.caserneLevel || 0;
+    totalPower +=
+      params.batiment.basePower.hopital * detailBatimentLvl.hospitalLevel || 0;
+    totalPower +=
+      params.batiment.basePower.forge * detailBatimentLvl.forgeLevel || 0;
     const troopWeights = {
       archer: [1, 2, 3, 4, 5],
       chevalier: [1, 2, 3, 4, 5],
@@ -901,8 +917,10 @@ class DatabaseManager {
   async getForgeLvl(userId) {
     return this.queryMain(SQL_QUERIES.GET_FORGE_LVL, [userId]);
   }
-  async getCaserneLvl(userId) {
-    return this.queryMain(SQL_QUERIES.GET_CASERNE_LVL, [userId]);
+  async getCaserneInfo(userId) {
+    const result = await this.queryMain(SQL_QUERIES.GET_CASERNE_LVL, [userId]);
+    console.log("getCaserneInfo", result);
+    return result;
   }
   async updateForge(userId) {
     return this.queryMain(SQL_QUERIES.UPDATE_FORGE_LVL, [userId]);
@@ -915,6 +933,16 @@ class DatabaseManager {
   }
   async getHospitalLvl(userId) {
     return this.queryMain(SQL_QUERIES.GET_HOSPITAL_LVL, [userId]);
+  }
+  async addTraining(userId, troopType, troopLevel, troopAmount, endTime) {
+    console.log("addTraining");
+    return this.queryMain(SQL_QUERIES.ADD_TRAINING, [
+      troopType,
+      troopLevel,
+      troopAmount,
+      endTime,
+      userId,
+    ]);
   }
 }
 

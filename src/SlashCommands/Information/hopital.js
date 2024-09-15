@@ -27,8 +27,8 @@ module.exports = {
     },
     {
       type: 1,
-      name: "upgrade", /// ok
-      description: "Améliorer votre hôpital",
+      name: "info", /// ok
+      description: "info de votre hôpital",
     },
     {
       type: 1,
@@ -47,8 +47,19 @@ module.exports = {
         .setColor(color.error);
       return interaction.reply({ embeds: [embed] });
     }
-    const colors = await dbManager.getColor(interaction.user.id);
     const userId = interaction.user.id;
+    const user = await dbManager.getStats(userId);
+    if (!user) {
+      const embed = new EmbedBuilder()
+        .setTitle("Erreur")
+        .setColor(color.error)
+        .setDescription(
+          `Vous n'avez pas encore commencé votre aventure. Tapez \`/createAccount\` pour commencer.`
+        );
+      return interaction.reply({ embeds: [embed], ephemeral: true });
+    }
+    const colors = await dbManager.getColor(interaction.user.id);
+
     const power = await dbManager.getPower(userId);
 
     function emoji(id) {
@@ -59,7 +70,7 @@ module.exports = {
     }
     const subCommand = interaction.options.getSubcommand();
     switch (subCommand) {
-      case "upgrade":
+      case "info":
         async function createHospitalEmbed(user, hopitalLvl) {
           const bonus = await dbManager.getBonus("hopital");
           const powerUpdate = await dbManager.getPower(userId);
@@ -101,7 +112,9 @@ module.exports = {
             .addFields(
               {
                 name: "Niveau de l'Hôpital",
-                value: `**${hopitalLvl}/25**`,
+                value: `**${hopitalLvl}/25**\n- Puissance hôpital : **${
+                  params.batiment.basePower.hopital * hopitalLvl
+                }**`,
                 inline: true,
               },
               {

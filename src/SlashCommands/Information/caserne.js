@@ -14,6 +14,7 @@ const params = require("../../jsons/param.json");
 const color = require("../../jsons/color.json");
 const Player = require("../../class/player");
 const { options } = require("./info");
+const e = require("express");
 const player = new Player();
 
 module.exports = {
@@ -87,8 +88,8 @@ module.exports = {
     },
     {
       type: 1,
-      name: "upgrade", ///ok
-      description: "Ameliorer la caserne",
+      name: "info", ///ok
+      description: "info sur la caserne",
     },
     {
       type: 1,
@@ -117,9 +118,22 @@ module.exports = {
         .setColor(color.error);
       return interaction.reply({ embeds: [embed] });
     }
-    const colors = await dbManager.getColor(interaction.user.id);
     const userId = interaction.user.id;
+    const user = await dbManager.getStats(userId);
+    if (!user) {
+      const embed = new EmbedBuilder()
+        .setTitle("Erreur")
+        .setColor(color.error)
+        .setDescription(
+          `Vous n'avez pas encore commencé votre aventure. Tapez \`/createAccount\` pour commencer.`
+        );
+      return interaction.reply({ embeds: [embed], ephemeral: true });
+    }
+    const colors = await dbManager.getColor(interaction.user.id);
     const power = await dbManager.getPower(userId);
+    const powerFr = power.toLocaleString("fr-FR", {
+      useGrouping: true,
+    });
 
     function emoji(id) {
       return (
@@ -129,13 +143,14 @@ module.exports = {
     }
     const subCommand = interaction.options.getSubcommand();
     switch (subCommand) {
-      case "upgrade":
-        async function createCaserneEmbed(user, caserneLvl) {
+      case "info":
+        async function createCaserneEmbed(user, caserneInfo) {
           const bonus = await dbManager.getBonus("caserne");
           const powerUpdate = await dbManager.getPower(userId);
           const formattedPower = powerUpdate.toLocaleString("fr-FR", {
             useGrouping: true,
           });
+          const caserneLvl = caserneInfo[0].lvl;
           let priceUpgrade;
           if (caserneLvl >= 1 && caserneLvl <= 9) {
             priceUpgrade = caserneLvl * 2250;
@@ -144,6 +159,20 @@ module.exports = {
           } else if (caserneLvl >= 22 && caserneLvl <= 25) {
             priceUpgrade = (caserneLvl - 21) * 6500 + 12 * 4700 + 9 * 2250;
           }
+          let farmableTroopLvl = 1;
+          if (caserneLvl >= 7) {
+            farmableTroopLvl = 2;
+          }
+          if (caserneLvl >= 13) {
+            farmableTroopLvl = 3;
+          }
+          if (caserneLvl >= 20) {
+            farmableTroopLvl = 4;
+          }
+          if (caserneLvl >= 25) {
+            farmableTroopLvl = 5;
+          }
+
           let bonus1 = bonus.bonus1 * caserneLvl;
           let bonus2 = caserneLvl >= 10 ? bonus.bonus2 * (caserneLvl - 6) : 0;
           let bonus3 = caserneLvl >= 22 ? bonus.bonus3 * (caserneLvl - 18) : 0;
@@ -153,7 +182,21 @@ module.exports = {
             bonus2 = Math.round(bonus2 * 1.4);
           }
           const priceUpgradeText =
-            caserneLvl === 25 ? "Max" : `${priceUpgrade} ${emoji("power")}`;
+            caserneLvl === 25 ? "Max" : `${priceUpgrade} ${emoji(emo.power)}`;
+          //troupe en formation ?
+          let trainingInfoString = "Aucune troupe en formation";
+          if (caserneInfo[0].troopAmount > 0) {
+            const troopType = caserneInfo[0].troopType;
+            const troopLevel = caserneInfo[0].troopLevel;
+            const troopAmount = caserneInfo[0].troopAmount;
+            const endTime = caserneInfo[0].troopEndTime;
+            const remainingTime = Math.floor(endTime / 1000);
+            trainingInfoString = `**${troopAmount} ${troopType}(s) niveau ${troopLevel}** en formation. Fin <t:${endTime}:R>.`;
+          }
+          const baseCapacity = params.batiment.caserne.baseCapacity;
+          const trainingCapacity = Math.round(
+            baseCapacity + baseCapacity * (bonus1 / 100)
+          );
 
           return new EmbedBuilder()
             .setAuthor({
@@ -171,13 +214,20 @@ module.exports = {
             .addFields(
               {
                 name: "Niveau de la caserne",
-                value: `**${caserneLvl}/25**`,
+                value: `**${caserneLvl}/25**\n- Puissance Caserne : **${
+                  params.batiment.basePower.caserne * caserneLvl
+                }**\n- Niveau troupe max : **${farmableTroopLvl}/5**\n- Capacité d'entraînement : **${trainingCapacity}**`,
                 inline: true,
               },
               {
                 name: "Prix d'Amélioration",
                 value: `**${priceUpgradeText}**`,
                 inline: true,
+              },
+              {
+                name: "Camps de Formation",
+                value: trainingInfoString,
+                inline: false,
               },
               {
                 name: "Bonus Actuels",
@@ -198,11 +248,11 @@ module.exports = {
             });
         }
 
-        const caserneLvl = await dbManager.getCaserneLvl(userId);
+        const caserneInfo = await dbManager.getCaserneInfo(userId);
         // Création de l'embed initial
         const caserneEmbed = await createCaserneEmbed(
           interaction.user,
-          caserneLvl[0].lvl
+          caserneInfo
         );
 
         // Ajout du bouton pour l'amélioration de la caserne
@@ -211,7 +261,7 @@ module.exports = {
             .setCustomId("upgradeCaserne")
             .setLabel("Améliorer la Caserne")
             .setStyle(ButtonStyle.Primary)
-            .setDisabled(caserneLvl[0].lvl === 25)
+            .setDisabled(caserneInfo[0].lvl === 25)
         );
 
         // Envoi du message
@@ -282,7 +332,7 @@ module.exports = {
                 .setCustomId("upgradeCaserne")
                 .setLabel("Améliorer la Caserne")
                 .setStyle(ButtonStyle.Primary)
-                .setDisabled(caserneLvl[0].lvl === 25)
+                .setDisabled(newCaserneLvl === 25)
             );
 
             // Réponse à l'interaction
@@ -303,7 +353,249 @@ module.exports = {
       //! niveau , détails de sa carner et de ses troupes, + (bonus)
 
       case "train":
-      //! train des troupes (avec un temps de train)
+        const troopType = interaction.options.getString("type");
+        const troopLevel = parseInt(interaction.options.getString("niveau"));
+        const troopAmount = interaction.options.getInteger("nombre");
+        const caserne = await dbManager.getCaserneInfo(userId);
+        const bonus = await dbManager.getBonus("caserne");
+        const stat = await dbManager.getStats(userId);
+
+        const caserneLvl = caserne[0].lvl;
+
+        // Calcul des bonus
+        let bonus1 = bonus.bonus1 * caserneLvl;
+        let bonus2 = caserneLvl >= 10 ? bonus.bonus2 * (caserneLvl - 6) : 0;
+        let bonus3 = caserneLvl >= 22 ? bonus.bonus3 * (caserneLvl - 18) : 0;
+
+        if (caserneLvl === 25) {
+          bonus3 = Math.round(bonus3 * 1.6);
+          bonus1 = Math.round(bonus1 * 1.3);
+          bonus2 = Math.round(bonus2 * 1.4);
+        }
+
+        // Capacité d'entraînement de la caserne
+        const baseCapacity = params.batiment.caserne.baseCapacity;
+        const trainingCapacity = Math.round(
+          baseCapacity + baseCapacity * (bonus1 / 100)
+        );
+        /*if (caserne.troopAmount + troopAmount > trainingCapacity) {*/
+        if (caserne[0].troopAmount > 0) {
+          const embedErrorCapacity = new EmbedBuilder()
+            .setTitle("Entrainement en cours")
+            .setDescription(
+              `Vous avez déjà ${caserne[0].troopAmount} troupe(s) en formation.`
+            )
+            .setColor(color.error);
+
+          return interaction.reply({
+            embeds: [embedErrorCapacity],
+            ephemeral: true,
+          });
+        }
+        if (troopAmount > trainingCapacity) {
+          // ! Création de l'embed pour la capacité dépassée
+          const embedErrorCapacity = new EmbedBuilder()
+            .setAuthor({
+              name: `Puissance : ${powerFr}`,
+              iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+            })
+            .setTitle("Erreur : Capacité dépassée")
+            .setDescription(
+              `Capacité d'entraînement dépassée. Maximum : **${trainingCapacity}** troupes.`
+            )
+            .setColor(color.error);
+
+          return interaction.reply({
+            embeds: [embedErrorCapacity],
+            ephemeral: true,
+          });
+        }
+
+        const trainingCost = {
+          1: 10,
+          2: 20,
+          3: 30,
+          4: 50,
+          5: 80,
+        };
+
+        // Temps d'entraînement par niveau de troupe (en secondes)
+        const trainingTime = {
+          1: 12,
+          2: 17,
+          3: 22,
+          4: 27,
+          5: 37,
+        };
+
+        // Calcul du coût total avec bonus si applicable
+        let totalCost = Math.round(trainingCost[troopLevel] * troopAmount);
+        if (caserneLvl >= 22) {
+          totalCost = Math.round(totalCost - totalCost * (bonus3 / 100));
+        }
+
+        // Calcul du temps total avec bonus si applicable
+        let totalTime = trainingTime[troopLevel] * troopAmount;
+        if (caserneLvl >= 10) {
+          totalTime = totalTime - totalTime * (bonus2 / 100);
+        }
+
+        // Vérifier le niveau de la caserne pour chaque niveau de troupe
+        if (
+          (troopLevel === 2 && caserneLvl < 7) ||
+          (troopLevel === 3 && caserneLvl < 13) ||
+          (troopLevel === 4 && caserneLvl < 20) ||
+          (troopLevel === 5 && caserneLvl < 25)
+        ) {
+          // ! Création de l'embed pour le niveau de caserne insuffisant
+          const embedErrorLevel = new EmbedBuilder()
+            .setAuthor({
+              name: `Puissance : ${powerFr}`,
+              iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+            })
+            .setTitle("Erreur : Niveau de caserne insuffisant")
+            .setDescription(
+              `Votre caserne doit être au niveau ${
+                [7, 13, 20, 25][troopLevel - 2]
+              } pour entraîner des troupes de niveau ${troopLevel}.`
+            )
+            .setColor(color.error);
+
+          return interaction.reply({
+            embeds: [embedErrorLevel],
+            ephemeral: true,
+          });
+        }
+
+        // Vérifier les fragments disponibles
+        if (stat.fragments < totalCost) {
+          const embedErrorFragments = new EmbedBuilder()
+            .setAuthor({
+              name: `Puissance : ${powerFr}`,
+              iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+            })
+            .setTitle("Erreur : Fragments insuffisants")
+            .setDescription(
+              `Vous n'avez pas assez de fragments pour entraîner ces troupes. Coût requis : ${totalCost} ${emoji(
+                emo.power
+              )}.`
+            )
+            .setColor(color.error);
+
+          return interaction.reply({
+            embeds: [embedErrorFragments],
+            ephemeral: true,
+          });
+        }
+
+        // ! Création de l'embed pour confirmer l'entraînement
+        const endTime = Date.now() + totalTime * 1000;
+
+        const embedConfirmation = new EmbedBuilder()
+
+          .setAuthor({
+            name: `Puissance : ${powerFr}`,
+            iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+          })
+          .setTitle("Entraînement de troupes")
+          /*.setThumbnail("")*/
+          .setDescription(
+            `Voulez vous commencer l'entraînement de **${troopAmount}** troupe(s) ${troopType}(s) niveau **${troopLevel}**.`
+          )
+          .addFields(
+            {
+              name: "Coût",
+              value: `${totalCost} ${emoji(emo.power)}`,
+              inline: true,
+            },
+            {
+              name: "Temps d'entraînement",
+              value: `<t:${Math.floor(endTime / 1000)}:R>`,
+              inline: true,
+            }
+          )
+          .setColor(colors);
+
+        const rowTrain = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId(
+              `confirm_${userId}_${troopType}_${troopLevel}_${troopAmount}_${endTime}`
+            )
+            .setLabel("Confirmer")
+            .setStyle(ButtonStyle.Primary),
+          new ButtonBuilder()
+            .setCustomId(`cancel_${userId}`)
+            .setLabel("Annuler")
+            .setStyle(ButtonStyle.Danger)
+        );
+
+        const replyMessage = await interaction.reply({
+          embeds: [embedConfirmation],
+          components: [rowTrain],
+          fetchReply: true,
+        });
+        const filter = (i) => i.user.id === userId;
+        const collector = replyMessage.createMessageComponentCollector({
+          filter,
+          time: 60000,
+        }); // 60 secondes
+        collector.on("collect", async (i) => {
+          if (i.customId.startsWith("confirm")) {
+            await dbManager.updatePower(userId, -totalCost);
+            await dbManager.addTraining(
+              userId,
+              troopType,
+              troopLevel,
+              troopAmount,
+              endTime / 1000
+            );
+
+            const embedSuccess = new EmbedBuilder()
+              .setAuthor({
+                name: `Puissance : ${powerFr}`,
+                iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
+              })
+              .setTitle("Entraînement de troupes confirmé")
+              .setDescription(
+                `L'entraînement de ${troopAmount} troupe(s) ${troopType}(s) niveau ${troopLevel} a commencé\n\nFin le <t:${Math.floor(
+                  endTime / 1000
+                )}:f>.`
+              )
+              .setColor(colors);
+
+            await i.update({
+              embeds: [embedSuccess],
+              components: [],
+            });
+          } else if (i.customId.startsWith("cancel")) {
+            const embedCanceled = new EmbedBuilder()
+              .setTitle("Entraînement annulé")
+              .setDescription("L'entraînement des troupes a été annulé.")
+              .setColor(color.error);
+
+            await i.update({
+              embeds: [embedCanceled],
+              components: [],
+            });
+          }
+        });
+
+        collector.on("end", (collected) => {
+          if (collected.size === 0) {
+            const embedTimeout = new EmbedBuilder()
+              .setTitle("Temps écoulé")
+              .setDescription(
+                "Le temps pour confirmer ou annuler l'entraînement est écoulé."
+              )
+              .setColor(color.error);
+
+            replyMessage.edit({
+              embeds: [embedTimeout],
+              components: [],
+              e,
+            });
+          }
+        });
 
       default:
         await interaction.reply({

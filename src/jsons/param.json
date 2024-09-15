@@ -28,6 +28,14 @@
   "batiment": {
     "bonus2": "10",
     "bonus3": "22",
+    "basePower": {
+      "forge": "1925",
+      "caserne": "3250",
+      "hopital": "2800"
+    },
+    "caserne": {
+      "baseCapacity": 500
+    },
     "prix": {
       "forge": {
         "1-9": "2500",

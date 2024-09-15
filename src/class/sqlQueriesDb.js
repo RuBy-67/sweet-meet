@@ -89,7 +89,7 @@ JOIN materiau m ON mu.IdMateriau = m.id`,
   GET_ALL_BADGE: `SELECT * FROM badge`,
   GET_DATA_MATERIAL_BY_ID: `SELECT * FROM materiau WHERE id = ?`,
   GET_FORGE_LVL: `SELECT lvl FROM forge WHERE discordId = ?`,
-  GET_CASERNE_LVL: `SELECT lvl FROM caserne WHERE discordId = ?`,
+  GET_CASERNE_LVL: `SELECT * FROM caserne WHERE discordId = ?`,
   GET_HOSPITAL_LVL: `SELECT lvl FROM hospital WHERE discordId = ?`,
   GET_FORGE_INFO: `SELECT * FROM batiment WHERE nom = 'forge'`,
   GET_TROOP_TYPE: `SELECT * FROM batiment WHERE nom = ?`,
@@ -181,6 +181,8 @@ WHERE u.discordId = ?`,
   GET_BOSS_BY_USER_BY_BOSS_ID: `SELECT * FROM user_boss WHERE discordId = ? AND bossId = ?`,
   GET_CURRENT_STATE: `SELECT * FROM user_boss WHERE discordId = ? AND bossId = ?`,
   UPDATE_MATERIAL_STATE_ON_BOSS: `UPDATE user_boss SET muId1 = ?, muId2 = ?  WHERE discordId = ? AND bossId = ?`,
+  ADD_TRAINING: `UPDATE caserne  SET troopType = ?, troopLevel = ?, troopAmount = ?, troopEndTime = ? WHERE discordId = ?`,
+  UPDATE_TROOP_AMOUNT: `UPDATE caserne SET troopType = NULL, troopLevel = 0, troopAmount = 0 , troopEndTime = 0 WHERE discordId = ?`,
 };
 
 module.exports = SQL_QUERIES;
