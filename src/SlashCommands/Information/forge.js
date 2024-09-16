@@ -117,7 +117,7 @@ module.exports = {
             .setColor(color.error)
             .setDescription("Vous ne possédez aucun matériau à vendre.")
             .setThumbnail(
-              "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F97b6b18f-ba1a-43e5-a3c9-7316119eee5a%2Fd4d4a858-714f-4169-80c8-db72f5668623%2Fimage.png?table=block&id=bfe5b700-6789-46e9-a890-cb80c3f5295f&spaceId=97b6b18f-ba1a-43e5-a3c9-7316119eee5a&width=2000&userId=ae43cc5c-1a62-480c-8f4f-04874570864d&cache=v2"
+              "https://media.discordapp.net/attachments/1246893100790448198/1285311937487569062/image2.png?ex=66e9cf85&is=66e87e05&hm=7d1d21d92936d43d54b1c68b98893cb2103d50126a38547afdbd37b8846ef5e6&=&format=webp&quality=lossless&width=608&height=608"
             )
             .setFooter({
               text: `Demandé(e) par ${interaction.user.tag}`,
@@ -137,7 +137,7 @@ module.exports = {
               .setTitle("Boutique - Vente")
               .setColor(colors)
               .setThumbnail(
-                "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F97b6b18f-ba1a-43e5-a3c9-7316119eee5a%2Fd4d4a858-714f-4169-80c8-db72f5668623%2Fimage.png?table=block&id=bfe5b700-6789-46e9-a890-cb80c3f5295f&spaceId=97b6b18f-ba1a-43e5-a3c9-7316119eee5a&width=2000&userId=ae43cc5c-1a62-480c-8f4f-04874570864d&cache=v2"
+                "https://media.discordapp.net/attachments/1246893100790448198/1285311937487569062/image2.png?ex=66e9cf85&is=66e87e05&hm=7d1d21d92936d43d54b1c68b98893cb2103d50126a38547afdbd37b8846ef5e6&=&format=webp&quality=lossless&width=608&height=608"
               )
               .setDescription(
                 "Choisissez un objet à vendre dans la liste ci-dessous, *Les matériaux équipés ne sont pas vendable.*"
@@ -309,7 +309,7 @@ module.exports = {
               .setTitle("Boutique - Vente")
               .setColor(colors)
               .setThumbnail(
-                "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F97b6b18f-ba1a-43e5-a3c9-7316119eee5a%2Fd4d4a858-714f-4169-80c8-db72f5668623%2Fimage.png?table=block&id=bfe5b700-6789-46e9-a890-cb80c3f5295f&spaceId=97b6b18f-ba1a-43e5-a3c9-7316119eee5a&width=2000&userId=ae43cc5c-1a62-480c-8f4f-04874570864d&cache=v2"
+                "https://media.discordapp.net/attachments/1246893100790448198/1285311937487569062/image2.png?ex=66e9cf85&is=66e87e05&hm=7d1d21d92936d43d54b1c68b98893cb2103d50126a38547afdbd37b8846ef5e6&=&format=webp&quality=lossless&width=608&height=608"
               )
               .setDescription(
                 "Choisissez un objet à vendre au marchand dans la liste ci-dessous"
@@ -428,7 +428,7 @@ module.exports = {
                     .setTitle("Offre de vente")
                     .setColor(colors)
                     .setThumbnail(
-                      "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F97b6b18f-ba1a-43e5-a3c9-7316119eee5a%2Fd4d4a858-714f-4169-80c8-db72f5668623%2Fimage.png?table=block&id=bfe5b700-6789-46e9-a890-cb80c3f5295f&spaceId=97b6b18f-ba1a-43e5-a3c9-7316119eee5a&width=2000&userId=ae43cc5c-1a62-480c-8f4f-04874570864d&cache=v2"
+                      "https://media.discordapp.net/attachments/1246893100790448198/1285311937487569062/image2.png?ex=66e9cf85&is=66e87e05&hm=7d1d21d92936d43d54b1c68b98893cb2103d50126a38547afdbd37b8846ef5e6&=&format=webp&quality=lossless&width=608&height=608"
                     )
                     .setDescription(
                       `**${interaction.user.tag}** souhaite vendre **${emoji(
@@ -560,7 +560,7 @@ module.exports = {
             `- **Facteurs :**\n\n> Nombre de matériaux possédés\n> Niveaux des matériaux\n> Types des matériaux\n> Raretés des matériaux\n\n*Améliorer un matériau apportera une amélioration des bonus du matériau.*\n\n> *--> Sélectionnez un matériau à améliorer*`
           )
           .setThumbnail(
-            "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F97b6b18f-ba1a-43e5-a3c9-7316119eee5a%2Fd4d4a858-714f-4169-80c8-db72f5668623%2Fimage.png?table=block&id=bfe5b700-6789-46e9-a890-cb80c3f5295f&spaceId=97b6b18f-ba1a-43e5-a3c9-7316119eee5a&width=2000&userId=ae43cc5c-1a62-480c-8f4f-04874570864d&cache=v2"
+            "https://media.discordapp.net/attachments/1246893100790448198/1285311937487569062/image2.png?ex=66e9cf85&is=66e87e05&hm=7d1d21d92936d43d54b1c68b98893cb2103d50126a38547afdbd37b8846ef5e6&=&format=webp&quality=lossless&width=608&height=608"
           )
           .setFooter({
             text: `Demandé(e) par ${interaction.user.tag}`,
@@ -718,7 +718,7 @@ module.exports = {
             .setTitle("Forge 🔨")
             .setColor(colors)
             .setImage(
-              "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F97b6b18f-ba1a-43e5-a3c9-7316119eee5a%2Fd4d4a858-714f-4169-80c8-db72f5668623%2Fimage.png?table=block&id=bfe5b700-6789-46e9-a890-cb80c3f5295f&spaceId=97b6b18f-ba1a-43e5-a3c9-7316119eee5a&width=2000&userId=ae43cc5c-1a62-480c-8f4f-04874570864d&cache=v2"
+              "https://media.discordapp.net/attachments/1246893100790448198/1285311937487569062/image2.png?ex=66e9cf85&is=66e87e05&hm=7d1d21d92936d43d54b1c68b98893cb2103d50126a38547afdbd37b8846ef5e6&=&format=webp&quality=lossless&width=608&height=608"
             )
             .setDescription(
               "La forge vous permet d'améliorer vos matériaux, d'en fabriquer et de les vendre."

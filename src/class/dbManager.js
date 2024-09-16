@@ -1,6 +1,7 @@
 const { pool, poolCampagne, poolDate } = require("../db");
 const SQL_QUERIES = require("./sqlQueriesDb");
 const params = require("../jsons/param.json");
+const emo = require(`../jsons/emoji.json`);
 
 class DatabaseManager {
   constructor() {
@@ -919,7 +920,6 @@ class DatabaseManager {
   }
   async getCaserneInfo(userId) {
     const result = await this.queryMain(SQL_QUERIES.GET_CASERNE_LVL, [userId]);
-    console.log("getCaserneInfo", result);
     return result;
   }
   async updateForge(userId) {
@@ -943,6 +943,107 @@ class DatabaseManager {
       endTime,
       userId,
     ]);
+  }
+  async getTroops(userId, client) {
+    function emoji(id) {
+      return (
+        client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
+        "Missing Emoji"
+      );
+    }
+
+    const troopsData = await this.queryMain(SQL_QUERIES.GET_TROOPS, [userId]);
+    if (troopsData.length === 0) {
+      return "Aucune troupe possédée.";
+    }
+
+    const troops = troopsData[0];
+    const troopEmojis = {
+      archer: "🏹",
+      chevalier: emoji(emo.horse),
+      machine: emoji(emo.machine),
+      infanterie: emoji(emo.infant),
+    };
+
+    const troopNames = {
+      archer: "Archer",
+      chevalier: "Cavalier",
+      machine: "Machine",
+      infanterie: "Infanterie",
+    };
+
+    // Object to store troops grouped by type
+    const groupedTroops = {
+      archer: [],
+      chevalier: [],
+      machine: [],
+      infanterie: [],
+    };
+
+    // Group troops by type and level
+    for (const [key, value] of Object.entries(troops)) {
+      if (key !== "discordId" && parseInt(value, 10) > 0) {
+        const match = key.match(
+          /(archer|chevalier|machine|infanterie)Lvl(\d+)/
+        );
+        if (match) {
+          const troopType = match[1];
+          const troopLevel = match[2];
+          groupedTroops[troopType].push(
+            `- **${value}** Level: **${troopLevel}**`
+          );
+        }
+      }
+    }
+
+    // Construct the final message
+    const ownedTroops = [];
+    for (const [troopType, troopsList] of Object.entries(groupedTroops)) {
+      if (troopsList.length > 0) {
+        const emojiIcon = troopEmojis[troopType] || "❓";
+        const troopName = troopNames[troopType];
+        ownedTroops.push(`${emojiIcon} **${troopName}** :`);
+        ownedTroops.push(...troopsList); // Add each troop level and amount
+      }
+    }
+
+    // Return the formatted list of troops
+    return ownedTroops.length > 0
+      ? ownedTroops.join("\n")
+      : "Aucune troupe possédée.";
+  }
+  async getBossInfoArray(selectedBossIds) {
+    const bossInfo = await this.queryCampagne(SQL_QUERIES.GET_BOSS_INFO_ARRAY, [
+      selectedBossIds,
+    ]);
+    return bossInfo;
+  }
+  async getTroopsArray(userId) {
+    const result = await this.queryMain(SQL_QUERIES.GET_ALL_TROOPS, [userId]);
+
+    if (result.length === 0) {
+      return [];
+    }
+
+    const row = result[0];
+    const troopArray = [];
+
+    const troopTypes = ["archer", "chevalier", "infanterie", "machine"];
+    const maxLevels = 5;
+
+    troopTypes.forEach((type) => {
+      for (let level = 1; level <= maxLevels; level++) {
+        const key = `${type}Lvl${level}`;
+        if (row[key] > 0) {
+          troopArray.push({
+            name: `${type} Lvl ${level}`,
+            quantity: row[key],
+          });
+        }
+      }
+    });
+
+    return troopArray;
   }
 }
 

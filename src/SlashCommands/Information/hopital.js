@@ -104,7 +104,7 @@ module.exports = {
             .setTitle("Hôpital 💉")
             .setColor(colors)
             .setImage(
-              "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F97b6b18f-ba1a-43e5-a3c9-7316119eee5a%2F9797bbcb-6ad7-43f8-b0b2-7ca661253a88%2Fimage.png?table=block&id=2630b6c7-00bc-4b8e-9762-ba0a90f9acbc&spaceId=97b6b18f-ba1a-43e5-a3c9-7316119eee5a&width=2000&userId=ae43cc5c-1a62-480c-8f4f-04874570864d&cache=v2"
+              "https://media.discordapp.net/attachments/1246893100790448198/1285311936971407461/image.png?ex=66e9cf85&is=66e87e05&hm=97bdd05db43e1f019dd1d5b5da6c02fbb66fcd41e0b4ebf8df087176a1262fa4&=&format=webp&quality=lossless&width=608&height=608"
             )
             .setDescription(
               "l’hôpital permet de soigner vos troupes tombées au combat. Plus le niveau de l’hôpital est élevé, plus le temps de soin est réduit."

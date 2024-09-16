@@ -325,6 +325,16 @@ module.exports = {
               {
                 name: "Rareté",
                 value: rarete,
+                inline: true,
+              },
+              {
+                name: "Capacité",
+                value: `**${Math.round(
+                  bossInfo.capacity * (boss.level * 0.6)
+                )}** troupes ${emoji(emo.up)} + (**${Math.round(
+                  bossInfo.capacity * ((boss.level + 1) * 0.6) -
+                    bossInfo.capacity * (boss.level * 0.6)
+                )}**)`,
               },
               {
                 name: "Boosts",

@@ -183,6 +183,9 @@ WHERE u.discordId = ?`,
   UPDATE_MATERIAL_STATE_ON_BOSS: `UPDATE user_boss SET muId1 = ?, muId2 = ?  WHERE discordId = ? AND bossId = ?`,
   ADD_TRAINING: `UPDATE caserne  SET troopType = ?, troopLevel = ?, troopAmount = ?, troopEndTime = ? WHERE discordId = ?`,
   UPDATE_TROOP_AMOUNT: `UPDATE caserne SET troopType = NULL, troopLevel = 0, troopAmount = 0 , troopEndTime = 0 WHERE discordId = ?`,
+  GET_TROOPS: `SELECT * FROM troops WHERE discordId = ?`,
+  GET_BOSS_INFO_ARRAY: `SELECT * FROM bosses WHERE id IN (?)`,
+  GET_ALL_TROOPS: `SELECT * FROM troops WHERE discordId = ?`,
 };
 
 module.exports = SQL_QUERIES;

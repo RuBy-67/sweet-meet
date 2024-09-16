@@ -28,7 +28,7 @@ module.exports = {
       options: [
         {
           type: 3,
-          name: "type",
+          name: "type", // ok
           description: "Type de troupes",
           required: true,
           choices: [
@@ -95,16 +95,35 @@ module.exports = {
       type: 1,
       name: "default",
       description: "Armées par défaut", //! enregistré dans la db (4 par user)
+      options: {
+        type: 3,
+        name: "armée",
+        description: "Armée à modifier",
+        required: true,
+        choices: [
+          {
+            name: "Armée 1",
+            value: "armee1",
+          },
+          {
+            name: "Armée 2",
+            value: "armee2",
+          },
+          {
+            name: "Armée 3",
+            value: "armee3",
+          },
+          {
+            name: "Armée 4",
+            value: "armee4",
+          },
+        ],
+      },
     },
     {
       type: 1,
       name: "troops",
       description: "Gérer vos troupe (Améliorer)",
-    },
-    {
-      type: 1,
-      name: "détails",
-      description: "Détail de votre caserne", //! niveau , détails des troupes, (bonus)
     },
   ],
   run: async (client, interaction, args) => {
@@ -143,6 +162,256 @@ module.exports = {
     }
     const subCommand = interaction.options.getSubcommand();
     switch (subCommand) {
+      case "default":
+        const armyName = interaction.options.getString("armée");
+        const userId = interaction.user.id;
+
+        // Étape 1: Choix des Boss
+        const bossList = await dbManager.getBossByUser(userId);
+        const bossOptions = [];
+        for (const boss of bossList) {
+          const bossInfo = await dbManager.getBossInfo(boss.bossId);
+          bossOptions.push({
+            label: `${bossInfo[0].nom}`,
+            description: `(Niveau ${boss.level})`,
+            value: `${boss.bossId}`, // Assurez-vous d'utiliser boss.bossId comme valeur
+          });
+        }
+
+        const embedBossSelection = new EmbedBuilder()
+          .setTitle(`Sélectionnez les Boss pour l'armée "${armyName}"`)
+          .setDescription("Veuillez choisir jusqu'à 2 boss pour cette armée.")
+          .setColor(colors);
+
+        const bossSelectionMenu = new StringSelectMenuBuilder()
+          .setCustomId("select-boss")
+          .setPlaceholder("Choisir les boss")
+          .addOptions(bossOptions)
+          .setMaxValues(2);
+
+        await interaction.reply({
+          embeds: [embedBossSelection],
+          components: [new ActionRowBuilder().addComponents(bossSelectionMenu)],
+          ephemeral: true,
+        });
+
+        const bossCollector =
+          interaction.channel.createMessageComponentCollector({
+            filter: (i) => i.customId === "select-boss" && i.user.id === userId,
+            time: 60000,
+          });
+
+        bossCollector.on("collect", async (i) => {
+          const selectedBossIds = i.values;
+          const bossInfo = await dbManager.getBossInfoArray(selectedBossIds);
+
+          const maxCapacity = Math.max(
+            ...(await Promise.all(
+              bossInfo.map(async (boss) => {
+                const bossInfoUser = await dbManager.getBossByUserByBossId(
+                  userId,
+                  boss.id
+                );
+                return boss.capacity * bossInfoUser[0].level * 0.6;
+              })
+            ))
+          );
+
+          // Obtenez les troupes disponibles pour l'utilisateur
+          const troops = await dbManager.getTroopsArray(userId);
+
+          const troopOptions = troops.map((troop) => ({
+            label: troop.name,
+            value: troop.name,
+          }));
+
+          // Créez des boutons pour chaque type et niveau de troupe
+          const createTroopButtons = (type, level) => {
+            return [
+              new ButtonBuilder()
+                .setCustomId(`add-${type}Lvl${level}-1`)
+                .setLabel(`+1 ${type} Lvl ${level}`)
+                .setStyle(ButtonStyle.Primary),
+              new ButtonBuilder()
+                .setCustomId(`add-${type}Lvl${level}-100`)
+                .setLabel(`+100 ${type} Lvl ${level}`)
+                .setStyle(ButtonStyle.Primary),
+              new ButtonBuilder()
+                .setCustomId(`reset-${type}Lvl${level}`)
+                .setLabel(`Reset ${type} Lvl ${level}`)
+                .setStyle(ButtonStyle.Danger),
+            ];
+          };
+
+          const troopButtonsRows = [];
+          const troopTypes = ["archer", "chevalier", "infanterie", "machine"];
+          const maxLevels = 5;
+
+          troopTypes.forEach((type) => {
+            for (let level = 1; level <= maxLevels; level++) {
+              troopButtonsRows.push(createTroopButtons(type, level));
+            }
+          });
+
+          // Pagination
+          const createPaginationButtons = (page) => {
+            const maxPages = Math.ceil(troopButtonsRows.length / 5);
+
+            const actionRow = new ActionRowBuilder().addComponents(
+              new ButtonBuilder()
+                .setCustomId(`page-${page - 1}`)
+                .setLabel("Previous")
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(page === 1),
+              new ButtonBuilder()
+                .setCustomId(`page-${page + 1}`)
+                .setLabel("Next")
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(page === maxPages)
+            );
+
+            return actionRow;
+          };
+
+          const updateMessageWithPagination = async (interaction, page) => {
+            const start = (page - 1) * 5;
+            const end = start + 5;
+            const buttonsToShow = troopButtonsRows.slice(start, end);
+
+            // Assurez-vous que chaque ActionRow contient des boutons ou des sélecteurs corrects
+            const actionRow = new ActionRowBuilder();
+            buttonsToShow.forEach((button) => actionRow.addComponents(button));
+
+            await interaction.update({
+              embeds: [embedTroopSelection],
+              components: [
+                actionRow, // Ajoutez seulement un ActionRow avec jusqu'à 5 composants
+                createPaginationButtons(page), // Pagination boutons
+              ],
+            });
+          };
+
+          // Créez l'embed pour la sélection des troupes
+          const embedTroopSelection = new EmbedBuilder()
+            .setTitle(`Sélectionnez les Troupes pour l'armée "${armyName}"`)
+            .setDescription(
+              `Veuillez choisir les troupes dans la limite de la capacité maximale: ${maxCapacity}.`
+            )
+            .setColor(colors);
+
+          // Envoi du message initial avec la première page
+          await updateMessageWithPagination(i, 1);
+
+          // Interaction pour la pagination
+          const troopCollector = i.channel.createMessageComponentCollector({
+            filter: (i) => i.user.id === userId,
+            time: 60000,
+          });
+
+          troopCollector.on("collect", async (troopInteraction) => {
+            const [action, troopType, level, amount] =
+              troopInteraction.customId.split("-");
+
+            // Mise à jour de la construction de l'armée
+            if (action === "add") {
+              armyInConstruction[`${troopType}Lvl${level}`] += parseInt(
+                amount,
+                10
+              );
+            } else if (action === "reset") {
+              armyInConstruction[`${troopType}Lvl${level}`] = 0;
+            }
+
+            const updatedEmbedTroopSelection = new EmbedBuilder()
+              .setTitle(`Sélectionnez les Troupes pour l'armée "${armyName}"`)
+              .setDescription(
+                `Veuillez choisir les troupes dans la limite de la capacité maximale: ${maxCapacity}.`
+              )
+              .setColor(colors)
+              .addFields({
+                name: "Troupes sélectionnées",
+                value:
+                  Object.entries(armyInConstruction)
+                    .filter(([key, value]) => value > 0)
+                    .map(([key, value]) => `- ${key}: ${value}`)
+                    .join("\n") || "Aucune troupe sélectionnée.",
+              });
+
+            await troopInteraction.update({
+              embeds: [updatedEmbedTroopSelection],
+              components: troopButtonsRows.slice(0, 5), // Always show the first 5 rows of buttons
+            });
+          });
+
+          troopCollector.on("end", async () => {
+            const embedConfirmation = new EmbedBuilder()
+              .setTitle(`Confirmer l'armée "${armyName}"`)
+              .setDescription(
+                `Boss sélectionnés: ${selectedBossIds.join(
+                  ", "
+                )}\nTroupes sélectionnées: ${
+                  Object.entries(armyInConstruction)
+                    .filter(([key, value]) => value > 0)
+                    .map(([key, value]) => `${key}: ${value}`)
+                    .join(", ") || "Aucune troupe sélectionnée."
+                }`
+              )
+              .setColor(colors);
+
+            const confirmButton = new ButtonBuilder()
+              .setCustomId("confirm-army")
+              .setLabel("Confirmer")
+              .setStyle(ButtonStyle.Success);
+
+            const cancelButton = new ButtonBuilder()
+              .setCustomId("cancel-army")
+              .setLabel("Annuler")
+              .setStyle(ButtonStyle.Danger);
+
+            await i.followUp({
+              embeds: [embedConfirmation],
+              components: [
+                new ActionRowBuilder().addComponents(
+                  confirmButton,
+                  cancelButton
+                ),
+              ],
+              ephemeral: true,
+            });
+
+            const confirmationCollector =
+              i.channel.createMessageComponentCollector({
+                filter: (i) => i.user.id === userId,
+                time: 60000,
+              });
+
+            confirmationCollector.on("collect", async (confirmInteraction) => {
+              if (confirmInteraction.customId === "confirm-army") {
+                await dbManager.insertArmy(
+                  userId,
+                  armyName,
+                  selectedBossIds,
+                  Object.entries(armyInConstruction)
+                    .filter(([key, value]) => value > 0)
+                    .map(([key, value]) => ({ type: key, quantity: value }))
+                );
+
+                await confirmInteraction.update({
+                  content: "Votre armée a été définie avec succès.",
+                  components: [],
+                });
+              } else if (confirmInteraction.customId === "cancel-army") {
+                await confirmInteraction.update({
+                  content: "L'opération a été annulée.",
+                  components: [],
+                });
+              }
+            });
+          });
+        });
+
+      case "troops":
+
       case "info":
         async function createCaserneEmbed(user, caserneInfo) {
           const bonus = await dbManager.getBonus("caserne");
@@ -197,6 +466,7 @@ module.exports = {
           const trainingCapacity = Math.round(
             baseCapacity + baseCapacity * (bonus1 / 100)
           );
+          const troupeString = await dbManager.getTroops(userId, client);
 
           return new EmbedBuilder()
             .setAuthor({
@@ -206,10 +476,10 @@ module.exports = {
             .setTitle("Caserne ⚔️")
             .setColor(colors)
             .setImage(
-              "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F97b6b18f-ba1a-43e5-a3c9-7316119eee5a%2Ffc899c09-5ab1-4dcc-a949-9eb1ef7e0e97%2Fimage.png?table=block&id=65ab0b24-7a32-445a-b8c8-9ef070227dcc&spaceId=97b6b18f-ba1a-43e5-a3c9-7316119eee5a&width=2000&userId=ae43cc5c-1a62-480c-8f4f-04874570864d&cache=v2"
+              "https://media.discordapp.net/attachments/1246893100790448198/1285311938154332225/image3.png?ex=66e9cf85&is=66e87e05&hm=f10e53f678a0ef4e89fcdeae9ca0506833d59b7f73ea1b53dc5092a6f7eab535&=&format=webp&quality=lossless&width=608&height=608"
             )
             .setDescription(
-              "La caserne vous permet de former des troupes pour vos combats, de les améliorer et de set les matériaux de vos boss"
+              "La caserne vous permet de former des troupes pour vos combats, de les améliorer et de créer vos armée par défaut"
             )
             .addFields(
               {
@@ -227,6 +497,11 @@ module.exports = {
               {
                 name: "Camps de Formation",
                 value: trainingInfoString,
+                inline: false,
+              },
+              {
+                name: "Vos Troupes",
+                value: troupeString,
                 inline: false,
               },
               {
@@ -342,15 +617,6 @@ module.exports = {
             });
           }
         });
-
-      case "default":
-      //! set un max de 4 armées par défaut par user
-
-      case "troops":
-      //! géré ses troupe (améliorer)
-
-      case "détails":
-      //! niveau , détails de sa carner et de ses troupes, + (bonus)
 
       case "train":
         const troopType = interaction.options.getString("type");
