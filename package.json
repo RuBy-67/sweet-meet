@@ -20,6 +20,7 @@
     "express": "^4.19.2",
     "fs": "^0.0.1-security",
     "mysql2": "^3.9.7",
+    "node-fetch": "^3.3.2",
     "os-utils": "^0.0.14"
   }
 }
