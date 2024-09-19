@@ -60,7 +60,7 @@ module.exports = {
       await message.react('🟢');  // Smash
       await message.react('🔴');  // Pass
 
-      // Attendre 24 heures pour compter les votes
+      // Attendre 3 heures pour compter les votes
       setTimeout(async () => {
         const messageFetched = await interaction.channel.messages.fetch(message.id);
         const reactions = messageFetched.reactions.cache;
