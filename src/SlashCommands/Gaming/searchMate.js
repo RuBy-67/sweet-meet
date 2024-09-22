@@ -176,6 +176,7 @@ module.exports = {
                                     const voiceChannel = await interaction.guild.channels.create({
                                         name: `${interaction.user.username}-room`,
                                         type: ChannelType.GuildVoice,
+                                        parent: '1216057432728408265', // Remplacez 'CATEGORY_ID' par l'ID de votre catégorie
                                         permissionOverwrites: [
                                             {
                                                 id: interaction.guild.id,
