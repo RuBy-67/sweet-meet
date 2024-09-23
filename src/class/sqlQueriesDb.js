@@ -188,6 +188,8 @@ WHERE u.discordId = ?`,
   GET_ALL_TROOPS: `SELECT * FROM troops WHERE discordId = ?`,
   DELETE_ARMY: `DELETE FROM troops WHERE discordId = ? AND nom =? `,
   GET_ARMY: `SELECT * FROM user_army WHERE discordId = ? AND nom = ?`,
+  INSERT_ARMY_IN_CONSTRUCTION: `INSERT INTO user_army (discordId, nom, boss1, boss2) VALUES (?, ?, ?, ?)`,
+  GET_BOSS_INFO_BY_ID_UNIQUE: `SELECT * FROM user_boss WHERE id = ?`,
 };
 
 module.exports = SQL_QUERIES;

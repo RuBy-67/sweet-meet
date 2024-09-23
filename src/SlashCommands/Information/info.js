@@ -302,6 +302,7 @@ module.exports = {
 
           // Ligne de séparation pour l'esthétique
           bossStats += `\n__-------------------------__`;
+          let bonusCapacite = 1;
 
           // Gestion des niveaux et autres éléments pour l'embed
           const currentBossLevel = boss.level;
@@ -330,10 +331,10 @@ module.exports = {
               {
                 name: "Capacité",
                 value: `**${Math.round(
-                  bossInfo.capacity * (boss.level * 0.6)
+                  bossInfo.capacity * (boss.level * 0.6) * bonusCapacite
                 )}** troupes ${emoji(emo.up)} + (**${Math.round(
                   bossInfo.capacity * ((boss.level + 1) * 0.6) -
-                    bossInfo.capacity * (boss.level * 0.6)
+                    bossInfo.capacity * (boss.level * 0.6) * bonusCapacite
                 )}**)`,
               },
               {

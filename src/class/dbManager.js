@@ -1048,8 +1048,93 @@ class DatabaseManager {
   async deleteArmy(userId, armyName) {
     return this.queryMain(SQL_QUERIES.DELETE_ARMY, [userId, armyName]);
   }
-  async getArmy(userId, armyName) {
+  async getArmyByName(userId, armyName) {
     return this.queryMain(SQL_QUERIES.GET_ARMY, [userId, armyName]);
+  }
+  async insertArmyInConstruction(userId, armyName, selectedBossIds) {
+    const bossId1 = selectedBossIds[0] || null;
+    const bossId2 = selectedBossIds[1] || null;
+    return this.queryMain(SQL_QUERIES.INSERT_ARMY_IN_CONSTRUCTION, [
+      userId,
+      armyName,
+      bossId1,
+      bossId2,
+    ]);
+  }
+  async calculateMaxCapacity(userId, boss1, boss2) {
+    console.log(boss1);
+    console.log(boss2);
+    let bonusCapacity = 1;
+    let capacityBoss1 = "";
+    let capacityBoss2 = "";
+    //nésséssite la capa boss de base et le level,
+    const [bossInfo1] = await this.getBossInfoByIdUnique(boss1);
+    const [bossInfo2] = await this.getBossInfoByIdUnique(boss2);
+    console.log(bossInfo1);
+    console.log(bossInfo2);
+    if (boss1) {
+      const [boss1Info] = await this.getBossInfo(bossInfo1.bossId);
+      console.log(boss1Info);
+      capacityBoss1 =
+        boss1Info.capacity * (bossInfo1.level * 0.6) * bonusCapacity;
+    }
+    if (boss2) {
+      const [boss2Info] = await this.getBossInfo(bossInfo2.bossId);
+      console.log(boss2Info);
+      capacityBoss2 =
+        boss2Info.capacity * (bossInfo2.level * 0.6) * bonusCapacity;
+    }
+    if (capacityBoss1 > capacityBoss2) {
+      return capacityBoss1;
+    } else {
+      return capacityBoss2;
+    }
+  }
+  async getBossInfoByIdUnique(idUnique) {
+    return this.queryMain(SQL_QUERIES.GET_BOSS_INFO_BY_ID_UNIQUE, [idUnique]);
+  }
+  async getTroopsForArmy(userId, armyName) {
+    return this.queryMain(SQL_QUERIES.GET_ARMY, [userId, armyName]);
+  }
+  async updateArmyWithTroops(userId, armyName, troops) {
+    // Commencez par récupérer l'armée en fonction de l'utilisateur et du nom de l'armée
+    const army = await this.queryMain(
+      "SELECT id FROM armies WHERE discordId = ? AND nom = ?",
+      [userId, armyName]
+    );
+
+    if (!army.length) {
+      throw new Error(`L'armée ${armyName} n'existe pas.`);
+    }
+
+    const armyId = army[0].id;
+
+    // Créer un objet pour stocker les colonnes et valeurs à mettre à jour
+    const columnsToUpdate = [];
+    const valuesToUpdate = [];
+
+    // Parcourir chaque troupe à mettre à jour
+    for (const troop of troops) {
+      const { type, quantity } = troop;
+
+      // Créez le nom de colonne en fonction du type et du niveau (ex: "archerLvl1")
+      const column = `${type}`;
+      columnsToUpdate.push(`${column} = ?`);
+      valuesToUpdate.push(quantity);
+    }
+
+    // Ajoutez l'ID de l'armée pour la clause WHERE
+    valuesToUpdate.push(armyId);
+
+    // Créer la requête SQL pour mettre à jour les colonnes de troupe
+    const query = `
+      UPDATE user_army
+      SET ${columnsToUpdate.join(", ")}
+      WHERE id = ?
+    `;
+
+    // Exécuter la requête de mise à jour
+    await this.queryMain(query, valuesToUpdate);
   }
 }
 
