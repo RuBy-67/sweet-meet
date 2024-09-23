@@ -5,7 +5,6 @@ const CHANNEL_ID = '1216037981576761379';
 
 // Fonction pour vérifier les événements et envoyer un message de partage 1 heure avant l'événement
 async function checkEvents(client) {
-  try {
     const guild = client.guilds.cache.get(GUILD_ID);
     if (!guild) {
       console.error(`Erreur : Le serveur avec l'ID ${GUILD_ID} n'a pas été trouvé.`);
@@ -29,14 +28,10 @@ async function checkEvents(client) {
         console.log(`L'événement ${event.name} a déjà commencé.`);
       }
     });
-  } catch (error) {
-    console.error('Erreur lors de la vérification des événements :', error);
-  }
 }
 
 // Fonction pour partager un événement directement dans le chat
 async function shareEvent(client, event) {
-  try {
     const channel = client.channels.cache.get(CHANNEL_ID);
     if (!channel) {
       console.error(`Erreur : Le channel avec l'ID ${CHANNEL_ID} n'a pas été trouvé.`);
@@ -52,9 +47,6 @@ async function shareEvent(client, event) {
     channel.send(`https://discord.com/events/${GUILD_ID}/${event.id}`).catch(error => {
       console.error(`Erreur lors du partage de l'événement dans le channel ${channel.name} :`, error);
     });
-  } catch (error) {
-    console.error('Erreur lors du partage de l\'événement :', error);
-  }
 }
 
 module.exports = {
