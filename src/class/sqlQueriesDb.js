@@ -186,6 +186,8 @@ WHERE u.discordId = ?`,
   GET_TROOPS: `SELECT * FROM troops WHERE discordId = ?`,
   GET_BOSS_INFO_ARRAY: `SELECT * FROM bosses WHERE id IN (?)`,
   GET_ALL_TROOPS: `SELECT * FROM troops WHERE discordId = ?`,
+  DELETE_ARMY: `DELETE FROM troops WHERE discordId = ? AND nom =? `,
+  GET_ARMY: `SELECT * FROM user_army WHERE discordId = ? AND nom = ?`,
 };
 
 module.exports = SQL_QUERIES;

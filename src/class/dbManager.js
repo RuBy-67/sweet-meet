@@ -1045,6 +1045,12 @@ class DatabaseManager {
 
     return troopArray;
   }
+  async deleteArmy(userId, armyName) {
+    return this.queryMain(SQL_QUERIES.DELETE_ARMY, [userId, armyName]);
+  }
+  async getArmy(userId, armyName) {
+    return this.queryMain(SQL_QUERIES.GET_ARMY, [userId, armyName]);
+  }
 }
 
 module.exports = DatabaseManager;

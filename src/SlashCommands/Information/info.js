@@ -1363,7 +1363,7 @@ module.exports = {
               emo.x
             )} @Ru3y_67](https://x.com/Ru3y_67)**\n➼ ** | [${emoji(
               emo.insta
-            )} @ru3y_67](https://www.instagram.com/ru3y_67?igsh=MXZ0aDFjZHZncTlzdw==)**\n➼ ** |** ${emoji(
+            )} @Ru3y_mx](https://www.instagram.com/ru3y_mx?igsh=MXZ0aDFjZHZncTlzdw==)**\n➼ ** |** ${emoji(
               emo.discord
             )} <@375590278880428034>\n\n *Besoin d'une Update, un beug ? DM moi 😉*`
           )

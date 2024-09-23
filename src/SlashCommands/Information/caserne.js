@@ -95,35 +95,52 @@ module.exports = {
       type: 1,
       name: "default",
       description: "Armées par défaut", //! enregistré dans la db (4 par user)
-      options: {
-        type: 3,
-        name: "armée",
-        description: "Armée à modifier",
-        required: true,
-        choices: [
-          {
-            name: "Armée 1",
-            value: "armee1",
-          },
-          {
-            name: "Armée 2",
-            value: "armee2",
-          },
-          {
-            name: "Armée 3",
-            value: "armee3",
-          },
-          {
-            name: "Armée 4",
-            value: "armee4",
-          },
-        ],
-      },
-    },
-    {
-      type: 1,
-      name: "troops",
-      description: "Gérer vos troupe (Améliorer)",
+      options: [
+        {
+          type: 3,
+          name: "type", // ok
+          description: "Type d'action, nouvelle armée (max4) ou mise à jour",
+          required: true,
+          choices: [
+            {
+              name: "Update",
+              value: "update",
+            },
+            {
+              name: "Create",
+              value: "create",
+            },
+            {
+              name: "Delete",
+              value: "delete",
+            },
+          ],
+        },
+        {
+          type: 3,
+          name: "armée",
+          description: "Nom de l'armée",
+          required: true,
+          choices: [
+            {
+              name: "Armée 1",
+              value: "armee1",
+            },
+            {
+              name: "Armée 2",
+              value: "armee2",
+            },
+            {
+              name: "Armée 3",
+              value: "armee3",
+            },
+            {
+              name: "Armée 4",
+              value: "armee4",
+            },
+          ],
+        },
+      ],
     },
   ],
   run: async (client, interaction, args) => {
@@ -164,8 +181,75 @@ module.exports = {
     switch (subCommand) {
       case "default":
         const armyName = interaction.options.getString("armée");
+        const type = interaction.options.getString("type");
         const userId = interaction.user.id;
+        switch (type) {
+          case "create":
 
+          case "update":
+          case "delete":
+            const detailArmy = await dbManager.getArmy(userId, armyName);
+            const confirmationRow = new ActionRowBuilder().addComponents(
+              new ButtonBuilder()
+                .setCustomId("confirmDelete")
+                .setLabel("Oui")
+                .setStyle(ButtonStyle.Danger),
+              new ButtonBuilder()
+                .setCustomId("cancelDelete")
+                .setLabel("Non")
+                .setStyle(ButtonStyle.Secondary)
+            );
+
+            // Send a message asking for confirmation
+            const msg = await interaction.reply({
+              content: `Êtes-vous sûr de vouloir supprimer l'armée **${armyName}** ?`,
+              components: [confirmationRow],
+              ephemeral: true, // Set to true if you want to keep it private for the user
+            });
+
+            // Create a collector for button interactions
+            const filter = (i) =>
+              i.customId === "confirmDelete" || i.customId === "cancelDelete";
+            const collector = msg.createMessageComponentCollector({
+              filter,
+              time: 15000, // 15 seconds to respond
+            });
+
+            collector.on("collect", async (i) => {
+              if (i.user.id !== interaction.user.id) {
+                return i.reply({
+                  content: "Vous ne pouvez pas répondre à cette confirmation.",
+                  ephemeral: true,
+                });
+              }
+
+              if (i.customId === "confirmDelete") {
+                // Execute the deleteArmy function when confirmed
+                await dbManager.deleteArmy(userId, armyName);
+                await i.update({
+                  content: `L'armée **${armyName}** a été supprimée avec succès.`,
+                  components: [], // Remove buttons after confirmation
+                });
+              } else if (i.customId === "cancelDelete") {
+                // Cancel the deletion process
+                await i.update({
+                  content: "Suppression annulée.",
+                  components: [], // Remove buttons after cancellation
+                });
+              }
+            });
+
+            // Handle the end of the interaction if the user doesn't respond in time
+            collector.on("end", (collected) => {
+              if (collected.size === 0) {
+                msg.edit({
+                  content:
+                    "La suppression a expiré, aucune action n'a été effectuée.",
+                  components: [],
+                });
+              }
+            });
+        }
         // Étape 1: Choix des Boss
         const bossList = await dbManager.getBossByUser(userId);
         const bossOptions = [];
@@ -409,8 +493,6 @@ module.exports = {
             });
           });
         });
-
-      case "troops":
 
       case "info":
         async function createCaserneEmbed(user, caserneInfo) {

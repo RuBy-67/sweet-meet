@@ -237,6 +237,7 @@ module.exports = {
         });
 
       case "soigner":
+      //todo 25 50 ou 100% des troupes de l’hôpital limiter par le level de l’hôpital
 
       case "détails":
 
