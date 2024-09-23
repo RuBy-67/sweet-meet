@@ -27,7 +27,8 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setTitle('Horoscope du jour')
       .setColor(0x00AE86)
-      .setDescription('Voici les prédictions astrologiques pour chaque signe du zodiaque :');
+      .setDescription('Voici les prédictions astrologiques pour chaque signe du zodiaque :')
+      .setThumbnail('https://giphy.com/gifs/WmtnVfTNbDigG32A8u');
 
     // Ajouter chaque signe astrologique et ses prédictions dans l'embed
     Object.keys(horoscopeData).forEach((sign) => {
