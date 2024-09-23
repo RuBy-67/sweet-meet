@@ -29,7 +29,7 @@ module.exports = {
             });
 
             // Enregistre le collector pour gérer les boutons 'next', 'previous' et 'like'
-            registerCollector(client, embedMessage, rows, page);
+            registerCollector(client, embedMessage, rows, page, interaction.user.id);
         } catch (error) {
             console.error("Erreur lors de la récupération des profils : ", error);
             await interaction.editReply('Une erreur est survenue lors de la récupération des profils.');
@@ -77,13 +77,16 @@ function generateActionRow() {
     );
 }
 
-function registerCollector(client, embedMessage, rows, page) {
+function registerCollector(client, embedMessage, rows, page, userId) {
     const collector = embedMessage.createMessageComponentCollector({
         componentType: ComponentType.Button,
-        time: 300000
     });
 
     collector.on('collect', async (i) => {
+        if (i.user.id !== userId) {
+            return i.reply({ content: 'Vous ne pouvez pas interagir avec ces boutons.', ephemeral: true });
+        }
+
         try {
             if (i.customId === 'like') {
                 const likedId = rows[page].user_id;

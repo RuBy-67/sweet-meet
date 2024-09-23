@@ -1,8 +1,9 @@
 const { Client, Collection, GatewayIntentBits } = require("discord.js");
 const { loadEvents } = require("./src/handlers/loadEvents");
 const { loadSlashCommands } = require("./src/handlers/loadSlashCommands");
-const createDateProfil = require('./src/SlashCommands/User/createDateprofil');
-const dateProfilCommand = require('./src/SlashCommands/User/dateProfil');
+const createDateProfil = require("./src/SlashCommands/User/createDateprofil");
+const dateProfilCommand = require("./src/SlashCommands/User/dateProfil");
+const { checkEvents } = require("./src/events/eventCheck");
 const {
   botToken,
   botToken2Test,
@@ -49,6 +50,16 @@ process.on("unhandledRejection", (reason, promise) => {
   );
 });
 
+client.once("ready", () => {
+  console.log(`Connecté en tant que ${client.user.tag}`);
+  checkEvents(client);
+
+  // vérification des événements toutes les heures (3600000 ms = 1 heure)
+  setInterval(() => {
+    checkEvents(client);
+  }, 3600000); // 1 heure en millisecondes
+});
+
 client.login(botToken).then(() => {
   console.log(
     ` Successfully logged in as: ${client.user.username}#${client.user.discriminator} `
@@ -57,10 +68,10 @@ client.login(botToken).then(() => {
 
 createDateProfil.registerEvent(client);
 
-client.on('interactionCreate', async (interaction) => {
+client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
-  if (interaction.commandName === 'dateprofil') {
-      await dateProfilCommand.run(client, interaction);
+  if (interaction.commandName === "dateprofil") {
+    await dateProfilCommand.run(client, interaction);
   }
 });
