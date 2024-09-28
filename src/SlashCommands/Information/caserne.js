@@ -114,6 +114,10 @@ module.exports = {
               name: "Delete",
               value: "delete",
             },
+            {
+              name: "Details",
+              value: "detail",
+            },
           ],
         },
         {
@@ -253,6 +257,86 @@ module.exports = {
             });
 
             break;
+          case "detail":
+            // Récupérer les informations de l'armée depuis la base de données
+            const [armyDetails] = await dbManager.getTroopsForArmy(
+              userId,
+              armyName
+            );
+
+            // Filtrer les clés à exclure et obtenir les valeurs restantes qui sont supérieures à 0
+            const filteredArmyDetails = Object.entries(armyDetails).filter(
+              ([key, value]) =>
+                !["id", "nom", "discordId", "boss1", "boss2"].includes(key) &&
+                value > 0
+            );
+
+            // Calculer la capacité actuelle de l'armée
+            const currentCapacity = filteredArmyDetails.reduce(
+              (total, [_, value]) => total + value,
+              0
+            );
+
+            // Détails des bosses
+            const boss1Id = armyDetails.boss1;
+            const boss2Id = armyDetails.boss2;
+            const maxCapacityArmy = await dbManager.calculateMaxCapacity(
+              userId,
+              boss1Id,
+              boss2Id
+            );
+
+            let bossDetails = "";
+
+            // Récupérer les informations de boss 1
+            if (boss1Id) {
+              const boss1Level = await dbManager.getBossInfoByIdUnique(boss1Id); // Récupérer le niveau
+              const boss1Info = await dbManager.getBossInfo(
+                boss1Level[0].bossId
+              ); // Récupérer les infos générales
+              bossDetails += `- Boss 1: **${boss1Info[0].nom}**, Level: **${
+                boss1Level[0].level
+              }**/60\n__Type:__ ${
+                params.troops.type[boss1Info[0].troopType]
+              }\n`; // Ajouter les détails du boss 1
+            }
+
+            // Récupérer les informations de boss 2
+            if (boss2Id) {
+              const boss2Level = await dbManager.getBossInfoByIdUnique(boss2Id); // Récupérer le niveau
+              const boss2Info = await dbManager.getBossInfo(
+                boss2Level[0].bossId
+              ); // Récupérer les infos générales
+              bossDetails += `- Boss 2: **${boss2Info[0].nom}**, Level: **${
+                boss2Level[0].level
+              }**/60\n__Type:__ ${
+                params.troops.type[boss2Info[0].troopType]
+              }\n`; // Ajouter les détails du boss 2
+            }
+
+            // Créer une description des troupes dans l'armée
+            const armyDescription =
+              filteredArmyDetails.length > 0
+                ? filteredArmyDetails
+                    .map(([key, value]) => `- ${key}: **${value}**`)
+                    .join("\n")
+                : "Aucune troupe dans l'armée.";
+
+            // Créer l'embed pour afficher les détails de l'armée
+            const detailEmbed = new EmbedBuilder()
+              .setTitle(`Détails de l'armée "${armyName}"`)
+              .setDescription(
+                `Capacité actuelle: **${currentCapacity}**/**${maxCapacityArmy}**\n${bossDetails}`
+              )
+              .addFields({
+                name: "Troupes dans l'armée",
+                value: armyDescription,
+              })
+              .setColor(colors);
+
+            // Envoyer l'embed avec les détails à l'utilisateur
+            await interaction.reply({ embeds: [detailEmbed] });
+            break;
 
           case "update":
             // Récupérer l'armée en fonction du nom fourni
@@ -260,7 +344,7 @@ module.exports = {
               userId,
               armyName
             );
-            console.log(armyToUpdate);
+
             if (!armyToUpdate) {
               return interaction.reply({
                 content: `L'armée "${armyName}" n'existe pas, veuillez d'abord la créer avec '/caserne default create'`,
@@ -296,7 +380,7 @@ module.exports = {
                   key.startsWith("machine")
                 ) {
                   // Additionner la quantité de la troupe
-                  total += army[key]; // Ici, army[key] devrait être un nombre
+                  total += army[key];
                 }
               }
 
@@ -305,11 +389,6 @@ module.exports = {
 
             // Calculer le total des troupes
             const totalTroops = calculateTotalTroops(currentTroops);
-
-            const armyInConstruction = currentTroops.reduce((acc, troop) => {
-              acc[`${troop.type}Lvl${troop.level}`] = troop.quantity;
-              return acc;
-            }, {});
 
             // Embed initial de sélection des troupes
             const embedTroopSelection = new EmbedBuilder()
@@ -320,93 +399,138 @@ module.exports = {
               .setColor(colors);
 
             // Création du menu déroulant avec toutes les troupes et niveaux
+            const currentInventory = await dbManager.getUserInventory(userId);
+
             const troopLevelOptions = [
-              { label: "Archer Niveau 1", value: "archer-1", emoji: "🏹" },
-              { label: "Archer Niveau 2", value: "archer-2", emoji: "🏹" },
-              { label: "Archer Niveau 3", value: "archer-3", emoji: "🏹" },
-              { label: "Archer Niveau 4", value: "archer-4", emoji: "🏹" },
-              { label: "Archer Niveau 5", value: "archer-5", emoji: "🏹" },
+              {
+                label: "Archer Niveau 1",
+                value: "archer-1",
+                emoji: "🏹",
+                key: "archerLvl1",
+              },
+              {
+                label: "Archer Niveau 2",
+                value: "archer-2",
+                emoji: "🏹",
+                key: "archerLvl2",
+              },
+              {
+                label: "Archer Niveau 3",
+                value: "archer-3",
+                emoji: "🏹",
+                key: "archerLvl3",
+              },
+              {
+                label: "Archer Niveau 4",
+                value: "archer-4",
+                emoji: "🏹",
+                key: "archerLvl4",
+              },
+              {
+                label: "Archer Niveau 5",
+                value: "archer-5",
+                emoji: "🏹",
+                key: "archerLvl5",
+              },
               {
                 label: "Chevalier Niveau 1",
                 value: "chevalier-1",
                 emoji: emo.horse,
+                key: "chevalierLvl1",
               },
               {
                 label: "Chevalier Niveau 2",
                 value: "chevalier-2",
                 emoji: emo.horse,
+                key: "chevalierLvl2",
               },
               {
                 label: "Chevalier Niveau 3",
                 value: "chevalier-3",
                 emoji: emo.horse,
+                key: "chevalierLvl3",
               },
               {
                 label: "Chevalier Niveau 4",
                 value: "chevalier-4",
                 emoji: emo.horse,
+                key: "chevalierLvl4",
               },
               {
                 label: "Chevalier Niveau 5",
                 value: "chevalier-5",
                 emoji: emo.horse,
+                key: "chevalierLvl5",
               },
               {
                 label: "Infanterie Niveau 1",
                 value: "infanterie-1",
                 emoji: emo.infant,
+                key: "infanterieLvl1",
               },
               {
                 label: "Infanterie Niveau 2",
                 value: "infanterie-2",
                 emoji: emo.infant,
+                key: "infanterieLvl2",
               },
               {
                 label: "Infanterie Niveau 3",
                 value: "infanterie-3",
                 emoji: emo.infant,
+                key: "infanterieLvl3",
               },
               {
                 label: "Infanterie Niveau 4",
                 value: "infanterie-4",
                 emoji: emo.infant,
+                key: "infanterieLvl4",
               },
               {
                 label: "Infanterie Niveau 5",
                 value: "infanterie-5",
                 emoji: emo.infant,
+                key: "infanterieLvl5",
               },
               {
                 label: "Machine Niveau 1",
                 value: "machine-1",
                 emoji: emo.machine,
+                key: "machineLvl1",
               },
               {
                 label: "Machine Niveau 2",
                 value: "machine-2",
                 emoji: emo.machine,
+                key: "machineLvl2",
               },
               {
                 label: "Machine Niveau 3",
                 value: "machine-3",
                 emoji: emo.machine,
+                key: "machineLvl3",
               },
               {
                 label: "Machine Niveau 4",
                 value: "machine-4",
                 emoji: emo.machine,
+                key: "machineLvl4",
               },
               {
                 label: "Machine Niveau 5",
                 value: "machine-5",
                 emoji: emo.machine,
+                key: "machineLvl5",
               },
             ];
+            const availableTroops = troopLevelOptions.filter(
+              (option) => currentInventory[option.key] > 0
+            );
 
             const levelSelectMenu = new StringSelectMenuBuilder()
               .setCustomId("select-troop-level")
               .setPlaceholder("Choisissez une troupe et son niveau")
-              .addOptions(troopLevelOptions);
+              .addOptions(availableTroops);
 
             const levelSelectRow = new ActionRowBuilder().addComponents(
               levelSelectMenu
@@ -425,172 +549,260 @@ module.exports = {
                 time: 60000,
               });
 
-            troopCollector.on("collect", async (troopInteraction) => {
-              if (troopInteraction.customId === "select-troop-level") {
-                const selectedValue = troopInteraction.values[0];
-                const [troopType, level] = selectedValue.split("-");
+            troopCollector.on("collect", async (interaction) => {
+              const [action, quantity, troopType, level] =
+                interaction.customId.split("-");
 
-                // Afficher les boutons pour ajuster la quantité
-                const quantityButtonsRowMore =
-                  new ActionRowBuilder().addComponents(
-                    new ButtonBuilder()
-                      .setCustomId(`add-1-${troopType}-${level}`)
-                      .setLabel("+1")
-                      .setStyle(ButtonStyle.Primary),
-                    new ButtonBuilder()
-                      .setCustomId(`add-100-${troopType}-${level}`)
-                      .setLabel("+100")
-                      .setStyle(ButtonStyle.Primary),
-                    new ButtonBuilder()
-                      .setCustomId(`add-1000-${troopType}-${level}`)
-                      .setLabel("+1.000")
-                      .setStyle(ButtonStyle.Primary),
-                    new ButtonBuilder()
-                      .setCustomId(`add-10000-${troopType}-${level}`)
-                      .setLabel("+10.000")
-                      .setStyle(ButtonStyle.Primary),
-                    new ButtonBuilder()
-                      .setCustomId(`add-100000-${troopType}-${level}`)
-                      .setLabel("+100.000")
-                      .setStyle(ButtonStyle.Primary)
+              // Déterminer si l'interaction est pour sélectionner un type de troupe ou pour ajuster la quantité
+              const isTroopSelection =
+                interaction.customId === "select-troop-level";
+
+              // Si c'est une sélection de type de troupe
+              if (isTroopSelection) {
+                const selectedValue = interaction.values[0];
+                const [troopType, level] = selectedValue.split("-");
+                const currentInventory = await dbManager.getUserInventory(
+                  userId
+                );
+                const availableTroops =
+                  currentInventory[`${troopType}Lvl${level}`];
+
+                // Création des boutons de quantité
+                const createQuantityButtons = (action, quantities) => {
+                  return new ActionRowBuilder().addComponents(
+                    ...quantities.map((qty) => {
+                      const quantityStr = qty
+                        .toString()
+                        .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                      return new ButtonBuilder()
+                        .setCustomId(`${action}-${qty}-${troopType}-${level}`)
+                        .setLabel(
+                          action === "add"
+                            ? `+${quantityStr}`
+                            : `-${quantityStr}`
+                        )
+                        .setStyle(
+                          action === "add"
+                            ? ButtonStyle.Primary
+                            : ButtonStyle.Danger
+                        )
+                        .setDisabled(
+                          action === "add" ? availableTroops < qty : false
+                        );
+                    })
                   );
-                const quantityButtonsRowLess =
-                  new ActionRowBuilder().addComponents(
-                    new ButtonBuilder()
-                      .setCustomId(`remove-1-${troopType}-${level}`)
-                      .setLabel("-1")
-                      .setStyle(ButtonStyle.Danger),
-                    new ButtonBuilder()
-                      .setCustomId(`remove-100-${troopType}-${level}`)
-                      .setLabel("-100")
-                      .setStyle(ButtonStyle.Danger),
-                    new ButtonBuilder()
-                      .setCustomId(`remove-1000-${troopType}-${level}`)
-                      .setLabel("-1.000")
-                      .setStyle(ButtonStyle.Danger),
-                    new ButtonBuilder()
-                      .setCustomId(`remove-10000-${troopType}-${level}`)
-                      .setLabel("-10.000")
-                      .setStyle(ButtonStyle.Danger),
-                    new ButtonBuilder()
-                      .setCustomId(`remove-100000-${troopType}-${level}`)
-                      .setLabel("-100.000")
-                      .setStyle(ButtonStyle.Danger)
-                  );
+                };
+
+                const addQuantities = [0];
+                const quantityButtonsRowMore = createQuantityButtons(
+                  "add",
+                  addQuantities
+                );
 
                 // Mise à jour de l'embed avec les boutons de quantité
-                await troopInteraction.update({
+                await interaction.update({
                   embeds: [embedTroopSelection],
-                  components: [quantityButtonsRowMore, quantityButtonsRowLess],
+                  components: [quantityButtonsRowMore],
+                });
+              } else if (action && quantity && troopType && level) {
+                const quantityValue = parseInt(quantity, 10);
+
+                // Fonction pour obtenir le total des troupes dans l'armée en construction
+                function getTotalTroops(armyInConstruction) {
+                  return Object.values(armyInConstruction).reduce(
+                    (total, qty) => total + qty,
+                    0
+                  );
+                }
+
+                // Récupération de l'inventaire de l'utilisateur
+                const currentInventory = await dbManager.getUserInventory(
+                  userId
+                );
+                const availableTroops =
+                  currentInventory[`${troopType}Lvl${level}`];
+
+                // Quantité actuelle de troupes de ce type dans l'armée en construction
+                const currentKey = `${troopType}Lvl${level}`;
+                const currentArmyTroops = currentInventory[currentKey] || 0;
+
+                // Vérification de l'action d'ajout
+                if (action === "add") {
+                  // Vérifiez si l'utilisateur a assez de troupes et s'il dépasse la capacité
+                  if (quantityValue > availableTroops) {
+                    return interaction.update({
+                      content: `Vous avez ${availableTroops} ${troopType} de niveau ${level} dans votre inventaire.`,
+                      components: [],
+                    });
+                  }
+
+                  if (
+                    getTotalTroops(currentInventory) + quantityValue >
+                    maxCapacity
+                  ) {
+                    return interaction.update({
+                      content: `La capacité maximale de l'armée est de ${maxCapacity}.`,
+                      components: [],
+                    });
+                  }
+
+                  // Mettre à jour la base de données pour retirer les troupes de l'inventaire
+                  await dbManager.updateUserTroops(
+                    userId,
+                    troopType,
+                    level,
+                    -quantityValue
+                  );
+                  // Ajouter ces troupes à l'armée de l'utilisateur
+                  await dbManager.updateUserArmy(
+                    userId,
+                    armyName,
+                    troopType,
+                    level,
+                    quantityValue
+                  );
+                } else if (action === "remove") {
+                  // Vérifiez si l'utilisateur peut retirer les troupes
+                  if (quantityValue > currentArmyTroops) {
+                    return interaction.update({
+                      content: `Vous ne pouvez pas retirer plus de troupes que vous n'en avez actuellement dans l'armée (${currentArmyTroops} disponibles).`,
+                      components: [],
+                    });
+                  }
+
+                  // Mettre à jour la base de données pour retirer les troupes de l'armée
+                  await dbManager.updateUserArmy(
+                    userId,
+                    armyName,
+                    troopType,
+                    level,
+                    -quantityValue
+                  );
+                  // Remettre ces troupes dans l'inventaire de l'utilisateur
+                  await dbManager.updateUserTroops(
+                    userId,
+                    troopType,
+                    level,
+                    quantityValue
+                  );
+                }
+
+                // Récupérer à nouveau l'inventaire mis à jour depuis la base de données
+                const updatedInventory = await dbManager.getUserInventory(
+                  userId
+                );
+                const [army] = await dbManager.getTroopsForArmy(
+                  userId,
+                  armyName
+                );
+                const filteredArmy = Object.entries(army).filter(
+                  ([key, value]) =>
+                    !["id", "nom", "discordId", "boss1", "boss2"].includes(
+                      key
+                    ) && value > 0
+                );
+                const currentCapacity = filteredArmy.reduce(
+                  (total, [key, value]) => total + value,
+                  0
+                );
+
+                // Mise à jour de l'embed avec les troupes actuelles
+                const updatedEmbedTroopSelection = new EmbedBuilder()
+                  .setTitle(
+                    `Sélection ${troopType} lvl${level} pour l' ${armyName}`
+                  )
+                  .setDescription(
+                    `Capacité maximale: **${maxCapacity}**\nCapacité actuelle: **${currentCapacity}**`
+                  )
+                  .addFields(
+                    {
+                      name: "Troupes Disponibles",
+                      value:
+                        Object.entries(updatedInventory)
+                          .filter(([key, value]) => value > 0)
+                          .map(([key, value]) => `- ${key}: **${value}**`)
+                          .join("\n") || "Aucune troupe disponible.",
+                    },
+                    {
+                      name: "Troupes dans l'armée",
+                      value:
+                        filteredArmy.length > 0
+                          ? filteredArmy
+                              .map(([key, value]) => `- ${key}: **${value}**`)
+                              .join("\n")
+                          : "Aucune troupe sélectionnée.",
+                    }
+                  )
+                  .setColor(colors);
+
+                // Boutons de retrait dynamiques
+                const quantityButtonsRowLess =
+                  new ActionRowBuilder().addComponents(
+                    ...[1, 100, 1000, 10000, 100000].map((q) =>
+                      new ButtonBuilder()
+                        .setCustomId(`remove-${q}-${troopType}-${level}`)
+                        .setLabel(`-${q}`)
+                        .setStyle(ButtonStyle.Danger)
+                        .setDisabled(updatedInventory[currentKey] < q)
+                    )
+                  );
+
+                // Boutons d'ajout dynamiques
+                const quantityButtonsRowMore =
+                  new ActionRowBuilder().addComponents(
+                    ...[1, 100, 1000, 10000, 100000].map((q) =>
+                      new ButtonBuilder()
+                        .setCustomId(`add-${q}-${troopType}-${level}`)
+                        .setLabel(`+${q}`)
+                        .setStyle(ButtonStyle.Primary)
+                        .setDisabled(
+                          updatedInventory[`${troopType}Lvl${level}`] < q
+                        )
+                    )
+                  );
+
+                // Bouton de confirmation et changement de type de troupe
+                const changeTroopTypeButton = new ButtonBuilder()
+                  .setCustomId("change-troop-type")
+                  .setLabel("Changer le type de troupe")
+                  .setStyle(ButtonStyle.Secondary);
+
+                const confirmRow = new ActionRowBuilder().addComponents(
+                  changeTroopTypeButton
+                );
+
+                await interaction.update({
+                  embeds: [updatedEmbedTroopSelection],
+                  components: [
+                    quantityButtonsRowMore,
+                    quantityButtonsRowLess,
+                    confirmRow,
+                  ],
                 });
               }
             });
 
-            // Gestion de l'ajout et de la suppression des troupes
-            troopCollector.on("collect", async (quantityInteraction) => {
-              const [action, quantity, troopType, level] =
-                quantityInteraction.customId.split("-");
-              const quantityValue = parseInt(quantity, 10);
-
-              const currentKey = `${troopType}Lvl${level}`;
-              armyInConstruction[currentKey] =
-                (armyInConstruction[currentKey] || 0) + quantityValue;
-
-              // Mise à jour de l'embed avec les troupes actuelles
-              const updatedEmbedTroopSelection = new EmbedBuilder()
-                .setTitle(`Sélectionnez les Troupes pour l'armée "${armyName}"`)
-                .setDescription(`Capacité maximale: ${maxCapacity}`)
-                .addFields({
-                  name: "Troupes sélectionnées",
-                  value:
-                    Object.entries(armyInConstruction)
-                      .filter(([key, value]) => value > 0)
-                      .map(([key, value]) => `- ${key}: ${value}`)
-                      .join("\n") || "Aucune troupe sélectionnée.",
-                })
-                .setColor(colors);
-
-              await quantityInteraction.update({
-                embeds: [updatedEmbedTroopSelection],
-                components: [quantityButtonsRowMore, quantityButtonsRowLess], // Conserver les boutons de quantité
-              });
+            // Gestion de la confirmation et du changement de type de troupe
+            troopCollector.on("collect", async (interaction) => {
+              if (interaction.customId === "change-troop-type") {
+                await interaction.update({
+                  content: "Pour le moment refaite la commande",
+                  embeds: [],
+                  components: [],
+                });
+              }
             });
 
             // Confirmation de la fin de la sélection de troupe
             troopCollector.on("end", async () => {
-              // todo --> boss selectionner mettre les nom pas les id boss 1 et boss2 contient les id
-              const embedConfirmation = new EmbedBuilder()
-                .setTitle(`Confirmer l'armée "${armyName}"`)
-                .setDescription(
-                  `Boss sélectionnés: ${[boss1, boss2].join(
-                    ", "
-                  )}\nTroupes sélectionnées: ${
-                    Object.entries(armyInConstruction)
-                      .filter(([key, value]) => value > 0)
-                      .map(([key, value]) => `${key}: ${value}`)
-                      .join(", ") || "Aucune troupe sélectionnée."
-                  }`
-                )
-                .setColor(colors);
-
-              const confirmButton = new ButtonBuilder()
-                .setCustomId("confirm-army")
-                .setLabel("Confirmer")
-                .setStyle(ButtonStyle.Success);
-
-              const cancelButton = new ButtonBuilder()
-                .setCustomId("cancel-army")
-                .setLabel("Annuler")
-                .setStyle(ButtonStyle.Danger);
-
-              await interaction.followUp({
-                embeds: [embedConfirmation],
-                components: [
-                  new ActionRowBuilder().addComponents(
-                    confirmButton,
-                    cancelButton
-                  ),
-                ],
-                ephemeral: true,
+              await interaction.editReply({
+                content: "Sélection de troupes terminée.",
+                components: [],
               });
-
-              // Gestion de la confirmation ou annulation de l'armée
-              const confirmationCollector =
-                interaction.channel.createMessageComponentCollector({
-                  filter: (i) => i.user.id === userId,
-                  time: 60000,
-                });
-
-              confirmationCollector.on(
-                "collect",
-                async (confirmInteraction) => {
-                  if (confirmInteraction.customId === "confirm-army") {
-                    await dbManager.updateArmyWithTroops(
-                      userId,
-                      armyName,
-                      Object.entries(armyInConstruction)
-                        .filter(([key, value]) => value > 0)
-                        .map(([key, value]) => ({ type: key, quantity: value }))
-                    );
-
-                    await confirmInteraction.update({
-                      content: "Votre armée a été mise à jour avec succès.",
-                      components: [],
-                    });
-                  } else if (confirmInteraction.customId === "cancel-army") {
-                    await confirmInteraction.update({
-                      content: "L'opération a été annulée.",
-                      components: [],
-                    });
-                  }
-                }
-              );
             });
-
             break;
 
           case "delete":
-            const detailArmy = await dbManager.getArmy(userId, armyName);
             const confirmationRow = new ActionRowBuilder().addComponents(
               new ButtonBuilder()
                 .setCustomId("confirmDelete")

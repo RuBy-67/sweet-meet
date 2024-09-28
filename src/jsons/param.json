@@ -36,6 +36,9 @@
     "caserne": {
       "baseCapacity": 500
     },
+    "hopital": {
+      "baseCapacity": 2500
+    },
     "prix": {
       "forge": {
         "1-9": "2500",
@@ -57,6 +60,14 @@
 
   "troops": {
     "baseBonusType": "3",
+    "type": {
+      "0": "Inconnu",
+      "1": "Archer",
+      "2": "Infanterie",
+      "3": "Machine",
+      "4": "Cavalier",
+      "5": "MultiTroupe"
+    },
     "bosses": {
       "type": {
         "1": {

@@ -556,6 +556,12 @@ class DatabaseManager {
       SQL_QUERIES.GET_DETAILS_TROOPS,
       [userId]
     );
+
+    const allArmyDetails = await this.queryMain(
+      SQL_QUERIES.GET_DETAILS_ARMY_TROOPS,
+      [userId]
+    );
+
     const [detailBossLvl] = await this.queryMain(SQL_QUERIES.GET_DETAILS_BOSS, [
       userId,
     ]);
@@ -586,6 +592,12 @@ class DatabaseManager {
     totalPower += calculateTroopPower(detailTroops, "chevalier");
     totalPower += calculateTroopPower(detailTroops, "infanterie");
     totalPower += calculateTroopPower(detailTroops, "machine");
+    const troopTypes = ["archer", "chevalier", "infanterie", "machine"];
+    allArmyDetails.forEach((detailArmyTroops) => {
+      troopTypes.forEach((troopType) => {
+        totalPower += calculateTroopPower(detailArmyTroops, troopType);
+      });
+    });
 
     // Calcul de la puissance des boss
     const typeMultipliers = {
@@ -1062,25 +1074,22 @@ class DatabaseManager {
     ]);
   }
   async calculateMaxCapacity(userId, boss1, boss2) {
-    console.log(boss1);
-    console.log(boss2);
     let bonusCapacity = 1;
     let capacityBoss1 = "";
     let capacityBoss2 = "";
     //nésséssite la capa boss de base et le level,
     const [bossInfo1] = await this.getBossInfoByIdUnique(boss1);
     const [bossInfo2] = await this.getBossInfoByIdUnique(boss2);
-    console.log(bossInfo1);
-    console.log(bossInfo2);
+
     if (boss1) {
       const [boss1Info] = await this.getBossInfo(bossInfo1.bossId);
-      console.log(boss1Info);
+
       capacityBoss1 =
         boss1Info.capacity * (bossInfo1.level * 0.6) * bonusCapacity;
     }
     if (boss2) {
       const [boss2Info] = await this.getBossInfo(bossInfo2.bossId);
-      console.log(boss2Info);
+
       capacityBoss2 =
         boss2Info.capacity * (bossInfo2.level * 0.6) * bonusCapacity;
     }
@@ -1099,7 +1108,7 @@ class DatabaseManager {
   async updateArmyWithTroops(userId, armyName, troops) {
     // Commencez par récupérer l'armée en fonction de l'utilisateur et du nom de l'armée
     const army = await this.queryMain(
-      "SELECT id FROM armies WHERE discordId = ? AND nom = ?",
+      "SELECT id FROM user_army WHERE discordId = ? AND nom = ?",
       [userId, armyName]
     );
 
@@ -1135,6 +1144,47 @@ class DatabaseManager {
 
     // Exécuter la requête de mise à jour
     await this.queryMain(query, valuesToUpdate);
+  }
+  async getUserInventory(userId) {
+    // Supposons que cette méthode interroge la base de données pour obtenir l'inventaire des troupes du joueur
+    const inventory = await this.queryMain(
+      `
+    SELECT archerLvl1, archerLvl2, archerLvl3, archerLvl4, archerLvl5,
+           chevalierLvl1, chevalierLvl2, chevalierLvl3, chevalierLvl4, chevalierLvl5,
+           infanterieLvl1, infanterieLvl2, infanterieLvl3, infanterieLvl4, infanterieLvl5,
+           machineLvl1, machineLvl2, machineLvl3, machineLvl4, machineLvl5
+    FROM troops
+    WHERE discordId = ?
+  `,
+      [userId]
+    );
+
+    // Retourner le résultat comme un objet utilisable
+    return inventory[0];
+  }
+
+  async updateUserTroops(userId, troopType, troopLevel, troopAmount) {
+    // Mettre à jour la quantité de troupes pour un utilisateur
+    return this.queryMain(
+      `
+    UPDATE troops
+    SET ${troopType}Lvl${troopLevel} = ${troopType}Lvl${troopLevel} + ?
+    WHERE discordId = ?
+  `,
+      [troopAmount, userId]
+    );
+  }
+  async updateUserArmy(userId, armyName, troopType, level, quantityValue) {
+    // Mettre à jour la quantité de troupes pour un utilisateur
+    const column = `${troopType}Lvl${level}`;
+    return this.queryMain(
+      `
+    UPDATE user_army
+    SET ${column} = ${column} +?
+    WHERE discordId = ? AND nom = ?
+  `,
+      [quantityValue, userId, armyName]
+    );
   }
 }
 

@@ -28,11 +28,11 @@ module.exports = {
     {
       type: 1,
       name: "info", /// ok
-      description: "info de votre hôpital",
+      description: "info sur votre hôpital",
     },
     {
       type: 1,
-      name: "détails", /// ok
+      name: "détails",
       description: "Détail de votre hôpital",
     },
   ],
@@ -237,7 +237,16 @@ module.exports = {
         });
 
       case "soigner":
-      //todo 25 50 ou 100% des troupes de l’hôpital limiter par le level de l’hôpital
+      //todo 25% 50% ou 100% des troupes de l’hôpital limiter par le level de l’hôpital
+      // todo Cc'està dire au level 1 la capacité est de :
+      // todo  et au level 25 la capacité est de :
+      //todo param.hopital.baseCapacity
+      // todo let bonus1 = bonus.bonus1 * hopitalLvl;
+      // todo capacitéBase * bonus1
+      //todo le temps de soin est calculer il est de 8s pour une troupe lvl 1 (puis *2 à chaque fois jusque 5)
+      // todo comme pour la formation, on entre le timestamp (temps) dans la db hopital "troupeEndTime"
+      // voire pour gérer cas soin + combat autre bdd "soin en cours?"
+      // combat remplis hopital et soin envoie dans soin en cours mm
 
       case "détails":
 

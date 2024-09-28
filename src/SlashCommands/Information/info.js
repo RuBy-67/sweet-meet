@@ -325,7 +325,9 @@ module.exports = {
             .addFields(
               {
                 name: "Rareté",
-                value: rarete,
+                value: `${rarete}\n__Type:__ ${
+                  params.troops.type[bossInfo.troopType]
+                }`,
                 inline: true,
               },
               {
