@@ -547,6 +547,41 @@ class DatabaseManager {
         await this.queryMain(sqlUpdateTroops, [troopAmount, userId]);
       }
     }
+    const troupeInHealing = await this.getHealing(userId);
+    if (troupeInHealing.length > 0) {
+      const currentTime = Math.round(Date.now() / 1000);
+      if (troupeInHealing[0].troopEndTime < currentTime) {
+        const troopTypes = ["archer", "chevalier", "infanterie", "machine"];
+        const updateColumns = [];
+        const updateParams = [];
+        troopTypes.forEach((type) => {
+          for (let lvl = 1; lvl <= 5; lvl++) {
+            const columnName = `${type}Lvl${lvl}`;
+            updateColumns.push(`${columnName} = ${columnName} + ?`);
+            updateParams.push(troupeInHealing[0][columnName] || 0);
+          }
+        });
+
+        updateParams.push(troupeInHealing[0].discordId);
+
+        const updateQuery = `
+                UPDATE troops
+                SET ${updateColumns.join(", ")}
+                WHERE discordId = ?;
+            `;
+
+        await this.queryMain(updateQuery, updateParams);
+        console.log(
+          `Mise à jour effectuée pour la troupe : ${troupeInHealing[0].discordId}`
+        );
+
+        const deleteQuery = `
+                DELETE FROM hospital_soins
+                WHERE discordId = ?;
+            `;
+        await this.queryMain(deleteQuery, [troupeInHealing[0].discordId]);
+      }
+    }
 
     const [detailBatimentLvl] = await this.queryMain(
       SQL_QUERIES.GET_DETAILS_BATIMENT,
@@ -970,12 +1005,6 @@ class DatabaseManager {
     }
 
     const troops = troopsData[0];
-    const troopEmojis = {
-      archer: "🏹",
-      chevalier: emoji(emo.horse),
-      machine: emoji(emo.machine),
-      infanterie: emoji(emo.infant),
-    };
 
     const troopNames = {
       archer: "Archer",
@@ -999,10 +1028,15 @@ class DatabaseManager {
           /(archer|chevalier|machine|infanterie)Lvl(\d+)/
         );
         if (match) {
-          const troopType = match[1];
-          const troopLevel = match[2];
+          const troopType = match[1]; // e.g. "archer", "chevalier", etc.
+          const troopLevel = match[2]; // e.g. "1", "2", etc.
+
+          // Dynamically get the emoji for the troop type and level
+          const troopEmoji = emoji(emo[`${troopType}${troopLevel}`]) || "❓";
+
+          // Add formatted troop information to the grouped troops
           groupedTroops[troopType].push(
-            `- **${value}** Level: **${troopLevel}**`
+            `${troopEmoji} **${value}** Level: **${troopLevel}**`
           );
         }
       }
@@ -1012,9 +1046,8 @@ class DatabaseManager {
     const ownedTroops = [];
     for (const [troopType, troopsList] of Object.entries(groupedTroops)) {
       if (troopsList.length > 0) {
-        const emojiIcon = troopEmojis[troopType] || "❓";
         const troopName = troopNames[troopType];
-        ownedTroops.push(`${emojiIcon} **${troopName}** :`);
+        ownedTroops.push(`**${troopName}** :`);
         ownedTroops.push(...troopsList); // Add each troop level and amount
       }
     }
@@ -1185,6 +1218,144 @@ class DatabaseManager {
   `,
       [quantityValue, userId, armyName]
     );
+  }
+  async getTroopToHeal(userId) {
+    return this.queryMain(SQL_QUERIES.GET_TROOP_TO_HEAL, [userId]);
+  }
+  async getTroopHealing(userId) {
+    return this.queryMain(SQL_QUERIES.GET_TROOP_HEALING, [userId]);
+  }
+  async startTroopHealing(userId, totalHealingTime, typeTroupe = null) {
+    const currentTime = Math.floor(Date.now() / 1000); // Timestamp actuel en secondes
+    const endTime = currentTime + totalHealingTime; // Timestamp de fin de soin
+
+    // Requête pour récupérer les troupes dans l'hôpital
+    let query;
+    let queryParams = [userId];
+
+    // Si `typeTroupe` est null, on soigne toutes les troupes
+    if (typeTroupe === null) {
+      query = `
+            SELECT *
+            FROM hospital
+            WHERE discordId = ?;
+        `;
+    } else {
+      // Sinon, on soigne seulement le type de troupe spécifié
+      query = `
+            SELECT *
+            FROM hospital
+            WHERE discordId = ?
+            AND (${typeTroupe}Lvl1 > 0 OR ${typeTroupe}Lvl2 > 0 OR ${typeTroupe}Lvl3 > 0 OR ${typeTroupe}Lvl4 > 0 OR ${typeTroupe}Lvl5 > 0);
+        `;
+    }
+
+    // Exécuter la requête pour obtenir les troupes présentes dans l'hôpital
+    const troopsInHospital = await this.queryMain(query, queryParams);
+
+    if (!troopsInHospital.length) {
+      return "Aucune troupe à soigner.";
+    }
+
+    // Préparer les données pour l'insertion dans `hospital_soins`
+    const healingEntries = {};
+
+    for (const row of troopsInHospital) {
+      const troopTypes = ["archer", "chevalier", "infanterie", "machine"];
+
+      troopTypes.forEach((troopType) => {
+        for (let lvl = 1; lvl <= 5; lvl++) {
+          const columnName = `${troopType}Lvl${lvl}`;
+          const troopCount = row[columnName];
+
+          if (
+            troopCount > 0 &&
+            (typeTroupe === null || troopType === typeTroupe)
+          ) {
+            // Si la clé n'existe pas encore, on l'initialise
+            if (!healingEntries[columnName]) {
+              healingEntries[columnName] = 0;
+            }
+            // Ajouter le nombre de troupes à soigner pour cette colonne
+            healingEntries[columnName] += troopCount;
+          }
+        }
+      });
+    }
+
+    if (Object.keys(healingEntries).length > 0) {
+      const typesToInsert =
+        typeTroupe === null
+          ? ["archer", "chevalier", "infanterie", "machine"]
+          : [typeTroupe];
+
+      // Ajustez la requête pour l'insertion
+      const insertColumns = typesToInsert
+        .map((t) => `${t}Lvl1, ${t}Lvl2, ${t}Lvl3, ${t}Lvl4, ${t}Lvl5`)
+        .join(", ");
+      const insertValues = typesToInsert
+        .map((t) => {
+          return [
+            healingEntries[`${t}Lvl1`] || 0,
+            healingEntries[`${t}Lvl2`] || 0,
+            healingEntries[`${t}Lvl3`] || 0,
+            healingEntries[`${t}Lvl4`] || 0,
+            healingEntries[`${t}Lvl5`] || 0,
+          ];
+        })
+        .flat();
+
+      // Remplacez `?` par le bon nombre de valeurs
+      const insertQuery = `
+        INSERT INTO hospital_soins (discordId, troopEndTime ${insertColumns})
+        VALUES (?,? ${insertValues.map(() => "?").join(", ")})
+        ON DUPLICATE KEY UPDATE
+        ${typesToInsert
+          .map(
+            (t) =>
+              `${t}Lvl1 = ${t}Lvl1 + VALUES(${t}Lvl1), 
+                ${t}Lvl2 = ${t}Lvl2 + VALUES(${t}Lvl2), 
+                ${t}Lvl3 = ${t}Lvl3 + VALUES(${t}Lvl3), 
+                ${t}Lvl4 = ${t}Lvl4 + VALUES(${t}Lvl4), 
+                ${t}Lvl5 = ${t}Lvl5 + VALUES(${t}Lvl5)`
+          )
+          .join(", ")}
+    `;
+
+      // Ajoutez discordId aux paramètres d'insertion
+      const insertParams = [userId, endTime, ...insertValues];
+
+      await this.queryMain(insertQuery, insertParams);
+
+      // Mettre à jour les colonnes correspondantes dans la table hospital pour mettre à 0 les troupes soignées
+      const updateColumns = typesToInsert
+        .map(
+          (t) => `
+                ${t}Lvl1 = ${t}Lvl1 - ${healingEntries[`${t}Lvl1`] || 0}, 
+                ${t}Lvl2 = ${t}Lvl2 - ${healingEntries[`${t}Lvl2`] || 0}, 
+                ${t}Lvl3 = ${t}Lvl3 - ${healingEntries[`${t}Lvl3`] || 0}, 
+                ${t}Lvl4 = ${t}Lvl4 - ${healingEntries[`${t}Lvl4`] || 0}, 
+                ${t}Lvl5 = ${t}Lvl5 - ${healingEntries[`${t}Lvl5`] || 0}`
+        )
+        .join(", ");
+
+      const updateQuery = `
+            UPDATE hospital
+            SET ${updateColumns}
+            WHERE discordId = ?;
+        `;
+
+      // Ajoute discordId aux paramètres de mise à jour
+      const updateParams = [userId];
+
+      await this.queryMain(updateQuery, updateParams);
+    } else {
+      console.log("Aucune troupe à soigner.");
+      return;
+    }
+  }
+  async getHealing(userId) {
+    return this.queryMain(SQL_QUERIES.GET_HEALING, [userId]);
   }
 }
 

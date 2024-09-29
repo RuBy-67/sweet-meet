@@ -191,6 +191,9 @@ WHERE u.discordId = ?`,
   INSERT_ARMY_IN_CONSTRUCTION: `INSERT INTO user_army (discordId, nom, boss1, boss2) VALUES (?, ?, ?, ?)`,
   GET_BOSS_INFO_BY_ID_UNIQUE: `SELECT * FROM user_boss WHERE id = ?`,
   GET_DETAILS_ARMY_TROOPS: `SELECT * FROM user_army WHERE discordId = ? AND nom IN ('armee1', 'armee2', 'armee3', 'armee4')`,
+  GET_TROOP_TO_HEAL: `SELECT * FROM hospital WHERE discordId = ? `,
+  GET_TROOP_HEALING: `SELECT * FROM hospital_soins WHERE discordId = ?`,
+  GET_HEALING: `SELECT * FROM hospital_soins WHERE discordId = ?`,
 };
 
 module.exports = SQL_QUERIES;

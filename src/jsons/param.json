@@ -37,7 +37,7 @@
       "baseCapacity": 500
     },
     "hopital": {
-      "baseCapacity": 2500
+      "baseCapacity": 10000
     },
     "prix": {
       "forge": {

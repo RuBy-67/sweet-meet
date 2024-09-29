@@ -217,7 +217,10 @@ module.exports = {
               .setDescription(
                 "Veuillez choisir jusqu'à 2 boss pour cette armée."
               )
-              .setColor(colors);
+              .setColor(colors)
+              .setThumbnail(
+                "https://media.discordapp.net/attachments/1246893100790448198/1285311938154332225/image3.png?ex=66fa4a45&is=66f8f8c5&hm=c5a0ad6235655bb37a2594baf4979a03f30810d7d97b3aa303bbfd74a92ca9ba&=&format=webp&quality=lossless&width=810&height=810"
+              );
 
             const bossSelectionMenu = new StringSelectMenuBuilder()
               .setCustomId("select-boss")
@@ -318,15 +321,33 @@ module.exports = {
             const armyDescription =
               filteredArmyDetails.length > 0
                 ? filteredArmyDetails
-                    .map(([key, value]) => `- ${key}: **${value}**`)
+                    .map(([key, value]) => {
+                      // Retirer "Lvl" de la clé pour obtenir le nom d'émoji
+                      const troopTypeWithLevel = key.replace(/Lvl/, ""); // Retire uniquement "Lvl" sans toucher au chiffre
+
+                      const troopEmoji = emoji(emo[troopTypeWithLevel]); // Exemple : pour cavalierLvl1, cela donne cavalier1
+
+                      // Formater la chaîne pour inclure l'émoji et le niveau
+                      return `- ${capitalize(
+                        key.replace(/Lvl/, " Niveau ")
+                      )}: **${value}** ${troopEmoji} `;
+                    })
                     .join("\n")
                 : "Aucune troupe dans l'armée.";
+
+            // Fonction pour capitaliser les premiers caractères
+            function capitalize(string) {
+              return string.charAt(0).toUpperCase() + string.slice(1);
+            }
 
             // Créer l'embed pour afficher les détails de l'armée
             const detailEmbed = new EmbedBuilder()
               .setTitle(`Détails de l'armée "${armyName}"`)
               .setDescription(
                 `Capacité actuelle: **${currentCapacity}**/**${maxCapacityArmy}**\n${bossDetails}`
+              )
+              .setThumbnail(
+                "https://media.discordapp.net/attachments/1246893100790448198/1285311938154332225/image3.png?ex=66fa4a45&is=66f8f8c5&hm=c5a0ad6235655bb37a2594baf4979a03f30810d7d97b3aa303bbfd74a92ca9ba&=&format=webp&quality=lossless&width=810&height=810"
               )
               .addFields({
                 name: "Troupes dans l'armée",
@@ -388,159 +409,74 @@ module.exports = {
             };
 
             // Calculer le total des troupes
-            const totalTroops = calculateTotalTroops(currentTroops);
 
             // Embed initial de sélection des troupes
             const embedTroopSelection = new EmbedBuilder()
               .setTitle(`Sélectionnez les Troupes pour l'armée "${armyName}"`)
-              .setDescription(
-                `Capacité maximale: ${maxCapacity}\nCurrent Troops: ${totalTroops}`
-              )
-              .setColor(colors);
+              .setDescription(`Capacité maximale: **${maxCapacity}**`)
+              .setColor(colors)
+              .setThumbnail(
+                "https://media.discordapp.net/attachments/1246893100790448198/1285311938154332225/image3.png?ex=66fa4a45&is=66f8f8c5&hm=c5a0ad6235655bb37a2594baf4979a03f30810d7d97b3aa303bbfd74a92ca9ba&=&format=webp&quality=lossless&width=810&height=810"
+              );
 
             // Création du menu déroulant avec toutes les troupes et niveaux
             const currentInventory = await dbManager.getUserInventory(userId);
 
-            const troopLevelOptions = [
-              {
-                label: "Archer Niveau 1",
-                value: "archer-1",
-                emoji: "🏹",
-                key: "archerLvl1",
-              },
-              {
-                label: "Archer Niveau 2",
-                value: "archer-2",
-                emoji: "🏹",
-                key: "archerLvl2",
-              },
-              {
-                label: "Archer Niveau 3",
-                value: "archer-3",
-                emoji: "🏹",
-                key: "archerLvl3",
-              },
-              {
-                label: "Archer Niveau 4",
-                value: "archer-4",
-                emoji: "🏹",
-                key: "archerLvl4",
-              },
-              {
-                label: "Archer Niveau 5",
-                value: "archer-5",
-                emoji: "🏹",
-                key: "archerLvl5",
-              },
-              {
-                label: "Chevalier Niveau 1",
-                value: "chevalier-1",
-                emoji: emo.horse,
-                key: "chevalierLvl1",
-              },
-              {
-                label: "Chevalier Niveau 2",
-                value: "chevalier-2",
-                emoji: emo.horse,
-                key: "chevalierLvl2",
-              },
-              {
-                label: "Chevalier Niveau 3",
-                value: "chevalier-3",
-                emoji: emo.horse,
-                key: "chevalierLvl3",
-              },
-              {
-                label: "Chevalier Niveau 4",
-                value: "chevalier-4",
-                emoji: emo.horse,
-                key: "chevalierLvl4",
-              },
-              {
-                label: "Chevalier Niveau 5",
-                value: "chevalier-5",
-                emoji: emo.horse,
-                key: "chevalierLvl5",
-              },
-              {
-                label: "Infanterie Niveau 1",
-                value: "infanterie-1",
-                emoji: emo.infant,
-                key: "infanterieLvl1",
-              },
-              {
-                label: "Infanterie Niveau 2",
-                value: "infanterie-2",
-                emoji: emo.infant,
-                key: "infanterieLvl2",
-              },
-              {
-                label: "Infanterie Niveau 3",
-                value: "infanterie-3",
-                emoji: emo.infant,
-                key: "infanterieLvl3",
-              },
-              {
-                label: "Infanterie Niveau 4",
-                value: "infanterie-4",
-                emoji: emo.infant,
-                key: "infanterieLvl4",
-              },
-              {
-                label: "Infanterie Niveau 5",
-                value: "infanterie-5",
-                emoji: emo.infant,
-                key: "infanterieLvl5",
-              },
-              {
-                label: "Machine Niveau 1",
-                value: "machine-1",
-                emoji: emo.machine,
-                key: "machineLvl1",
-              },
-              {
-                label: "Machine Niveau 2",
-                value: "machine-2",
-                emoji: emo.machine,
-                key: "machineLvl2",
-              },
-              {
-                label: "Machine Niveau 3",
-                value: "machine-3",
-                emoji: emo.machine,
-                key: "machineLvl3",
-              },
-              {
-                label: "Machine Niveau 4",
-                value: "machine-4",
-                emoji: emo.machine,
-                key: "machineLvl4",
-              },
-              {
-                label: "Machine Niveau 5",
-                value: "machine-5",
-                emoji: emo.machine,
-                key: "machineLvl5",
-              },
+            const troopTypes = [
+              { name: "archer" },
+              { name: "chevalier" },
+              { name: "infanterie" },
+              { name: "machine" },
             ];
+
+            const maxLevel = 5; // Niveaux disponibles pour chaque troupe
+
+            // Générer dynamiquement les options pour les troupes
+            const troopLevelOptions = troopTypes.flatMap((troop) =>
+              Array.from({ length: maxLevel }, (_, i) => {
+                const level = i + 1; // Le niveau commence à 1
+                return {
+                  label: `${capitalize(troop.name)} Niveau ${level}`,
+                  value: `0-0-${troop.name}-${level}`,
+                  emoji: emo[`${troop.name}${level}`], // Récupérer l'emoji spécifique au niveau
+                  key: `${troop.name}Lvl${level}`,
+                };
+              })
+            );
+
+            // Fonction pour capitaliser le nom des troupes
+            function capitalize(string) {
+              return string.charAt(0).toUpperCase() + string.slice(1);
+            }
             const availableTroops = troopLevelOptions.filter(
               (option) => currentInventory[option.key] > 0
             );
 
-            const levelSelectMenu = new StringSelectMenuBuilder()
-              .setCustomId("select-troop-level")
-              .setPlaceholder("Choisissez une troupe et son niveau")
-              .addOptions(availableTroops);
+            if (availableTroops.length > 0) {
+              const levelSelectMenu = new StringSelectMenuBuilder()
+                .setCustomId("select-troop-level")
+                .setPlaceholder("Choisissez une troupe et son niveau")
+                .addOptions(availableTroops);
 
-            const levelSelectRow = new ActionRowBuilder().addComponents(
-              levelSelectMenu
-            );
+              const levelSelectRow = new ActionRowBuilder().addComponents(
+                levelSelectMenu
+              );
 
-            // Afficher l'embed avec le menu déroulant
-            await interaction.reply({
-              embeds: [embedTroopSelection],
-              components: [levelSelectRow],
-            });
+              // Afficher l'embed avec le menu déroulant si des troupes sont disponibles
+              await interaction.reply({
+                embeds: [embedTroopSelection],
+                components: [levelSelectRow],
+                fetchReply: true,
+              });
+            } else {
+              // Si aucune troupe n'est disponible, afficher un message sans menu déroulant
+              await interaction.reply({
+                embeds: [embedTroopSelection],
+                content: "Aucune troupe disponible.",
+                components: [],
+                fetchReply: true,
+              });
+            }
 
             // Gestion des interactions de sélection de troupe
             const troopCollector =
@@ -550,247 +486,190 @@ module.exports = {
               });
 
             troopCollector.on("collect", async (interaction) => {
-              const [action, quantity, troopType, level] =
-                interaction.customId.split("-");
-
-              // Déterminer si l'interaction est pour sélectionner un type de troupe ou pour ajuster la quantité
+              let quantity = "0";
+              let action = "0";
+              let troopType = "";
+              let level = "";
               const isTroopSelection =
                 interaction.customId === "select-troop-level";
-
-              // Si c'est une sélection de type de troupe
+              let selectedValue = "";
               if (isTroopSelection) {
-                const selectedValue = interaction.values[0];
-                const [troopType, level] = selectedValue.split("-");
-                const currentInventory = await dbManager.getUserInventory(
-                  userId
-                );
-                const availableTroops =
-                  currentInventory[`${troopType}Lvl${level}`];
+                selectedValue = interaction.values[0];
+              } else {
+                selectedValue = interaction.customId;
+              }
 
-                // Création des boutons de quantité
-                const createQuantityButtons = (action, quantities) => {
-                  return new ActionRowBuilder().addComponents(
-                    ...quantities.map((qty) => {
-                      const quantityStr = qty
-                        .toString()
-                        .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                      return new ButtonBuilder()
-                        .setCustomId(`${action}-${qty}-${troopType}-${level}`)
-                        .setLabel(
-                          action === "add"
-                            ? `+${quantityStr}`
-                            : `-${quantityStr}`
-                        )
-                        .setStyle(
-                          action === "add"
-                            ? ButtonStyle.Primary
-                            : ButtonStyle.Danger
-                        )
-                        .setDisabled(
-                          action === "add" ? availableTroops < qty : false
-                        );
-                    })
-                  );
-                };
+              [action, quantity, troopType, level] = selectedValue.split("-");
+              console.log(action, quantity, troopType, level);
+              const quantityValue = parseInt(quantity, 10);
 
-                const addQuantities = [0];
-                const quantityButtonsRowMore = createQuantityButtons(
-                  "add",
-                  addQuantities
-                );
-
-                // Mise à jour de l'embed avec les boutons de quantité
-                await interaction.update({
-                  embeds: [embedTroopSelection],
-                  components: [quantityButtonsRowMore],
-                });
-              } else if (action && quantity && troopType && level) {
-                const quantityValue = parseInt(quantity, 10);
-
-                // Fonction pour obtenir le total des troupes dans l'armée en construction
-                function getTotalTroops(armyInConstruction) {
-                  return Object.values(armyInConstruction).reduce(
-                    (total, qty) => total + qty,
-                    0
-                  );
-                }
-
-                // Récupération de l'inventaire de l'utilisateur
-                const currentInventory = await dbManager.getUserInventory(
-                  userId
-                );
-                const availableTroops =
-                  currentInventory[`${troopType}Lvl${level}`];
-
-                // Quantité actuelle de troupes de ce type dans l'armée en construction
-                const currentKey = `${troopType}Lvl${level}`;
-                const currentArmyTroops = currentInventory[currentKey] || 0;
-
-                // Vérification de l'action d'ajout
-                if (action === "add") {
-                  // Vérifiez si l'utilisateur a assez de troupes et s'il dépasse la capacité
-                  if (quantityValue > availableTroops) {
-                    return interaction.update({
-                      content: `Vous avez ${availableTroops} ${troopType} de niveau ${level} dans votre inventaire.`,
-                      components: [],
-                    });
-                  }
-
-                  if (
-                    getTotalTroops(currentInventory) + quantityValue >
-                    maxCapacity
-                  ) {
-                    return interaction.update({
-                      content: `La capacité maximale de l'armée est de ${maxCapacity}.`,
-                      components: [],
-                    });
-                  }
-
-                  // Mettre à jour la base de données pour retirer les troupes de l'inventaire
-                  await dbManager.updateUserTroops(
-                    userId,
-                    troopType,
-                    level,
-                    -quantityValue
-                  );
-                  // Ajouter ces troupes à l'armée de l'utilisateur
-                  await dbManager.updateUserArmy(
-                    userId,
-                    armyName,
-                    troopType,
-                    level,
-                    quantityValue
-                  );
-                } else if (action === "remove") {
-                  // Vérifiez si l'utilisateur peut retirer les troupes
-                  if (quantityValue > currentArmyTroops) {
-                    return interaction.update({
-                      content: `Vous ne pouvez pas retirer plus de troupes que vous n'en avez actuellement dans l'armée (${currentArmyTroops} disponibles).`,
-                      components: [],
-                    });
-                  }
-
-                  // Mettre à jour la base de données pour retirer les troupes de l'armée
-                  await dbManager.updateUserArmy(
-                    userId,
-                    armyName,
-                    troopType,
-                    level,
-                    -quantityValue
-                  );
-                  // Remettre ces troupes dans l'inventaire de l'utilisateur
-                  await dbManager.updateUserTroops(
-                    userId,
-                    troopType,
-                    level,
-                    quantityValue
-                  );
-                }
-
-                // Récupérer à nouveau l'inventaire mis à jour depuis la base de données
-                const updatedInventory = await dbManager.getUserInventory(
-                  userId
-                );
-                const [army] = await dbManager.getTroopsForArmy(
-                  userId,
-                  armyName
-                );
-                const filteredArmy = Object.entries(army).filter(
-                  ([key, value]) =>
-                    !["id", "nom", "discordId", "boss1", "boss2"].includes(
-                      key
-                    ) && value > 0
-                );
-                const currentCapacity = filteredArmy.reduce(
-                  (total, [key, value]) => total + value,
+              // Fonction pour obtenir le total des troupes dans l'armée en construction
+              function getTotalTroops(armyInConstruction) {
+                return Object.values(armyInConstruction).reduce(
+                  (total, qty) => total + qty,
                   0
                 );
+              }
 
-                // Mise à jour de l'embed avec les troupes actuelles
-                const updatedEmbedTroopSelection = new EmbedBuilder()
-                  .setTitle(
-                    `Sélection ${troopType} lvl${level} pour l' ${armyName}`
+              // Récupération de l'inventaire de l'utilisateur
+              const currentInventory = await dbManager.getUserInventory(userId);
+              const availableTroops =
+                currentInventory[`${troopType}Lvl${level}`];
+
+              // Quantité actuelle de troupes de ce type dans l'armée en construction
+              const currentKey = `${troopType}Lvl${level}`;
+              const currentArmyTroops = currentInventory[currentKey] || 0;
+
+              // Vérification de l'action d'ajout
+              if (action === "add") {
+                // Vérifiez si l'utilisateur a assez de troupes et s'il dépasse la capacité
+                if (quantityValue > availableTroops) {
+                  return interaction.update({
+                    content: `Vous avez ${availableTroops} ${troopType} de niveau ${level} dans votre inventaire.`,
+                    components: [],
+                  });
+                }
+
+                if (
+                  getTotalTroops(currentInventory) + quantityValue >
+                  maxCapacity
+                ) {
+                  return interaction.update({
+                    content: `La capacité maximale de l'armée est de ${maxCapacity}.`,
+                    components: [],
+                  });
+                }
+
+                // Mettre à jour la base de données pour retirer les troupes de l'inventaire
+                await dbManager.updateUserTroops(
+                  userId,
+                  troopType,
+                  level,
+                  -quantityValue
+                );
+                // Ajouter ces troupes à l'armée de l'utilisateur
+                await dbManager.updateUserArmy(
+                  userId,
+                  armyName,
+                  troopType,
+                  level,
+                  quantityValue
+                );
+              } else if (action === "remove") {
+                // Vérifiez si l'utilisateur peut retirer les troupes
+                if (quantityValue > currentArmyTroops) {
+                  return interaction.update({
+                    content: `Vous ne pouvez pas retirer plus de troupes que vous n'en avez actuellement dans l'armée (${currentArmyTroops} disponibles).`,
+                    components: [],
+                  });
+                }
+
+                // Mettre à jour la base de données pour retirer les troupes de l'armée
+                await dbManager.updateUserArmy(
+                  userId,
+                  armyName,
+                  troopType,
+                  level,
+                  -quantityValue
+                );
+                // Remettre ces troupes dans l'inventaire de l'utilisateur
+                await dbManager.updateUserTroops(
+                  userId,
+                  troopType,
+                  level,
+                  quantityValue
+                );
+              }
+
+              // Récupérer à nouveau l'inventaire mis à jour depuis la base de données
+              const updatedInventory = await dbManager.getUserInventory(userId);
+              const [army] = await dbManager.getTroopsForArmy(userId, armyName);
+              const filteredArmy = Object.entries(army).filter(
+                ([key, value]) =>
+                  !["id", "nom", "discordId", "boss1", "boss2"].includes(key) &&
+                  value > 0
+              );
+              const currentCapacity = filteredArmy.reduce(
+                (total, [key, value]) => total + value,
+                0
+              );
+              let maxUsableCapacity = maxCapacity - currentCapacity;
+              if (maxUsableCapacity > availableTroops) {
+                maxUsableCapacity = availableTroops;
+              }
+
+              // Mise à jour de l'embed avec les troupes actuelles
+              const updatedEmbedTroopSelection = new EmbedBuilder()
+                .setTitle(
+                  `Sélection ${troopType} lvl${level} pour l' ${armyName}`
+                )
+                .setThumbnail(
+                  "https://media.discordapp.net/attachments/1246893100790448198/1285311938154332225/image3.png?ex=66fa4a45&is=66f8f8c5&hm=c5a0ad6235655bb37a2594baf4979a03f30810d7d97b3aa303bbfd74a92ca9ba&=&format=webp&quality=lossless&width=810&height=810"
+                )
+                .setDescription(
+                  `Capacité actuelle: **${currentCapacity}**/${maxCapacity}`
+                )
+                .addFields(
+                  {
+                    name: "Troupes Disponibles",
+                    value:
+                      Object.entries(updatedInventory)
+                        .filter(([key, value]) => value > 0)
+                        .map(([key, value]) => `- ${key}: **${value}**`)
+                        .join("\n") || "Aucune troupe disponible.",
+                  },
+                  {
+                    name: "Troupes dans l'armée",
+                    value:
+                      filteredArmy.length > 0
+                        ? filteredArmy
+                            .map(([key, value]) => `- ${key}: **${value}**`)
+                            .join("\n")
+                        : "Aucune troupe sélectionnée.",
+                  }
+                )
+                .setColor(colors);
+
+              // Boutons de retrait dynamiques
+              const quantityButtonsRowLess =
+                new ActionRowBuilder().addComponents(
+                  ...[1, 100, 1000, 10000, 100000].map((q) =>
+                    new ButtonBuilder()
+                      .setCustomId(`remove-${q}-${troopType}-${level}`)
+                      .setLabel(`-${q}`)
+                      .setStyle(ButtonStyle.Danger)
+                      .setDisabled(updatedInventory[currentKey] < q)
                   )
-                  .setDescription(
-                    `Capacité maximale: **${maxCapacity}**\nCapacité actuelle: **${currentCapacity}**`
-                  )
-                  .addFields(
-                    {
-                      name: "Troupes Disponibles",
-                      value:
-                        Object.entries(updatedInventory)
-                          .filter(([key, value]) => value > 0)
-                          .map(([key, value]) => `- ${key}: **${value}**`)
-                          .join("\n") || "Aucune troupe disponible.",
-                    },
-                    {
-                      name: "Troupes dans l'armée",
-                      value:
-                        filteredArmy.length > 0
-                          ? filteredArmy
-                              .map(([key, value]) => `- ${key}: **${value}**`)
-                              .join("\n")
-                          : "Aucune troupe sélectionnée.",
-                    }
-                  )
-                  .setColor(colors);
-
-                // Boutons de retrait dynamiques
-                const quantityButtonsRowLess =
-                  new ActionRowBuilder().addComponents(
-                    ...[1, 100, 1000, 10000, 100000].map((q) =>
-                      new ButtonBuilder()
-                        .setCustomId(`remove-${q}-${troopType}-${level}`)
-                        .setLabel(`-${q}`)
-                        .setStyle(ButtonStyle.Danger)
-                        .setDisabled(updatedInventory[currentKey] < q)
-                    )
-                  );
-
-                // Boutons d'ajout dynamiques
-                const quantityButtonsRowMore =
-                  new ActionRowBuilder().addComponents(
-                    ...[1, 100, 1000, 10000, 100000].map((q) =>
-                      new ButtonBuilder()
-                        .setCustomId(`add-${q}-${troopType}-${level}`)
-                        .setLabel(`+${q}`)
-                        .setStyle(ButtonStyle.Primary)
-                        .setDisabled(
-                          updatedInventory[`${troopType}Lvl${level}`] < q
-                        )
-                    )
-                  );
-
-                // Bouton de confirmation et changement de type de troupe
-                const changeTroopTypeButton = new ButtonBuilder()
-                  .setCustomId("change-troop-type")
-                  .setLabel("Changer le type de troupe")
-                  .setStyle(ButtonStyle.Secondary);
-
-                const confirmRow = new ActionRowBuilder().addComponents(
-                  changeTroopTypeButton
                 );
 
-                await interaction.update({
-                  embeds: [updatedEmbedTroopSelection],
-                  components: [
-                    quantityButtonsRowMore,
-                    quantityButtonsRowLess,
-                    confirmRow,
-                  ],
-                });
-              }
-            });
+              // Boutons d'ajout dynamiques
+              const quantityButtonsRowMore =
+                new ActionRowBuilder().addComponents(
+                  ...[1, 100, 1000, 10000, 100000].map((q) =>
+                    new ButtonBuilder()
+                      .setCustomId(`add-${q}-${troopType}-${level}`)
+                      .setLabel(`+${q}`)
+                      .setStyle(ButtonStyle.Primary)
+                      .setDisabled(
+                        updatedInventory[`${troopType}Lvl${level}`] < q
+                      )
+                  )
+                );
+              const otherRow = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                  .setCustomId(`add-${maxUsableCapacity}-${troopType}-${level}`)
+                  .setLabel(`(Max) +${maxUsableCapacity}`)
+                  .setStyle(ButtonStyle.Secondary)
+              );
 
-            // Gestion de la confirmation et du changement de type de troupe
-            troopCollector.on("collect", async (interaction) => {
-              if (interaction.customId === "change-troop-type") {
-                await interaction.update({
-                  content: "Pour le moment refaite la commande",
-                  embeds: [],
-                  components: [],
-                });
-              }
+              await interaction.update({
+                embeds: [updatedEmbedTroopSelection],
+                components: [
+                  quantityButtonsRowMore,
+                  quantityButtonsRowLess,
+                  otherRow,
+                ],
+              });
             });
 
             // Confirmation de la fin de la sélection de troupe

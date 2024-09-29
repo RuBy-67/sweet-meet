@@ -81,7 +81,7 @@ module.exports = {
       switch (type) {
         case 1: // Infanterie
           const infanterie = await dbManager.getTroopType("infanterie");
-          return `**Infanterie ${emoji(emo.infant)}** (+${
+          return `**Infanterie ${emoji(emo.infanterie1)}** (+${
             params.troops.baseBonusType
           }%)\n> Attaque : **${Math.round(
             infanterie.attaque * (1 + bonusPercentage)
@@ -93,7 +93,7 @@ module.exports = {
 
         case 2: // Archer
           const archer = await dbManager.getTroopType("archer");
-          return `**Archer ${emoji(emo.archer)}** (+${
+          return `**Archer ${emoji(emo.archer1)}** (+${
             params.troops.baseBonusType
           }%)\n> Attaque : **${Math.round(
             archer.attaque * (1 + bonusPercentage)
@@ -105,7 +105,7 @@ module.exports = {
 
         case 3: // Cavalier
           const cavalier = await dbManager.getTroopType("cavalier");
-          return `**Cavalier ${emoji(emo.horse)}** (+${
+          return `**Cavalier ${emoji(emo.chevalier1)}** (+${
             params.troops.baseBonusType
           }%)\n> Attaque : **${Math.round(
             cavalier.attaque * (1 + bonusPercentage)
@@ -117,7 +117,7 @@ module.exports = {
 
         case 4: // Machine
           const machine = await dbManager.getTroopType("machine");
-          return `**Machine ${emoji(emo.machine)}** (+${
+          return `**Machine ${emoji(emo.machine1)}** (+${
             params.troops.baseBonusType
           }%)\n> Attaque : **${Math.round(
             machine.attaque * (1 + bonusPercentage)
