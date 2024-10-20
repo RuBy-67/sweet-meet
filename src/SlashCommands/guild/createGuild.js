@@ -35,6 +35,16 @@ module.exports = {
         );
       return interaction.reply({ embeds: [embed] });
     }
+    const user = await dbManager.getStats(userId);
+    if (!user) {
+      const embed = new EmbedBuilder()
+        .setTitle("Erreur")
+        .setColor(color.error)
+        .setDescription(
+          `Vous n'avez pas encore commencé votre aventure. Tapez \`/createAccount\` pour commencer.`
+        );
+      return interaction.reply({ embeds: [embed], ephemeral: true });
+    }
     function emoji(id) {
       return (
         client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||

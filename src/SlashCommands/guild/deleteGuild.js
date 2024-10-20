@@ -17,7 +17,7 @@ module.exports = {
     const userId = interaction.user.id;
     const colors = await dbManager.getColor(userId);
 
-    /*if (config.maintenance) {
+    if (config.maintenance) {
       const embed = new EmbedBuilder()
         .setTitle("⚒️ Maintenance ⚒️")
         .setColor(color.error)
@@ -25,7 +25,7 @@ module.exports = {
           `> Le bot est actuellement en maintenance, veuillez réessayer plus tard.`
         );
       return interaction.reply({ embeds: [embed] });
-    }*/
+    }
 
     // Check si l'user fait partie d'une guild
     const guild = await dbManager.getGuildByOwnerId(userId);

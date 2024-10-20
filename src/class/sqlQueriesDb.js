@@ -58,7 +58,7 @@ const SQL_QUERIES = {
     FROM materiau 
     WHERE rarete = ?`,
   ADD_MATERIAL_TO_USER: `
-    INSERT INTO materiau_user (idUser, idMateriau, lvl) 
+    INSERT INTO materiau_user (discordId, materiauId, level) 
     VALUES (?, ?, ?)`,
   GET_ROLE_BY_ID: `SELECT * FROM role WHERE id = ?`,
   GET_ROLE_BY_USER_ID_ROLE_ID: `SELECT * FROM role_user WHERE idRole = ? AND idUser = ?`,
@@ -194,6 +194,7 @@ WHERE u.discordId = ?`,
   GET_TROOP_TO_HEAL: `SELECT * FROM hospital WHERE discordId = ? `,
   GET_TROOP_HEALING: `SELECT * FROM hospital_soins WHERE discordId = ?`,
   GET_HEALING: `SELECT * FROM hospital_soins WHERE discordId = ?`,
+  ADD_CARD_TO_BOSS: `UPDATE user_boss SET carte = carte + ? WHERE discordId = ? AND bossId = ?`,
 };
 
 module.exports = SQL_QUERIES;

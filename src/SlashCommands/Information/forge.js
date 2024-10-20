@@ -783,7 +783,6 @@ module.exports = {
           const { customId } = interaction;
 
           if (customId === "upgradeForge") {
-            console.log("Upgrade Forge");
             const userId = interaction.user.id;
 
             const stats = await dbManager.getStats(userId); // Pour les fragments

@@ -62,12 +62,39 @@ class DatabaseManager {
       bossId,
     ]);
   }
+  async upgradePoussiere(userId, amount, type) {
+    const columnMap = {
+      1: "poussiereCommune",
+      2: "poussiereRare",
+      3: "poussiereEpique",
+      4: "poussiereLegendaire",
+    };
+    const columnName = columnMap[type];
+    await this.queryMain("UPDATE user SET ?? = ?? + ? WHERE discordId = ?", [
+      columnName,
+      columnName,
+      amount,
+      userId,
+    ]);
+  }
+  async upgradeCard(userId, bossId, amount) {
+    this.queryMain(SQL_QUERIES.ADD_CARD_TO_BOSS, [amount, userId, bossId]);
+  }
 
   async getGuild() {
     return this.queryMain(SQL_QUERIES.GET_GUILD);
   }
   async addBossId(userId, bossId, lvl) {
-    this.queryMain(SQL_QUERIES.ADD_BOSS_ID, [userId, bossId, lvl]);
+    const possede = await this.getBossByUserByBossId(userId, bossId);
+    if (possede.length > 0) {
+      return this.queryMain(SQL_QUERIES.ADD_CARD_TO_BOSS, [
+        lvl,
+        userId,
+        bossId,
+      ]);
+    } else {
+      this.queryMain(SQL_QUERIES.ADD_BOSS_ID, [userId, bossId, lvl]);
+    }
   }
 
   async createAccount(userId, civilisation, type) {

@@ -114,6 +114,16 @@ module.exports = {
         .setColor(color.error);
       return interaction.reply({ embeds: [embed] });
     }
+    const user = await dbManager.getStats(userId);
+    if (!user) {
+      const embed = new EmbedBuilder()
+        .setTitle("Erreur")
+        .setColor(color.error)
+        .setDescription(
+          `Vous n'avez pas encore commencé votre aventure. Tapez \`/createAccount\` pour commencer.`
+        );
+      return interaction.reply({ embeds: [embed], ephemeral: true });
+    }
     const Embedcolors = await dbManager.getColor(interaction.user.id);
 
     function emoji(id) {
@@ -135,33 +145,38 @@ module.exports = {
         // Définir les ajustements en fonction de la difficulté
         const difficultyAdjustments = {
           0: {
-            factor: 0.1,
-            rewardMultiplierVictory: 0.04,
-            rewardMultiplierDefeat: 0.03,
+            factor: 3,
+            rewardMultiplierVictory: 0.4,
+            carteBoss: 1,
+            rewardMultiplierDefeat: 0.01,
             label: "Noob 🍼",
           },
           1: {
-            factor: 0.3,
-            rewardMultiplierVictory: 0.25,
-            rewardMultiplierDefeat: 0.1,
+            factor: 9,
+            rewardMultiplierVictory: 1,
+            carteBoss: 2,
+            rewardMultiplierDefeat: 0.3,
             label: "Facile 👼",
           },
           2: {
-            factor: 1.75,
-            rewardMultiplierVictory: 1,
+            factor: 15,
+            rewardMultiplierVictory: 1.8,
+            carteBoss: 4,
             rewardMultiplierDefeat: 0.8,
             label: "Moyen 🧒",
           },
           3: {
-            factor: 2.88,
-            rewardMultiplierVictory: 1.25,
+            factor: 24,
+            rewardMultiplierVictory: 2.5,
             rewardMultiplierDefeat: 1,
+            carteBoss: 8,
             label: "Difficile 💪",
           },
           4: {
-            factor: 9.75,
-            rewardMultiplierVictory: 2,
-            rewardMultiplierDefeat: 1.25,
+            factor: 38,
+            rewardMultiplierVictory: 3,
+            rewardMultiplierDefeat: 2,
+            carteBoss: 10,
             label: "Légendaire 👑",
           },
         };
@@ -174,9 +189,10 @@ module.exports = {
         } = difficultyAdjustments[difficulty] || {};
 
         // Calculer les statistiques ajustées
-        const attaque = Math.round(bossInfo.attaque * factor);
-        const defense = Math.round(bossInfo.defense * factor);
-        const sante = Math.round(bossInfo.sante * factor);
+        const attaque = Math.round(bossInfo.attaqueBoost * factor);
+        const defense = Math.round(bossInfo.defenseBoost * factor);
+        const sante = Math.round(bossInfo.santeBoost * factor);
+        const troupe = Math.round(bossInfo.capacity * factor);
         const recompenseV = Math.round(7000 * rewardMultiplierVictory);
         const recompenseD = Math.round(7000 * rewardMultiplierDefeat);
         const cooldownDurationTrain =

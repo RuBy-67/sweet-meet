@@ -15,8 +15,6 @@ class Player extends DatabaseManager {
 
   async getStatsById(userId) {
     const result = await this.getStats(userId);
-    console.log(result);
-
     const powerUser = result.power;
     const statsADS = await this.calculateStats(powerUser, userId);
 
@@ -203,7 +201,6 @@ class Player extends DatabaseManager {
           material.id
         }`
     );
-    console.log(materialStrings);
     return materialStrings.join("\n");
   }
 
@@ -334,14 +331,62 @@ class Player extends DatabaseManager {
   }
 
   async dayliBox() {
+    // shop
     const materials = await this.getMateriau();
     const selectedMaterial = await this.selectRandomMaterial(
       materials,
       "dayli"
     );
     const dayPower = Math.floor((await this.generateRandomPower()) / 3);
-    return { dayMaterial: selectedMaterial, dayPower };
+    // ajouter carte (de 1 à 15)
+    const nbCarte = Math.floor(Math.random() * 10) + 1;
+    function getRandomWeightedNumber() {
+      const weightedNumbers = [
+        { number: 1, weight: 1 },
+        { number: 7, weight: 1 },
+        { number: 8, weight: 1 },
+        { number: 9, weight: 1 },
+        { number: 2, weight: 2 },
+        { number: 3, weight: 2 },
+        { number: 4, weight: 2 },
+        { number: 5, weight: 2 },
+        { number: 6, weight: 2 },
+        { number: 10, weight: 2 },
+        { number: 11, weight: 2 },
+        { number: 12, weight: 5 },
+        { number: 13, weight: 5 },
+        { number: 14, weight: 5 },
+        { number: 15, weight: 5 },
+        { number: 16, weight: 5 },
+        { number: 17, weight: 5 },
+        { number: 18, weight: 10 },
+        { number: 19, weight: 10 },
+        { number: 20, weight: 10 },
+        { number: 21, weight: 10 },
+        { number: 22, weight: 10 },
+      ];
+
+      // Calcul de la somme totale des poids
+      const totalWeight = weightedNumbers.reduce(
+        (sum, item) => sum + item.weight,
+        0
+      );
+
+      // Générer un nombre aléatoire entre 0 et le total des poids
+      let randomWeight = Math.random() * totalWeight;
+
+      // Sélection du chiffre basé sur le poids
+      for (let item of weightedNumbers) {
+        if (randomWeight < item.weight) {
+          return item.number;
+        }
+        randomWeight -= item.weight;
+      }
+    }
+    const bossId = getRandomWeightedNumber();
+    return { dayMaterial: selectedMaterial, dayPower, nbCarte, bossId };
   }
+
   async freeDayliBox(userId) {
     const materials = await this.getMateriau();
     const selectedMaterial = await this.selectRandomMaterial(
@@ -349,7 +394,53 @@ class Player extends DatabaseManager {
       "freeDayli"
     );
     const power = Math.floor((await this.generateRandomPower()) / 6);
-    return { userId, material: selectedMaterial, power };
+    // ajouter carte de 0 à 3
+    const nbCarte = Math.floor(Math.random() * 3);
+    function getRandomWeightedNumber() {
+      const weightedNumbers = [
+        { number: 1, weight: 1 },
+        { number: 7, weight: 1 },
+        { number: 8, weight: 1 },
+        { number: 9, weight: 1 },
+        { number: 2, weight: 3 },
+        { number: 3, weight: 3 },
+        { number: 4, weight: 3 },
+        { number: 5, weight: 3 },
+        { number: 6, weight: 3 },
+        { number: 10, weight: 3 },
+        { number: 11, weight: 3 },
+        { number: 12, weight: 6 },
+        { number: 13, weight: 6 },
+        { number: 14, weight: 6 },
+        { number: 15, weight: 6 },
+        { number: 16, weight: 6 },
+        { number: 17, weight: 6 },
+        { number: 18, weight: 10 },
+        { number: 19, weight: 10 },
+        { number: 20, weight: 10 },
+        { number: 21, weight: 10 },
+        { number: 22, weight: 10 },
+      ];
+
+      // Calcul de la somme totale des poids
+      const totalWeight = weightedNumbers.reduce(
+        (sum, item) => sum + item.weight,
+        0
+      );
+
+      // Générer un nombre aléatoire entre 0 et le total des poids
+      let randomWeight = Math.random() * totalWeight;
+
+      // Sélection du chiffre basé sur le poids
+      for (let item of weightedNumbers) {
+        if (randomWeight < item.weight) {
+          return item.number;
+        }
+        randomWeight -= item.weight;
+      }
+    }
+    const bossId = getRandomWeightedNumber();
+    return { userId, material: selectedMaterial, power, nbCarte, bossId };
   }
 
   async selectRandomMaterial(materials, boxType) {

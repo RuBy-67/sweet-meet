@@ -1,3 +1,4 @@
+// revoire potion pour avoir des potion fixe et prédéfinis
 const {
   EmbedBuilder,
   StringSelectMenuBuilder,
@@ -234,15 +235,24 @@ module.exports = {
     },
   ],
   run: async (client, interaction, args) => {
-    if (config.maintenance) {
+    if (/*config.maintenance*/ true) {
       const embed = new EmbedBuilder()
         .setTitle("⚒️ Maintenance ⚒️")
         .setColor(color.error)
-        .setDescription(
-          `> Le bot est actuellement en maintenance, veuillez réessayer plus tard.`
-        )
+        .setDescription(`> Commande en révision, veuillez réessayer plus tard.`)
         .setColor(color.error);
       return interaction.reply({ embeds: [embed] });
+    }
+    const userId = interaction.user.id;
+    const user = await dbManager.getStats(userId);
+    if (!user) {
+      const embed = new EmbedBuilder()
+        .setTitle("Erreur")
+        .setColor(color.error)
+        .setDescription(
+          `Vous n'avez pas encore commencé votre aventure. Tapez \`/createAccount\` pour commencer.`
+        );
+      return interaction.reply({ embeds: [embed], ephemeral: true });
     }
     const Embedcolors = await dbManager.getColor(interaction.user.id);
 

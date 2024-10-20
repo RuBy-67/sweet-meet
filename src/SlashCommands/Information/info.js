@@ -263,10 +263,10 @@ module.exports = {
 
           // Gestion des raretés et poussières
           const raretes = {
-            "Commune 🟢": "poussiereCommune",
-            "Rare 🟠": "poussiereRare",
-            "Épique 🟣": "poussiereEpique",
-            "Légendaire 🟡": "poussiereLegendaire",
+            Commune: "poussiereCommune",
+            Rare: "poussiereRare",
+            Épique: "poussiereEpique",
+            Légendaire: "poussiereLegendaire",
           };
           const rareteKey = bossInfo.type;
           const rarete = Object.keys(raretes)[rareteKey - 1] || "Inconnue";
@@ -303,7 +303,6 @@ module.exports = {
           // Ligne de séparation pour l'esthétique
           bossStats += `\n__-------------------------__`;
           let bonusCapacite = 1;
-
           // Gestion des niveaux et autres éléments pour l'embed
           const currentBossLevel = boss.level;
           const roundedLevel = Math.ceil((currentBossLevel + 1) * 0.1) * 10;
@@ -313,6 +312,7 @@ module.exports = {
 
           // Création de l'embed
           const embed = new EmbedBuilder()
+
             .setAuthor({
               name: `Bosses`,
               iconURL: targetUser.displayAvatarURL({ dynamic: true }),
@@ -347,7 +347,7 @@ module.exports = {
                 ? [
                     {
                       name: `${emoji(
-                        emo["Poussière de terre"]
+                        emo[colonnePoussiere]
                       )} Poussière (${rarete}) - pour niveau ${boss.level + 1}`,
                       value: `${quantitePoussiere}/${requiredPoussière}`,
                       inline: true,
@@ -678,8 +678,13 @@ module.exports = {
             const bossIndex = currentPage - 1;
             if (bossIndex >= 0 && bossIndex < bossResult1.length) {
               const boss = bossResult1[bossIndex];
+              //check
+              const bossLevel = await dbManager.getBossByUserByBossId(
+                targetUser.id,
+                boss.bossId
+              );
 
-              if (boss.level >= 60) {
+              if (bossLevel[0].level >= 60) {
                 return i.reply({
                   content: "Le boss est déjà au niveau maximum.",
                   ephemeral: true,
@@ -698,7 +703,7 @@ module.exports = {
               const rarete = Object.keys(raretes)[rareteKey - 1] || "Inconnue";
               const colonnePoussiere = raretes[rarete] || "0";
               const quantitePoussiere = statsResult2[colonnePoussiere] || 0;
-              const currentBossLevel = boss.level;
+              const currentBossLevel = bossLevel[0].level;
               const roundedLevel = Math.ceil((currentBossLevel + 1) * 0.1) * 10;
               const requiredPoussière = (currentBossLevel + 1) * 10;
               const requiredCard =
@@ -710,14 +715,28 @@ module.exports = {
                   ephemeral: true,
                 });
               }
-
-              if (boss.carte < requiredCard && boss.level % 10 == 0) {
+              //updatePussière
+              await dbManager.upgradePoussiere(
+                targetUser.id,
+                boss.bossId,
+                -requiredPoussière,
+                rareteKey
+              );
+              console.log("poussière retirée");
+              if (boss.carte < requiredCard && bossLevel[0].level % 10 == 0) {
                 return i.reply({
                   content: `Vous n'avez pas assez de cartes pour améliorer ce boss.`,
                   ephemeral: true,
                 });
               }
-              // Effectuer l'upgrade
+              if (bossLevel[0].level % 10 == 0) {
+                // Effectuer l'upgrade
+                await dbManager.upgradeCard(
+                  targetUser.id,
+                  boss.bossId,
+                  -requiredCard
+                );
+              }
               await dbManager.upgradeBoss(targetUser.id, boss.bossId);
               const updatedBossInfo = await dbManager.getBossInfo(boss.bossId);
 
@@ -725,11 +744,12 @@ module.exports = {
                 targetUser.id,
                 boss.bossId
               );
+              const newStatsResult = await dbManager.getStats(targetUser.id);
 
               pages[currentPage] = await createBossEmbed(
                 boss1[0],
                 updatedBossInfo[0],
-                statsResult,
+                newStatsResult,
                 params,
                 targetUser,
                 EmbedColor,

@@ -17,17 +17,19 @@ const DatabaseManager = require("../class/dbManager");
 const dbManager = new DatabaseManager();
 const Cooldown = require("../class/cooldown");
 const cooldown = new Cooldown();
+const boss = require("../class/bossManager");
+const bossManager = new boss();
 
 async function openShop(client, shopMessage) {
   if (config.maintenance) {
     return;
   }
   let dayBox = "";
-  const { dayMaterial, dayPower } = await player.dayliBox();
+  const { dayMaterial, dayPower, nbCarte, bossId } = await player.dayliBox();
   if (dayMaterial != null) {
-    dayBox = `daysbox_${dayPower}_${dayMaterial.id}`;
+    dayBox = `daysbox_${dayPower}_${nbCarte}_${bossId}_${dayMaterial.id}`;
   } else {
-    dayBox = `daysbox_${dayPower}`;
+    dayBox = `daysbox_${dayPower}_${nbCarte}_${bossId}`;
   }
 
   function emoji(id) {
@@ -37,12 +39,12 @@ async function openShop(client, shopMessage) {
     );
   }
 
-  const BuyableMaterial = await dbManager.getRandomMaterial();
+  /* const BuyableMaterial = await dbManager.getRandomMaterial();
   const materialLevels = {};
   BuyableMaterial.forEach((material) => {
     const level = Math.floor(Math.random() * 5) + 1;
     materialLevels[material.id] = level;
-  });
+  });*/
   const role = await dbManager.getRolesFromDB();
   const temps = Math.floor(Date.now() / 1000);
   const timestamp = temps + param.shopDuration;
@@ -57,15 +59,15 @@ async function openShop(client, shopMessage) {
         name: `LootBox`,
         value: `- ${emoji(
           emo.RandomLootBox
-        )} **RandomLootBox**:\n> Une boîte aléatoire contient entre 1 et 3 matériels, Prix : **${
+        )} **RandomLootBox**:\n> Une boîte aléatoire contient entre 1 et 3 matériels et des cartes de bosses (1 à 15), Prix : **${
           param.boutique.achat.prix.RndLootBox
         }** ${emoji(emo.power)}\n\n- ${emoji(
           emo.DaysBox
-        )} **DaysBox:** \n> Boite journalière contient 0 ou 1 matériels et de la puissance, Prix : **${
+        )} **DaysBox:** \n> Boite journalière contient 0 ou 1 matériels et de la puissance et des cartes de bosses (0 à 10), Prix : **${
           param.boutique.achat.prix.LootBox
         } ${emoji(emo.power)}**`,
       },
-      {
+      /*{
         name: "Materiaux",
         value: BuyableMaterial.map((material) => {
           const level = materialLevels[material.id]; // Récupérer le niveau à partir de l'objet
@@ -78,7 +80,7 @@ async function openShop(client, shopMessage) {
             material.rarete
           }** \n> ${material.lore}`;
         }).join("\n\n"),
-      },
+      },*/
       {
         name: "Rôles",
         value: role
@@ -125,7 +127,7 @@ async function openShop(client, shopMessage) {
             .setValue(option.value)
         )
         .concat(
-          BuyableMaterial.map((material) => {
+          /*BuyableMaterial.map((material) => {
             const level = materialLevels[material.id]; // Récupérer le niveau à partir de l'objet
             const price = Math.floor(
               param.boutique.achat.prix.materiaux[material.rarete] * level * 0.6
@@ -135,7 +137,7 @@ async function openShop(client, shopMessage) {
               .setLabel(`${material.nom} (lvl: ${level})`)
               .setDescription(`Prix: ${price} 🌟`)
               .setValue(`material_${material.id}_${level}`);
-          }),
+          }),*/
           role.map((role) => {
             return new StringSelectMenuOptionBuilder()
               .setEmoji("1246899778726531142")
@@ -187,7 +189,13 @@ async function closeShop(client, shopMessage) {
   setTimeout(() => openShop(client, shopMessage), param.closeInterval * 1000);
 }
 ///-----------------------///
-async function randomLootBox(client, interaction, ...materialIds) {
+async function randomLootBox(
+  client,
+  interaction,
+  bossId,
+  nbCarte,
+  ...materialIds
+) {
   function emoji(id) {
     return (
       client.emojis.cache.find((emoji) => emoji.id === id)?.toString() ||
@@ -206,13 +214,61 @@ async function randomLootBox(client, interaction, ...materialIds) {
     });
   }
   let message = "Vous avez obtenu les récompenses suivantes :\n>>> ";
+  const infoBoss = await bossManager.getInfoBossById(bossId);
   for (const materialId of materialIds) {
     const [selectedItem] = await dbManager.getDataMateriauById(materialId);
     message += `- ${emoji(emo[selectedItem.nom])} **${selectedItem.nom}** \n`;
-
     await dbManager.addMaterialToUser(interaction.user.id, materialId);
   }
+  const possedeBoss = await dbManager.getBossByUserByBossId(
+    interaction.user.id,
+    bossId
+  );
+  if (possedeBoss.length === 0) {
+    await dbManager.addBossId(interaction.user.id, bossId, 1);
+    message += `Vous avez obtenu le boss **${infoBoss.nom}**`;
+  } else {
+    await dbManager.addBossId(interaction.user.id, bossId, nbCarte);
+    message += `Vous avez obtenu **${nbCarte}** cartes du boss **${infoBoss.nom}**`;
+  }
   await dbManager.updatePower(interaction.user.id, -totalPrice);
+
+  const nbPoussiere = Math.floor(Math.random() * (20 - 6 + 1)) + 20;
+  const map = {
+    1: "poussiereCommune",
+    2: "poussiereRare",
+    3: "poussiereEpique",
+    4: "poussiereLegendaire",
+  };
+  function getRandomWeightedNumber() {
+    const weightedNumbers = [
+      { number: 1, weight: 4 }, // Beaucoup de chances
+      { number: 2, weight: 3 }, // Un peu moins de chances
+      { number: 3, weight: 2 }, // Encore moins de chances
+      { number: 4, weight: 1 }, // Le moins de chances
+    ];
+
+    const totalWeight = weightedNumbers.reduce(
+      (sum, item) => sum + item.weight,
+      0
+    );
+    let randomWeight = Math.random() * totalWeight;
+
+    for (let item of weightedNumbers) {
+      if (randomWeight < item.weight) {
+        return item.number;
+      }
+      randomWeight -= item.weight;
+    }
+  }
+  const typePoussiere = getRandomWeightedNumber();
+  const string = map[typePoussiere];
+  message += `\n- **${nbPoussiere}** ${emoji(emo[string])}\n`;
+  await dbManager.upgradePoussiere(
+    interaction.user.id,
+    nbPoussiere,
+    typePoussiere
+  );
 
   await interaction.reply({
     content: message,
@@ -222,7 +278,14 @@ async function randomLootBox(client, interaction, ...materialIds) {
 
 ///-----------------------///
 
-async function daysBox(client, interaction, power, materialId) {
+async function daysBox(
+  client,
+  interaction,
+  power,
+  nbCarte,
+  bossId,
+  materialId
+) {
   power = Math.floor(power);
   const commandName = "daylibox";
   const cooldownDuration = param.cooldownBox;
@@ -262,6 +325,54 @@ async function daysBox(client, interaction, power, materialId) {
   await dbManager.updatePower(
     interaction.user.id,
     power - param.boutique.achat.prix.LootBox
+  );
+  const possedeBoss = await dbManager.getBossByUserByBossId(
+    interaction.user.id,
+    bossId
+  );
+  const infoBoss = await bossManager.getInfoBossById(bossId);
+  if (possedeBoss.length === 0) {
+    await dbManager.addBossId(interaction.user.id, bossId, 1);
+    message += `Vous avez obtenu le boss **${infoBoss.nom}**`;
+  } else {
+    await dbManager.addBossId(interaction.user.id, bossId, nbCarte);
+    message += `Vous avez obtenu **${nbCarte}** cartes du boss **${infoBoss.nom}**`;
+  }
+  const nbPoussiere = Math.floor(Math.random() * (40 - 15 + 1)) + 40;
+  const map = {
+    1: "poussiereCommune",
+    2: "poussiereRare",
+    3: "poussiereEpique",
+    4: "poussiereLegendaire",
+  };
+  function getRandomWeightedNumber() {
+    const weightedNumbers = [
+      { number: 1, weight: 4 }, // Beaucoup de chances
+      { number: 2, weight: 3 }, // Un peu moins de chances
+      { number: 3, weight: 2 }, // Encore moins de chances
+      { number: 4, weight: 1 }, // Le moins de chances
+    ];
+
+    const totalWeight = weightedNumbers.reduce(
+      (sum, item) => sum + item.weight,
+      0
+    );
+    let randomWeight = Math.random() * totalWeight;
+
+    for (let item of weightedNumbers) {
+      if (randomWeight < item.weight) {
+        return item.number;
+      }
+      randomWeight -= item.weight;
+    }
+  }
+  const typePoussiere = getRandomWeightedNumber();
+  const string = map[typePoussiere];
+  message += `\n- **${nbPoussiere}** ${emoji(emo[string])}\n`;
+  await dbManager.upgradePoussiere(
+    interaction.user.id,
+    nbPoussiere,
+    typePoussiere
   );
 
   await interaction.reply({

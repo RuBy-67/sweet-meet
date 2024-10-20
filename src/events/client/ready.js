@@ -118,11 +118,64 @@ module.exports = (client) => {
       } else if (selectedItem === "randomlootbox") {
         const selectedMaterials = await player.randomBox();
         const materialIds = selectedMaterials.map((material) => material.id);
-        await randomLootBox(client, interaction, ...materialIds);
+        const nbCarte = Math.floor(Math.random() * 15) + 1;
+        function getRandomWeightedNumber() {
+          const weightedNumbers = [
+            { number: 1, weight: 1 },
+            { number: 7, weight: 1 },
+            { number: 8, weight: 1 },
+            { number: 9, weight: 1 },
+            { number: 2, weight: 2 },
+            { number: 3, weight: 2 },
+            { number: 4, weight: 2 },
+            { number: 5, weight: 2 },
+            { number: 6, weight: 2 },
+            { number: 10, weight: 2 },
+            { number: 11, weight: 2 },
+            { number: 12, weight: 5 },
+            { number: 13, weight: 5 },
+            { number: 14, weight: 5 },
+            { number: 15, weight: 5 },
+            { number: 16, weight: 5 },
+            { number: 17, weight: 5 },
+            { number: 18, weight: 10 },
+            { number: 19, weight: 10 },
+            { number: 20, weight: 10 },
+            { number: 21, weight: 10 },
+            { number: 22, weight: 10 },
+          ];
+
+          // Calcul de la somme totale des poids
+          const totalWeight = weightedNumbers.reduce(
+            (sum, item) => sum + item.weight,
+            0
+          );
+
+          // Générer un nombre aléatoire entre 0 et le total des poids
+          let randomWeight = Math.random() * totalWeight;
+
+          // Sélection du chiffre basé sur le poids
+          for (let item of weightedNumbers) {
+            if (randomWeight < item.weight) {
+              return item.number;
+            }
+            randomWeight -= item.weight;
+          }
+        }
+        const bossId = getRandomWeightedNumber();
+        await randomLootBox(
+          client,
+          interaction,
+          bossId,
+          nbCarte,
+          ...materialIds
+        );
       } else if (selectedItem.startsWith("daysbox_")) {
-        const materialId = selectedItem.split("_")[2];
+        const materialId = selectedItem.split("_")[4];
         const power = selectedItem.split("_")[1];
-        await daysBox(client, interaction, power, materialId);
+        const nbCarte = selectedItem.split("_")[2];
+        const bossId = selectedItem.split("_")[3];
+        await daysBox(client, interaction, power, nbCarte, bossId, materialId);
       } else {
         await interaction.reply(`Sélection invalide.`);
       }
